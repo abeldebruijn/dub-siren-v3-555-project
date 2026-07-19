@@ -2,6 +2,8 @@
 
 Check the first column after buying an item: change `[ ]` to `[x]`.
 
+Items marked **starter pack** are supplied by the TinyTronics starter pack. The included potentiometers, tactile buttons and button caps do not match the required panel/PCB parts.
+
 Preferred strategy: consolidate standard parts at [TME](https://www.tme.eu/nl/) or [DigiKey Netherlands](https://www.digikey.nl/). Prices and stock checked/researched July 2026. Verify dimensions and availability before payment.
 
 ## PCB and fitted components
@@ -19,8 +21,8 @@ Preferred strategy: consolidate standard parts at [TME](https://www.tme.eu/nl/) 
 | [ ] | 1 | Resistor | 10 Ω, ¼ W, axial | [TME search](https://www.tme.eu/nl/katalog/tht-weerstanden_100026/?search=10R%200.25W) / [DigiKey search](https://www.digikey.nl/en/products?keywords=10%20ohm%200.25W%20axial) | 1% metal film preferred |  |
 | [ ] | 3 | Resistor | 560 Ω, ¼ W, axial | [TME search](https://www.tme.eu/nl/katalog/tht-weerstanden_100026/?search=560R%200.25W) / [DigiKey search](https://www.digikey.nl/en/products?keywords=560%20ohm%200.25W%20axial) | 1% metal film preferred |  |
 | [ ] | 2 | Resistor | 2.2 kΩ, ¼ W, axial | [TME search](https://www.tme.eu/nl/katalog/tht-weerstanden_100026/?search=2.2K%200.25W) / [DigiKey search](https://www.digikey.nl/en/products?keywords=2.2k%20ohm%200.25W%20axial) | 1% metal film preferred |  |
-| [ ] | 1 | Resistor | 4.7 kΩ, ¼ W, axial | [TME search](https://www.tme.eu/nl/katalog/tht-weerstanden_100026/?search=4.7K%200.25W) / [DigiKey search](https://www.digikey.nl/en/products?keywords=4.7k%20ohm%200.25W%20axial) | 1% metal film preferred |  |
-| [ ] | 2 | Resistor | 10 kΩ, ¼ W, axial | [TME search](https://www.tme.eu/nl/katalog/tht-weerstanden_100026/?search=10K%200.25W) / [DigiKey search](https://www.digikey.nl/en/products?keywords=10k%20ohm%200.25W%20axial) | 1% metal film preferred |  |
+| [x] | 1 | Resistor | 4.7 kΩ, ¼ W, axial | Included in TinyTronics starter pack | Verify supplied power rating; starter pack contains 30 | €0 (starter pack) |
+| [x] | 2 | Resistor | 10 kΩ, ¼ W, axial | Included in TinyTronics starter pack | Verify supplied power rating; starter pack contains 30 | €0 (starter pack) |
 | [ ] | 1 | Resistor | 68 kΩ, ¼ W, axial | [TME search](https://www.tme.eu/nl/katalog/tht-weerstanden_100026/?search=68K%200.25W) / [DigiKey search](https://www.digikey.nl/en/products?keywords=68k%20ohm%200.25W%20axial) | 1% metal film preferred |  |
 | [ ] | 1 | NPN transistor | 2N3904, TO-92 | [TinyTronics](https://www.tinytronics.nl/nl/schakelaars/transistoren-en-mosfet%27s/transistoren/npn-transistor-2n3904) / [DigiKey search](https://www.digikey.nl/en/products?keywords=2N3904%20TO-92) | Verify E-B-C orientation |  |
 | [ ] | 2 | Timer IC | NE555P, DIP-8 | [TME](https://www.tme.eu/nl/details/ne555p/watchdog-en-reset-circuits/texas-instruments/) / [DigiKey search](https://www.digikey.nl/en/products?keywords=NE555P) | Buy one spare if convenient |  |
@@ -29,7 +31,7 @@ Preferred strategy: consolidate standard parts at [TME](https://www.tme.eu/nl/) 
 | [ ] | 4 | IC socket | DIP-8, 2.54 mm pitch | [TME search](https://www.tme.eu/nl/katalog/ic-voeten_100060/?search=DIP8) / [DigiKey search](https://www.digikey.nl/en/products?keywords=DIP-8%20socket) | Recommended; not in source BOM |  |
 | [ ] | 5 | PCB potentiometer | Bourns PTD901-2015K-B503, 50 kΩ linear | [DigiKey exact part](https://www.digikey.nl/en/products/detail/bourns-inc/PTD901-2015K-B503/3781003) / [Mouser search](https://www.mouser.nl/c/?q=PTD901-2015K-B503) | Exact V3.1 PCB footprint |  |
 | [ ] | 8 | JST-PH PCB header | B2B-PH-K-S, 2-pin, 2.0 mm, vertical | [TME search](https://www.tme.eu/nl/katalog/?search=B2B-PH-K-S) / [DigiKey search](https://www.digikey.nl/en/products?keywords=B2B-PH-K-S) | PCB side |  |
-| [ ] | 1 | Pin header | 1×2, 2.54 mm, straight | [TME search](https://www.tme.eu/nl/katalog/pin-headers_112936/?search=1x2%202.54mm) / [DigiKey search](https://www.digikey.nl/en/products?keywords=1x2%202.54mm%20pin%20header) | LED connection |  |
+| [x] | 1 | Pin header | 1×2, 2.54 mm, straight | Cut two adjacent pins from included 40-pin male header | Confirm starter-pack header pitch is 2.54 mm | €0 (starter pack) |
 
 ## Connector mates, controls and audio
 
@@ -37,7 +39,7 @@ Preferred strategy: consolidate standard parts at [TME](https://www.tme.eu/nl/) 
 |---|---:|---|---|---|---|---:|
 | [ ] | 8 | JST-PH housing | PHR-2, 2-pin | [TME exact part](https://www.tme.eu/nl/details/phr-2/signaalconnectoren-raster-2-00mm/jst/) / [DigiKey search](https://www.digikey.nl/en/products?keywords=PHR-2) | Cable side |  |
 | [ ] | 20 | JST-PH crimp contact | SPH-002T-P0.5S, 24–30 AWG | [TME exact part](https://www.tme.eu/nl/details/sph-002t-p0.5s/signaalconnectoren-raster-2-00mm/jst/) / [DigiKey search](https://www.digikey.nl/en/products?keywords=SPH-002T-P0.5S) | Easier alternative: pre-crimped JST-PH leads |  |
-| [ ] | 1 | LED | 5 mm, any colour | [TinyTronics LEDs](https://www.tinytronics.nl/nl/componenten/leds/standaard-leds) / [TME search](https://www.tme.eu/nl/katalog/leds_100684/?search=5mm%20LED) | Use with PCB LED header |  |
+| [x] | 1 | LED | 5 mm, any colour | Included in TinyTronics starter pack | Choose green, red, yellow or white; use with PCB LED header | €0 (starter pack) |
 | [ ] | 2 | Reverb potentiometer | 50 kΩ linear, single-gang panel type | [TME search](https://www.tme.eu/nl/katalog/potmeters_24/?search=50k%20linear) / [DigiKey search](https://www.digikey.nl/en/products?keywords=50k%20linear%20panel%20potentiometer) | Echo and reverb controls |  |
 | [ ] | 7 | Knob | Fits selected 6 mm shafts | [TinyTronics knobs](https://www.tinytronics.nl/nl/componenten/weerstanden/potmeters/knoppen) / [TME knobs](https://www.tme.eu/nl/katalog/knoppen_100076/) | Five siren + two reverb |  |
 | [ ] | 1 | Momentary pushbutton | Normally open, panel mount | [TME search](https://www.tme.eu/nl/katalog/schakelaars_100056/?search=momentary%20pushbutton%20NO) / [TinyTronics switches](https://www.tinytronics.nl/nl/schakelaars) | Trigger control |  |

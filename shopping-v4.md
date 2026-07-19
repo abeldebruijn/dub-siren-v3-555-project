@@ -2,6 +2,8 @@
 
 Check the first column after buying an item: change `[ ]` to `[x]`.
 
+Items marked **starter pack** are supplied by the TinyTronics starter pack. The included potentiometers, tactile buttons and button caps do not match the required panel/PCB parts.
+
 **Do not order the seven PCB potentiometers until their footprint is measured against the V4 board.** The specified Panasonic EVU-F series was discontinued with no official replacement. V4 is easier to wire but currently harder to source exactly than V3.1.
 
 ## PCB and fitted components
@@ -16,15 +18,15 @@ Check the first column after buying an item: change `[ ]` to `[x]`.
 | [ ] | 1 | Resistor | 10 Ω, ¼ W, axial | [TME search](https://www.tme.eu/nl/katalog/tht-weerstanden_100026/?search=10R%200.25W) / [DigiKey search](https://www.digikey.nl/en/products?keywords=10%20ohm%200.25W%20axial) | 1% metal film preferred |  |
 | [ ] | 3 | Resistor | 560 Ω, ¼ W, axial | [TME search](https://www.tme.eu/nl/katalog/tht-weerstanden_100026/?search=560R%200.25W) / [DigiKey search](https://www.digikey.nl/en/products?keywords=560%20ohm%200.25W%20axial) | 1% metal film preferred |  |
 | [ ] | 2 | Resistor | 2.2 kΩ, ¼ W, axial | [TME search](https://www.tme.eu/nl/katalog/tht-weerstanden_100026/?search=2.2K%200.25W) / [DigiKey search](https://www.digikey.nl/en/products?keywords=2.2k%20ohm%200.25W%20axial) | 1% metal film preferred |  |
-| [ ] | 1 | Resistor | 4.7 kΩ, ¼ W, axial | [TME search](https://www.tme.eu/nl/katalog/tht-weerstanden_100026/?search=4.7K%200.25W) / [DigiKey search](https://www.digikey.nl/en/products?keywords=4.7k%20ohm%200.25W%20axial) | 1% metal film preferred |  |
-| [ ] | 2 | Resistor | 10 kΩ, ¼ W, axial | [TME search](https://www.tme.eu/nl/katalog/tht-weerstanden_100026/?search=10K%200.25W) / [DigiKey search](https://www.digikey.nl/en/products?keywords=10k%20ohm%200.25W%20axial) | 1% metal film preferred |  |
+| [x] | 1 | Resistor | 4.7 kΩ, ¼ W, axial | Included in TinyTronics starter pack | Verify supplied power rating; starter pack contains 30 | €0 (starter pack) |
+| [x] | 2 | Resistor | 10 kΩ, ¼ W, axial | Included in TinyTronics starter pack | Verify supplied power rating; starter pack contains 30 | €0 (starter pack) |
 | [ ] | 1 | Resistor | 68 kΩ, ¼ W, axial | [TME search](https://www.tme.eu/nl/katalog/tht-weerstanden_100026/?search=68K%200.25W) / [DigiKey search](https://www.digikey.nl/en/products?keywords=68k%20ohm%200.25W%20axial) | 1% metal film preferred |  |
 | [ ] | 1 | NPN transistor | 2N3904, TO-92 | [TinyTronics](https://www.tinytronics.nl/nl/schakelaars/transistoren-en-mosfet%27s/transistoren/npn-transistor-2n3904) / [DigiKey search](https://www.digikey.nl/en/products?keywords=2N3904%20TO-92) | Verify E-B-C orientation |  |
 | [ ] | 2 | Timer IC | NE555P, DIP-8 | [TME](https://www.tme.eu/nl/details/ne555p/watchdog-en-reset-circuits/texas-instruments/) / [DigiKey search](https://www.digikey.nl/en/products?keywords=NE555P) | Same as V3.1 |  |
 | [ ] | 1 | Op-amp IC | UA741CP, DIP-8 | [TME](https://www.tme.eu/nl/details/ua741cp/operationele-versterkers-tht/texas-instruments/) / [DigiKey search](https://www.digikey.nl/en/products?keywords=UA741CP) | Same as V3.1 |  |
 | [ ] | 1 | Audio-amplifier IC | LM386N-1/NOPB, DIP-8 | [TME](https://www.tme.eu/nl/details/lm386n-1_nopb/audio-versterkers/texas-instruments/) / [DigiKey search](https://www.digikey.nl/en/products?keywords=LM386N-1%2FNOPB) | Same as V3.1 |  |
 | [ ] | 4 | IC socket | DIP-8, 2.54 mm pitch | [TME search](https://www.tme.eu/nl/katalog/ic-voeten_100060/?search=DIP8) / [DigiKey search](https://www.digikey.nl/en/products?keywords=DIP-8%20socket) | Recommended; not in source BOM |  |
-| [ ] | 1 | LED | 5 mm, any colour | [TinyTronics LEDs](https://www.tinytronics.nl/nl/componenten/leds/standaard-leds) / [TME search](https://www.tme.eu/nl/katalog/leds_100684/?search=5mm%20LED) | Mounted directly on V4 PCB |  |
+| [x] | 1 | LED | 5 mm, any colour | Included in TinyTronics starter pack | Choose green, red, yellow or white; mounted directly on V4 PCB | €0 (starter pack) |
 | [ ] | 7 | PCB potentiometer | 50 kΩ linear, Panasonic EVUF3A footprint | [Discontinuation notice](https://www.ic-components.cz/files/c1/EVU-F3AF30B53.pdf) / [Thonk 9 mm pots](https://www.thonk.co.uk/product-category/parts/potentiometers/) | **STOP: EVU-F family discontinued. Confirm pin/board-lock spacing, shaft and height before choosing substitute** |  |
 | [ ] | 6 | JST-PH PCB header | B2B-PH-K-S, 2-pin, 2.0 mm, vertical | [TME search](https://www.tme.eu/nl/katalog/?search=B2B-PH-K-S) / [DigiKey search](https://www.digikey.nl/en/products?keywords=B2B-PH-K-S) | PCB side |  |
 | [ ] | 2 | JST-PH PCB header | B3B-PH-K-S, 3-pin, 2.0 mm, vertical | [TME exact part](https://www.tme.eu/nl/details/b3b-ph-k-s/signaalconnectoren-raster-2-00mm/jst/b3b-ph-k-s-lf-sn/) / [DigiKey search](https://www.digikey.nl/en/products?keywords=B3B-PH-K-S) | Echo and reverb inputs |  |
