@@ -8,7 +8,7 @@ This list matches the revised panel:
 - One momentary **Trigger** button
 - One modulation-rate LED
 - Eerste prototype: **USB-MIDI naar een Mac**
-- Latere standalone uitbreiding: **PCM5102A line-output via 3,5 mm**
+- Latere standalone uitbreiding: **PCM5102A line-output via RCA of 3,5 mm**
 
 Change `[ ]` to `[x]` after buying an item. Write the actual amount after **Final price**.
 
@@ -25,7 +25,7 @@ Phase 1: controls -> Pico 2 -> USB-MIDI -> Mac synth/patch -> Mac audio output
 Later, add the PCM5102A and move or copy the sound engine into the Pico firmware. This creates a standalone instrument while allowing USB-MIDI support to remain available.
 
 ```text
-Phase 2: controls -> Pico 2 sound engine -> PCM5102A -> 3.5 mm line output
+Phase 2: controls -> Pico 2 sound engine -> PCM5102A -> RCA or 3.5 mm line output
                      |
                      +-> optional USB-MIDI
 ```
@@ -34,10 +34,10 @@ Use USB-MIDI rather than a custom USB-serial protocol. macOS music applications 
 
 ## How the final standalone chain works
 
-The five potentiometers produce control voltages. The CD74HC4051 selects one control at a time because the Pico does not expose enough analogue inputs for all five. During phase 1, the Pico converts the controls into USB-MIDI messages and the Mac generates the audio. During phase 2, the Pico also generates the oscillator and modulation in software and calculates delay and feedback. Digital audio then travels over I²S to the PCM5102A DAC. The DAC converts it to analogue stereo line-level audio for a mixer, amplifier or powered speaker.
+The five potentiometers produce control voltages. The CD74HC4051 selects one control at a time because the Pico does not expose enough analogue inputs for all five. During phase 1, the Pico converts the controls into USB-MIDI messages and the Mac generates the audio. During phase 2, the Pico also generates the oscillator and modulation in software and calculates delay and feedback. Digital audio then travels over I²S to the PCM5102A DAC. The DAC converts it to analogue stereo line-level audio for a mixer, amplifier or powered speaker through RCA or 3.5 mm.
 
 ```text
-5 pots -> CD74HC4051 -> Pico 2 sound engine -> PCM5102A DAC -> 3.5 mm output
+5 pots -> CD74HC4051 -> Pico 2 sound engine -> PCM5102A DAC -> RCA/3.5 mm output
                          ^
 5-position selector -----|
 trigger button -----------|
@@ -144,15 +144,41 @@ trigger button -----------|
 
 The Mac needs a synth or patch made in software such as GarageBand, Logic, Ableton Live, Pure Data or Max. MIDI itself contains control messages, not audio.
 
-## Phase 2 — optional standalone 3.5 mm output
+## Phase 2 — optional standalone RCA or 3.5 mm output
 
 Reserve three Pico GPIO pins for the future I²S connection. Proposed allocation: `GP10 = BCLK`, `GP11 = LRCLK` and `GP12 = DATA`. Confirm this allocation against the selected firmware library before permanent soldering.
 
-- [ ] **1 × PCM5102A I²S DAC module with 3.5 mm output — approximately €6–€12**
-  - Specification: accepts 3.3 V I²S signals and preferably has its own fitted stereo 3.5 mm jack. Verify the module's supply-voltage instructions before wiring it.
+- [ ] **1 × PCM5102A I²S DAC module — approximately €6–€12**
+  - Specification: accepts 3.3 V I²S signals and exposes `LOUT`, `ROUT` and `GND` pins for the RCA route. A fitted stereo 3.5 mm jack is useful but optional. Verify the module's supply-voltage instructions before wiring it.
   - Why needed: the Pico creates digital samples but has no proper analogue audio output. The DAC converts those samples into clean stereo line-level audio.
   - Buy: [TinyTronics product information](https://www.tinytronics.nl/en/pcm5102-dac-audio-decoder-i2s) / [DigiKey search](https://www.digikey.nl/en/products?keywords=PCM5102A%20module) / [Amazon.nl search](https://www.amazon.nl/s?k=PCM5102A+I2S+DAC)
   - Final price: €
+
+Choose one primary output route:
+
+### Route A — stereo RCA output
+
+```text
+PCM5102A LOUT  -> white RCA centre pin
+PCM5102A ROUT  -> red RCA centre pin
+PCM5102A GND   -> both RCA outer contacts
+```
+
+- [ ] **1 × red/white panel-mount RCA socket pair — approximately €2–€7**
+  - Specification: female RCA/phono sockets; preferably an insulated pair so the audio ground does not unintentionally connect to a metal enclosure.
+  - Why needed: provides standard left/right line outputs for a mixer, amplifier or powered speakers.
+  - Mark white as left and red as right.
+  - Final price: €
+
+- [ ] **Approximately 30–50 cm shielded stereo audio wire — approximately €1–€4**
+  - Connect both shields/returns to `GND` at the DAC. Keep these wires short and away from USB, LED and digital clock wiring.
+  - Final price: €
+
+- [ ] **1 × stereo RCA cable — approximately €4–€10, if not already owned**
+  - Select RCA-to-RCA or RCA-to-6.35 mm depending on the destination equipment.
+  - Final price: €
+
+### Route B — stereo 3.5 mm output
 
 - [ ] **1 × 3.5 mm stereo audio cable — approximately €3–€7**
   - Specification: TRS male-to-male, or the cable required by the destination mixer/amplifier.
@@ -160,9 +186,9 @@ Reserve three Pico GPIO pins for the future I²S connection. Proposed allocation
   - Buy: [Thomann](https://www.thomann.de/nl/mini_jack_kabels.html) / [Amazon.nl search](https://www.amazon.nl/s?k=3.5mm+stereo+audio+kabel)
   - Final price: €
 
-The PCM5102A is normally line-level. It does not drive a passive speaker and may not drive headphones properly. Use a mixer, powered speaker or external amplifier.
+The PCM5102A is normally unbalanced line-level. Neither RCA nor 3.5 mm drives a passive speaker, and the output may not drive headphones properly. Use a mixer, powered speaker or external amplifier.
 
-These two items are not required for the phase-1 USB-MIDI prototype. Purchase them when standalone audio is implemented.
+The DAC and output-connector items are not required for the phase-1 USB-MIDI prototype. Purchase them when standalone audio is implemented. Both connector types can be fitted in parallel, but treat them as duplicate line outputs and normally connect only one destination at a time.
 
 ## Power stability and wiring
 
@@ -205,11 +231,12 @@ These temporary connections are less reliable than soldering. A permanent enclos
 
 - Phase-1 electronics and controls: approximately **€23–€43**
 - Breadboard, wiring and USB data cable: approximately **€10–€22**
-- Optional phase-2 DAC and audio cable: approximately **€9–€19**
+- Optional phase-2 DAC with 3.5 mm route: approximately **€9–€19**
+- Optional phase-2 DAC with RCA route: approximately **€13–€33**
 - Optional USB power adapter: approximately **€0–€10**
 - One Dutch shipment: allow approximately **€5–€8**
 - **Expected phase-1 prototype total: approximately €38–€83**
-- **Expected complete standalone total after phase 2: approximately €47–€102**
+- **Expected complete standalone total after phase 2: approximately €47–€116**, depending on output route
 
 The upper end assumes individually purchased panel controls and temporary solder-free adapters. Ordering most small parts from one supplier should keep the build closer to the lower half of the range.
 
@@ -220,7 +247,7 @@ The upper end assumes individually purchased panel controls and temporary solder
 - Five-position selector and selector knob: €
 - Trigger and LED: €
 - USB data cable: €
-- Later: PCM5102A and audio cable: €
+- Later: PCM5102A and selected RCA/3.5 mm output parts: €
 - Breadboard, wiring and power: €
 - Shipping: €
 - **Grand total: €**
