@@ -1,0 +1,27 @@
+version = 1
+revision = 3
+requires-python = ">=3.9"
+
+[[package]]
+name = "picozero"
+version = "0.6.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/20/57/48ecde31c905d493028d8f3df4506a96b878de7111d754e375d263a5df86/picozero-0.6.1.tar.gz", hash = "sha256:616baacd383e1d395d59b3f47ef768f7b26320148db2b8f670c86bab1f5fba55", size = 24426, upload-time = "2025-11-28T17:02:54.009Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4b/0f/73103f0f9e6a26d3b3c57607421cd4e2723ac986b35ae80e97b68d6cb71a/picozero-0.6.1-py3-none-any.whl", hash = "sha256:90882e1f87e2b349e88a93f4de13b0141ab243a8058e2c4a6fae5d3e287c3a02", size = 18986, upload-time = "2025-11-28T17:02:52.913Z" },
+]
+
+[[package]]
+name = "testing"
+version = "0.1.0"
+source = { virtual = "." }
+
+[package.dev-dependencies]
+dev = [
+    { name = "picozero" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [{ name = "picozero", specifier = ">=0.6.1" }]

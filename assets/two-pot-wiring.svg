@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" role="img" aria-labelledby="title desc">
+  <title id="title">Two potentiometers connected to Raspberry Pi Pico GP26 and GP27</title>
+  <desc id="desc">Both ten kilo-ohm potentiometers have outside pins connected to 3V3 and ground. The Rate potentiometer centre wiper connects to GP26. The Amount potentiometer centre wiper connects to GP27.</desc>
+  <rect width="1000" height="500" fill="#faf8f1"/>
+  <text x="45" y="48" fill="#252b2e" font-family="system-ui" font-size="25" font-weight="700">Two pots share power; each wiper gets its own ADC</text>
+
+  <g transform="translate(55 105)">
+    <rect width="270" height="310" rx="20" fill="#087a45" stroke="#075d36" stroke-width="4"/>
+    <rect x="-27" y="110" width="48" height="76" rx="7" fill="#b9bec0" stroke="#747b7e" stroke-width="3"/>
+    <text x="40" y="165" fill="#fff" font-family="system-ui" font-size="26" font-weight="700">PICO 2</text>
+    <g fill="#f0cd35">
+      <circle cx="250" cy="55" r="8"/><circle cx="250" cy="120" r="8"/>
+      <circle cx="250" cy="190" r="8"/><circle cx="250" cy="255" r="8"/>
+    </g>
+    <g fill="#fff" font-family="system-ui" font-size="17">
+      <text x="164" y="61">3V3</text>
+      <text x="145" y="126">GP26</text>
+      <text x="145" y="196">GP27</text>
+      <text x="164" y="261">GND</text>
+    </g>
+  </g>
+
+  <g font-family="system-ui">
+    <g transform="translate(575 85)">
+      <text x="36" y="0" fill="#252b2e" font-size="21" font-weight="700">MOD RATE</text>
+      <rect x="50" y="55" width="150" height="125" rx="25" fill="#b9b5aa" stroke="#56534d" stroke-width="4"/>
+      <circle cx="125" cy="95" r="35" fill="#77736a"/>
+      <rect x="113" y="15" width="24" height="75" rx="7" fill="#ddd8cb" stroke="#77736a" stroke-width="4"/>
+      <line x1="80" y1="180" x2="80" y2="235" stroke="#777" stroke-width="8"/>
+      <line x1="125" y1="180" x2="125" y2="235" stroke="#777" stroke-width="8"/>
+      <line x1="170" y1="180" x2="170" y2="235" stroke="#777" stroke-width="8"/>
+      <text x="96" y="267" fill="#54349d" font-size="16" font-weight="700">centre → GP26</text>
+    </g>
+
+    <g transform="translate(790 195)">
+      <text x="18" y="0" fill="#252b2e" font-size="21" font-weight="700">MOD AMOUNT</text>
+      <rect x="50" y="55" width="150" height="125" rx="25" fill="#b9b5aa" stroke="#56534d" stroke-width="4"/>
+      <circle cx="125" cy="95" r="35" fill="#77736a"/>
+      <rect x="113" y="15" width="24" height="75" rx="7" fill="#ddd8cb" stroke="#77736a" stroke-width="4"/>
+      <line x1="80" y1="180" x2="80" y2="235" stroke="#777" stroke-width="8"/>
+      <line x1="125" y1="180" x2="125" y2="235" stroke="#777" stroke-width="8"/>
+      <line x1="170" y1="180" x2="170" y2="235" stroke="#777" stroke-width="8"/>
+      <text x="66" y="267" fill="#167395" font-size="16" font-weight="700">centre → GP27</text>
+    </g>
+  </g>
+
+  <path d="M305 160 C430 160 500 320 655 320 M305 160 C510 160 650 430 870 430" fill="none" stroke="#d52d31" stroke-width="8" stroke-linecap="round"/>
+  <path d="M305 225 C430 225 520 320 700 320" fill="none" stroke="#7357bd" stroke-width="8" stroke-linecap="round"/>
+  <path d="M305 295 C500 295 650 430 915 430" fill="none" stroke="#167395" stroke-width="8" stroke-linecap="round"/>
+  <path d="M305 360 C450 360 570 320 745 320 M305 360 C520 360 690 430 960 430" fill="none" stroke="#202629" stroke-width="8" stroke-linecap="round"/>
+
+  <g font-family="system-ui" font-size="17" font-weight="700">
+    <text x="365" y="145" fill="#ac2025">3.3 V shared</text>
+    <text x="395" y="218" fill="#54349d">GP26</text>
+    <text x="430" y="290" fill="#167395">GP27</text>
+    <text x="385" y="385" fill="#202629">GND shared</text>
+  </g>
+</svg>

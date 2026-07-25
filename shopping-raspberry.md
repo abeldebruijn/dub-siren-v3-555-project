@@ -120,14 +120,16 @@ trigger button -----------|
   - Final price: €
 
 - [x] **1 × 5 mm LED — included in starter pack**
-  - Specification: any colour; the orange/red shown in the sketch is suitable.
+  - Specification: **red, yellow or green** — the starter pack supplies 3 each of green, red, yellow and white. Do **not** use the white ones on a 3.3 V GPIO pin: their ≈3.2 V forward voltage leaves almost no headroom, so they barely light and look faulty. Red is the safe default.
   - Why needed: flashes at the Mod Rate, making the low-frequency modulation speed visible even before the audio is connected.
   - Buy: [TinyTronics LEDs](https://www.tinytronics.nl/nl/componenten/leds/standaard-leds) / [TME search](https://www.tme.eu/nl/katalog/leds_100684/?search=5mm%20LED)
   - Final price: €0 (starter pack)
 
-- [x] **1 × 1 kΩ resistor — included in starter pack**
-  - Specification: ¼ W through-hole resistor. The included 1 kΩ value replaces the originally proposed 330 Ω value; it gives a dimmer but safe indicator LED at 3.3 V.
+- [x] **LED series resistor — included in starter pack**
+  - Specification: ¼ W through-hole, ±5% (4-band, gold). The starter pack supplies 30 each of 100 Ω, 1 kΩ, 4.7 kΩ, 10 kΩ, 47 kΩ, 100 kΩ and 1 MΩ.
+  - Use **1 kΩ** for the first red indicator LED: it gives an estimated ≈1.3 mA at 3.3 V, keeping the beginner circuit modest. The owned 100 Ω part estimates ≈13 mA and is not the default. A 330 Ω resistor would target ≈4 mA and is a useful future purchase.
   - Why needed: limits current through the LED and protects both the LED and Pico GPIO.
+  - See [`reference/resistor-colour-codes.html`](reference/resistor-colour-codes.html) for band identification and the current maths.
   - Final price: €0 (starter pack)
 
 ## Phase 1 — USB-MIDI output

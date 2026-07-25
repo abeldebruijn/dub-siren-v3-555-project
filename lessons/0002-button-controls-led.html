@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 2 — Let a button control the LED</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · lesson 0002</p>
+    <h1>Press to make light</h1>
+    <p class="lead">Turn the blinking output from Lesson 1 into an input–output instrument: hold the button, LED on; release it, LED off.</p>
+    <p class="meta">10–20 min · no solder · one new component</p>
+    <nav>
+      <a href="0001-blink-an-external-led.html">← Lesson 1</a>
+      <a href="#parts">Parts</a>
+      <a href="#button">Button anatomy</a>
+      <a href="#wire">Wire</a>
+      <a href="#code">Code</a>
+      <a href="#test">Test</a>
+      <a href="../reference/tactile-button-wiring.html">Button reference</a>
+    </nav>
+  </header>
+
+  <div class="callout safe">
+    <span class="label">Today’s win</span>
+    The LED follows your finger immediately. This is the first version of the dub siren’s momentary Trigger control.
+  </div>
+
+  <h2 id="parts">1. Keep Lesson 1 assembled</h2>
+  <ul class="parts">
+    <li><span class="label">Keep</span>Red LED on GP15</li>
+    <li><span class="label">Keep</span>1 kΩ LED resistor</li>
+    <li><span class="label">Add</span>One 12 × 12 mm tactile button</li>
+    <li><span class="label">Add</span>Two male-to-male jumpers</li>
+  </ul>
+  <p>The tactile button and jumpers are supplied by your starter pack. The final panel button works on the same principle, but we save it for the panel build.</p>
+
+  <h2 id="button">2. See the two hidden sides</h2>
+  <p>A four-leg tactile button is electrically a two-terminal switch. Two legs form one permanently connected side; the other two form the other side. Pressing joins both sides.</p>
+
+  <div class="switch-map" aria-label="Top view of a released four-leg tactile button">
+    <div class="contact-pair">
+      <span class="contact-dot"></span>
+      <span class="contact-link"></span>
+      <span class="contact-dot"></span>
+      <small>side A</small>
+    </div>
+    <div class="open-contact">press bridges</div>
+    <div class="contact-pair">
+      <span class="contact-dot"></span>
+      <span class="contact-link"></span>
+      <span class="contact-dot"></span>
+      <small>side B</small>
+    </div>
+  </div>
+
+  <div class="callout">
+    <span class="label">Why four legs?</span>
+    The duplicated legs hold the button firmly. Do not use two legs from the same side: they are already connected even when untouched.
+  </div>
+
+  <h2 id="wire">3. Add the input</h2>
+  <p><strong>Unplug USB.</strong> Keep the complete GP15 → resistor → LED → GND circuit unchanged.</p>
+  <ol>
+    <li>Place the tactile button across the breadboard’s centre trench.</li>
+    <li>Connect one button side to Pico <code>GP14</code>.</li>
+    <li>Connect the opposite button side to <code>GND</code>.</li>
+    <li>Trace it aloud: “GP14, button, ground.”</li>
+  </ol>
+
+  <figure class="breadboard-figure">
+    <img src="../assets/lesson-0002-button-breadboard.svg" alt="Breadboard diagram: the existing GP15 resistor and LED circuit, plus a push button from GP14 to ground.">
+    <figcaption>Purple = GP14 input. Black = ground. Orange = existing GP15 LED output. The button crosses the breadboard’s centre trench.</figcaption>
+  </figure>
+
+  <div class="circuit" aria-label="Complete LED output and button input wiring">
+    <span class="node">GP15</span>
+    <span class="wire">→</span>
+    <span class="node">1 kΩ + LED</span>
+    <span class="wire">→</span>
+    <span class="node">GND</span>
+    <span class="wire">plus</span>
+    <span class="node">GP14 → button → GND</span>
+  </div>
+
+  <details>
+    <summary>Why does the button need no external resistor?</summary>
+    <p><code>Button(14)</code> defaults to an internal pull-up. Inside the Pico, a weak resistor normally holds GP14 high. Pressing the button connects GP14 to ground. <code>picozero</code> translates that low voltage into <code>is_pressed = True</code>.</p>
+  </details>
+
+  <h2 id="code">4. Connect input to output</h2>
+  <p>Reconnect USB. Run <a href="../examples/0002-button-controls-led/main.py">the prepared <code>main.py</code></a>:</p>
+
+  <pre><code>from picozero import Button, LED
+
+led = LED(15)
+button = Button(14)
+
+button.when_pressed = led.on
+button.when_released = led.off</code></pre>
+
+  <p>The last two lines do not call the functions immediately. They hand <code>picozero</code> the actions to call later, when the button changes state. That is why there are no parentheses after <code>led.on</code> or <code>led.off</code>.</p>
+
+  <h2 id="test">5. Test the physical rule</h2>
+  <div class="task">
+    <span class="label">Predict before pressing</span>
+    <p>What should the LED do while untouched, while held, and immediately after release? Say it aloud, then test.</p>
+  </div>
+  <ol>
+    <li>Leave button untouched: LED stays off.</li>
+    <li>Hold button for three seconds: LED stays on for three seconds.</li>
+    <li>Release: LED turns off immediately.</li>
+    <li>Repeat ten times. Each press should produce one clean response.</li>
+  </ol>
+
+  <h3>If it behaves incorrectly</h3>
+  <ul>
+    <li><strong>Always on:</strong> unplug USB; the two button wires may use the same internally connected side.</li>
+    <li><strong>Never on:</strong> verify GP14, GND, and that the LED still works with the Lesson 1 blink code.</li>
+    <li><strong>Works only when button is twisted:</strong> reseat it; a leg may not be inside a breadboard contact.</li>
+    <li><strong>Several responses per press:</strong> mechanical contacts bounce. <code>Button</code> applies a short debounce time by default; we investigate only if it remains visible.</li>
+  </ul>
+
+  <h2>Make it yours</h2>
+  <p>After the basic test works, change one line:</p>
+  <pre><code>button.when_pressed = led.pulse</code></pre>
+  <p>Predict what release will do before trying it. If the LED keeps pulsing, restore <code>led.on</code> for now. Lesson 3 will compare momentary and latched behaviour deliberately.</p>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>The LED is on only while the button is held.</li>
+    <li>You can identify the button’s two connected sides.</li>
+    <li>You can explain why the input uses no external resistor.</li>
+    <li>You know why callback names have no parentheses.</li>
+  </ul>
+
+  <p><a href="0003-toggle-with-one-press.html">Continue to Lesson 3 →</a></p>
+
+  <p><strong>Tell your teaching agent:</strong> “The button works,” or describe exactly what the LED does when untouched, pressed, and released. Ask questions whenever the breadboard diagram and the real component seem different.</p>
+
+  <footer>
+    Primary source: <a href="https://picozero.readthedocs.io/en/latest/recipes.html#buttons">picozero button recipe</a> and <a href="https://picozero.readthedocs.io/en/latest/api.html#button">Button API</a>. This button-to-ground pattern becomes the final siren Trigger input.
+  </footer>
+</main>
+</body>
+</html>
