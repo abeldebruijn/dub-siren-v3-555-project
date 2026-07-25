@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 5 — Potentiometer controls LED brightness</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · lesson 0005</p>
+    <h1>Turn light like sound</h1>
+    <p class="lead">Use the potentiometer as an amount control and the button as a gate. This is the control pattern your siren will reuse.</p>
+    <p class="meta">15 min · keep Lessons 2 and 4 wired</p>
+    <nav>
+      <a href="0004-read-a-potentiometer.html">← Lesson 4</a>
+      <a href="#code">Code</a>
+      <a href="#swap">Change LED</a>
+      <a href="#test">Test</a>
+    </nav>
+  </header>
+
+  <div class="callout safe"><span class="label">Today’s win</span>Hold Trigger and turn the knob: LED brightness follows your hand.</div>
+
+  <h2>1. Keep all three controls</h2>
+  <div class="circuit" aria-label="Complete button, potentiometer, and LED wiring">
+    <span class="node">GP14 → button → GND</span>
+    <span class="wire">+</span>
+    <span class="node">3V3 → pot → GND</span>
+    <span class="wire">+</span>
+    <span class="node">wiper → GP26</span>
+    <span class="wire">+</span>
+    <span class="node">GP15 → 1 kΩ → LED → GND</span>
+  </div>
+  <p>The pot wiring is unchanged from <a href="0004-read-a-potentiometer.html#wire">Lesson 4’s diagram</a>.</p>
+
+  <h2 id="code">2. Map input to output</h2>
+  <p>Run <a href="../examples/0005-pot-led/main.py">this <code>main.py</code></a>:</p>
+  <pre><code>from picozero import Button, LED, Pot
+from time import sleep
+
+led = LED(15)
+button = Button(14)
+pot = Pot(26)
+
+while True:
+    if button.is_pressed:
+        led.value = pot.value
+    else:
+        led.off()
+    sleep(0.01)</code></pre>
+  <p><code>led.value</code> accepts the same <code>0.0…1.0</code> range produced by <code>pot.value</code>. The Pico rapidly switches the LED to create apparent brightness levels; this is PWM.</p>
+
+  <h2 id="test">3. Play the control</h2>
+  <ol>
+    <li>Button released: turn knob; LED stays off.</li>
+    <li>Hold button: turn knob slowly; brightness changes.</li>
+    <li>Release: LED turns off immediately.</li>
+    <li>Hold again: previous knob position determines brightness.</li>
+  </ol>
+  <div class="task"><span class="label">Siren translation</span><p>Say which line acts like Trigger, and which value could later become Mod Amount.</p></div>
+
+  <h2 id="swap">4. Change the LED colour</h2>
+  <p><strong>Unplug USB.</strong> Remove the red LED only. Insert a yellow or green LED in the same holes and orientation: long leg toward the resistor/GP15 side; short leg toward GND. Keep the 1 kΩ resistor.</p>
+  <p>Reconnect and repeat the test. Different colours can appear brighter at the same value. Do not use the starter-pack white LED here; its forward voltage is too close to 3.3 V for this beginner circuit.</p>
+
+  <details>
+    <summary>The replacement LED does not light</summary>
+    <p>Unplug USB and rotate the LED 180°. LEDs conduct in one direction. Then verify the resistor stayed in series rather than being bypassed.</p>
+  </details>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>The button gates the LED.</li>
+    <li>The potentiometer changes brightness while held.</li>
+    <li>You safely swapped red for yellow or green.</li>
+    <li>You can connect this pattern to Trigger and Mod Amount.</li>
+  </ul>
+
+  <p><a href="0006-pot-controls-flash-rate.html">Continue to Lesson 6 →</a></p>
+
+  <p><strong>Tell your teaching agent:</strong> which colour you used and whether brightness changes smoothly.</p>
+  <footer>Primary sources: <a href="https://picozero.readthedocs.io/en/latest/api.html#led">picozero LED API</a>, <a href="https://picozero.readthedocs.io/en/latest/api.html#pot">Pot API</a>, and <a href="../reference/resistor-colour-codes.html">your LED resistor reference</a>.</footer>
+</main>
+</body>
+</html>

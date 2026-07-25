@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 6 — Potentiometer controls flash rate</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · lesson 0006</p>
+    <h1>Make a visible LFO</h1>
+    <p class="lead">Hold Trigger and turn the potentiometer. The LED repeats slowly or quickly like the modulation-rate indicator in your dub siren.</p>
+    <p class="meta">15–20 min · no wiring changes</p>
+    <nav>
+      <a href="0005-pot-controls-led.html">← Lesson 5</a>
+      <a href="#map">Map rate</a>
+      <a href="#code">Code</a>
+      <a href="#test">Test</a>
+    </nav>
+  </header>
+
+  <div class="callout safe">
+    <span class="label">Today’s win</span>
+    The potentiometer controls a repeating event instead of brightness. This is your first low-frequency oscillator, or LFO.
+  </div>
+
+  <h2>1. Keep the complete circuit</h2>
+  <p>Keep the green LED on GP15 with its 1 kΩ resistor, button on GP14, and potentiometer wiper on GP26. No wires move.</p>
+
+  <div class="circuit" aria-label="Lesson 6 input and output relationship">
+    <span class="node">Button</span>
+    <span class="wire">gates</span>
+    <span class="node">repeating flash</span>
+    <span class="wire">while</span>
+    <span class="node">Pot</span>
+    <span class="wire">sets</span>
+    <span class="node">rate</span>
+  </div>
+
+  <h2 id="map">2. Turn 0…1 into milliseconds</h2>
+  <p>The loop needs a time interval. This line maps the pot to <code>500…50</code> milliseconds:</p>
+  <pre><code>interval = int(500 - pot.value * 450)</code></pre>
+  <ul>
+    <li>At <code>pot.value = 0.0</code>: interval is <code>500 ms</code>.</li>
+    <li>At <code>pot.value = 0.5</code>: interval is <code>275 ms</code>.</li>
+    <li>At <code>pot.value = 1.0</code>: interval is <code>50 ms</code>.</li>
+  </ul>
+  <div class="task">
+    <span class="label">Predict</span>
+    <p>Why does a smaller interval make the LED flash faster? Predict which end of the knob will be fastest.</p>
+  </div>
+
+  <h2 id="code">3. Run the LFO</h2>
+  <p>Run <a href="../examples/0006-pot-controls-flash-rate/main.py">this <code>main.py</code></a>:</p>
+  <pre><code>from picozero import Button, LED, Pot
+from time import sleep, ticks_diff, ticks_ms
+
+led = LED(15)
+button = Button(14)
+pot = Pot(26)
+
+last_change = ticks_ms()
+
+while True:
+    interval = int(500 - pot.value * 450)
+
+    if button.is_pressed:
+        now = ticks_ms()
+        if ticks_diff(now, last_change) &gt;= interval:
+            led.toggle()
+            last_change = now
+    else:
+        led.off()
+        last_change = ticks_ms()
+
+    sleep(0.01)</code></pre>
+
+  <p><code>ticks_ms()</code> reads the Pico’s millisecond clock. <code>ticks_diff()</code> asks how much time passed. The loop keeps checking the button every 10 ms, so release can turn the LED off quickly even at the slowest rate.</p>
+
+  <h2 id="test">4. Play and test</h2>
+  <ol>
+    <li>Release button: LED remains off at every knob position.</li>
+    <li>Hold button with knob fully slow: count five flashes.</li>
+    <li>Keep holding and turn toward fast: rate changes immediately.</li>
+    <li>Release during a slow flash: LED turns off without waiting for the interval.</li>
+  </ol>
+
+  <details>
+    <summary>The direction feels backwards</summary>
+    <p>Change the mapping to <code>interval = int(50 + pot.value * 450)</code>. This changes software direction without moving the pot wires.</p>
+  </details>
+
+  <details>
+    <summary>The LED appears dim at the fastest end</summary>
+    <p>At high speed, separate flashes merge visually. That is normal. Slow it down and confirm distinct on/off changes return.</p>
+  </details>
+
+  <h2>5. Translate it to the synthesizer</h2>
+  <p>The LED shows the LFO’s timing. Later the same repeating value will change pitch or another sound parameter. The pot becomes <strong>Mod Rate</strong>; the button remains <strong>Trigger</strong>.</p>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>The LED flashes only while Trigger is held.</li>
+    <li>The pot moves smoothly from slow to fast.</li>
+    <li>Release turns the LED off promptly.</li>
+    <li>You can explain why a smaller interval means a faster rate.</li>
+  </ul>
+
+  <p><a href="0007-two-pots-rate-and-amount.html">Continue to Lesson 7 →</a></p>
+
+  <p><strong>Tell your teaching agent:</strong> whether the knob moves slow → fast in the direction you prefer, and whether release stops immediately.</p>
+
+  <footer>Primary sources: <a href="https://docs.micropython.org/en/latest/library/time.html">MicroPython time functions</a> and the <a href="https://picozero.readthedocs.io/en/latest/api.html">picozero API</a>. This timing pattern becomes the siren’s Mod Rate control.</footer>
+</main>
+</body>
+</html>

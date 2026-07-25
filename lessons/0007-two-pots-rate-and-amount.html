@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 7 — Two potentiometers: rate and amount</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · lesson 0007</p>
+    <h1>Give the LFO two dimensions</h1>
+    <p class="lead">Keep Mod Rate on GP26. Add a second B10K potentiometer on GP27 to control how bright each flash becomes.</p>
+    <p class="meta">20–30 min · one new potentiometer · three connections</p>
+    <nav>
+      <a href="0006-pot-controls-flash-rate.html">← Lesson 6</a>
+      <a href="#wire">Wire</a>
+      <a href="#code">Code</a>
+      <a href="#test">Test</a>
+    </nav>
+  </header>
+
+  <div class="callout safe">
+    <span class="label">Today’s win</span>
+    One knob controls <em>how fast</em>; another controls <em>how much</em>. These become Mod Rate and Mod Amount on the final siren.
+  </div>
+
+  <h2>1. Name the existing knob</h2>
+  <p>Your GP26 potentiometer is now <strong>Mod Rate</strong>. Keep its three wires unchanged. The new potentiometer is <strong>Mod Amount</strong>.</p>
+
+  <h2 id="wire">2. Add Mod Amount with USB unplugged</h2>
+  <ol>
+    <li>Connect one outside pin of the new B10K pot to the same <code>3V3(OUT)</code> supply.</li>
+    <li>Connect its centre wiper to <code>GP27 / ADC1</code>.</li>
+    <li>Connect its other outside pin to the same <code>GND</code>.</li>
+    <li>Leave GP26, GP14, GP15, and the LED resistor unchanged.</li>
+  </ol>
+
+  <figure class="breadboard-figure">
+    <img src="../assets/two-pot-wiring.svg" alt="Two potentiometer diagram: both share 3V3 and ground; Rate centre goes to GP26 and Amount centre goes to GP27.">
+    <figcaption>Viewed from behind with terminals facing you. For each pot: terminal 1 → 3V3, centre terminal 2 → its GP input, terminal 3 → GND. If you use breadboard rails, verify they are continuous or bridge their split.</figcaption>
+  </figure>
+
+  <div class="callout danger">
+    <span class="label">Before reconnecting USB</span>
+    Trace both pots separately. Each must read: 3V3 → resistance → GND, with only the centre pin going to an ADC. Never connect VBUS or VSYS to GP26/GP27.
+  </div>
+
+  <h2 id="code">3. Name both analogue inputs</h2>
+  <p>Run <a href="../examples/0007-two-pots-rate-and-amount/main.py">this <code>main.py</code></a>:</p>
+  <pre><code>from picozero import Button, LED, Pot
+from time import sleep, ticks_diff, ticks_ms
+
+led = LED(15)
+button = Button(14)
+rate = Pot(26)
+amount = Pot(27)
+
+last_change = ticks_ms()
+light_on = False
+
+while True:
+    interval = int(500 - rate.value * 450)
+
+    if button.is_pressed:
+        now = ticks_ms()
+        if ticks_diff(now, last_change) &gt;= interval:
+            light_on = not light_on
+            last_change = now
+
+        led.value = amount.value if light_on else 0
+    else:
+        led.off()
+        light_on = False
+        last_change = ticks_ms()
+
+    sleep(0.01)</code></pre>
+
+  <p><code>light_on</code> remembers which half of the flash cycle is active. During the active half, <code>amount.value</code> sets brightness. Rate and Amount stay independent.</p>
+
+  <h2 id="test">4. Prove each knob has one job</h2>
+  <ol>
+    <li>Hold Trigger. Set Amount halfway.</li>
+    <li>Turn Rate only: speed changes; peak brightness should not.</li>
+    <li>Set Rate near the middle.</li>
+    <li>Turn Amount only: brightness changes; speed should not.</li>
+    <li>Release Trigger: LED stops immediately.</li>
+  </ol>
+
+  <div class="task">
+    <span class="label">Fault isolation</span>
+    <p>Without moving wires, predict the symptom if the two centre-wiper connections were exchanged.</p>
+  </div>
+
+  <details>
+    <summary>One knob works backwards</summary>
+    <p>Unplug USB and exchange only that pot’s two outside wires. Do not move its centre wiper.</p>
+  </details>
+
+  <details>
+    <summary>Amount at zero makes the flashing disappear</summary>
+    <p>Correct: zero amount produces zero brightness. Raise Amount before diagnosing Rate.</p>
+  </details>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>Rate changes speed without changing peak brightness.</li>
+    <li>Amount changes brightness without changing speed.</li>
+    <li>Trigger still stops immediately.</li>
+    <li>You can identify GP26/ADC0 and GP27/ADC1.</li>
+  </ul>
+
+  <p><strong>Tell your teaching agent:</strong> whether each knob changes only its assigned property, and which direction each knob turns.</p>
+
+  <footer>Primary sources: the <a href="https://datasheets.raspberrypi.com/pico/Pico-2-Pinout.pdf">official Pico 2 pinout</a>, <a href="https://picozero.readthedocs.io/en/latest/api.html#pot">picozero Pot API</a>, and <a href="https://docs.micropython.org/en/latest/library/time.html">MicroPython time functions</a>.</footer>
+</main>
+</body>
+</html>

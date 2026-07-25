@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Four-leg tactile button wiring</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · quick reference</p>
+    <h1>Inside a four-leg button</h1>
+    <p class="lead">Four metal legs, but only two electrical sides. Pressing joins those sides.</p>
+    <nav>
+      <a href="../lessons/0002-button-controls-led.html">Lesson 2</a>
+      <a href="pico-first-wiring.html">Pico wiring</a>
+      <a href="https://picozero.readthedocs.io/en/latest/recipes.html#buttons">picozero buttons</a>
+    </nav>
+  </header>
+
+  <h2>Released</h2>
+  <div class="switch-map" aria-label="Top view of released four-leg tactile button">
+    <div class="contact-pair">
+      <span class="contact-dot"></span>
+      <span class="contact-link"></span>
+      <span class="contact-dot"></span>
+      <small>one connected side</small>
+    </div>
+    <div class="open-contact">open</div>
+    <div class="contact-pair">
+      <span class="contact-dot"></span>
+      <span class="contact-link"></span>
+      <span class="contact-dot"></span>
+      <small>other connected side</small>
+    </div>
+  </div>
+  <p>The two legs on one side are already connected. The two legs on the opposite side are also connected. Between the sides, the switch is open.</p>
+
+  <h2>Pressed</h2>
+  <div class="circuit" aria-label="Pressed button connects GP14 to ground">
+    <span class="node">GP14</span>
+    <span class="wire">→</span>
+    <span class="node">button<br>side A</span>
+    <span class="wire">pressed →</span>
+    <span class="node">button<br>side B</span>
+    <span class="wire">→</span>
+    <span class="node">GND</span>
+  </div>
+  <p>Pressing bridges the two sides. The button has no positive or negative direction.</p>
+
+  <h2>Breadboard rule</h2>
+  <ol>
+    <li>Unplug USB.</li>
+    <li>Place the button across the breadboard’s centre trench.</li>
+    <li>Connect GP14 to one side.</li>
+    <li>Connect GND to the opposite side.</li>
+  </ol>
+  <div class="callout danger">
+    <span class="label">If it acts permanently pressed</span>
+    Your two wires probably use legs from the same internally connected side. Unplug USB, move one wire to the opposite side, then retry.
+  </div>
+
+  <footer>
+    Button shapes vary. If the moulding makes the pairs unclear, use a multimeter’s continuity mode while the button is disconnected.
+  </footer>
+</main>
+</body>
+</html>

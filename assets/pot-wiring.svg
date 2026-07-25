@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 430" role="img" aria-labelledby="title desc">
+  <title id="title">Ten kilo-ohm potentiometer wired to Raspberry Pi Pico GP26</title>
+  <desc id="desc">One outside potentiometer pin connects to Pico 3V3, the centre wiper connects to GP26 ADC0, and the other outside pin connects to ground.</desc>
+  <rect width="900" height="430" fill="#faf8f1"/>
+  <text x="45" y="48" fill="#252b2e" font-family="system-ui" font-size="25" font-weight="700">10 kΩ potentiometer → Pico analogue input</text>
+
+  <g transform="translate(55 100)">
+    <rect width="260" height="250" rx="20" fill="#087a45" stroke="#075d36" stroke-width="4"/>
+    <rect x="-27" y="84" width="48" height="76" rx="7" fill="#b9bec0" stroke="#747b7e" stroke-width="3"/>
+    <text x="35" y="125" fill="#fff" font-family="system-ui" font-size="25" font-weight="700">PICO 2</text>
+    <circle cx="242" cy="55" r="8" fill="#f0cd35"/>
+    <circle cx="242" cy="125" r="8" fill="#f0cd35"/>
+    <circle cx="242" cy="195" r="8" fill="#f0cd35"/>
+    <text x="150" y="61" fill="#fff" font-family="system-ui" font-size="17">3V3</text>
+    <text x="135" y="131" fill="#fff" font-family="system-ui" font-size="17">GP26</text>
+    <text x="150" y="201" fill="#fff" font-family="system-ui" font-size="17">GND</text>
+  </g>
+
+  <g transform="translate(650 98)">
+    <rect x="0" y="45" width="145" height="135" rx="25" fill="#b9b5aa" stroke="#56534d" stroke-width="4"/>
+    <circle cx="72" cy="84" r="36" fill="#77736a"/>
+    <rect x="60" y="-12" width="24" height="75" rx="7" fill="#ddd8cb" stroke="#77736a" stroke-width="4"/>
+    <line x1="28" y1="180" x2="28" y2="245" stroke="#777" stroke-width="9"/>
+    <line x1="72" y1="180" x2="72" y2="245" stroke="#777" stroke-width="9"/>
+    <line x1="116" y1="180" x2="116" y2="245" stroke="#777" stroke-width="9"/>
+    <text x="8" y="318" fill="#252b2e" font-family="system-ui" font-size="16">outer</text>
+    <text x="48" y="318" fill="#252b2e" font-family="system-ui" font-size="16" font-weight="700">centre</text>
+    <text x="101" y="318" fill="#252b2e" font-family="system-ui" font-size="16">outer</text>
+  </g>
+
+  <path d="M297 155 C430 155 500 343 678 343" fill="none" stroke="#d52d31" stroke-width="9" stroke-linecap="round"/>
+  <path d="M297 225 C430 225 525 368 722 368" fill="none" stroke="#7357bd" stroke-width="9" stroke-linecap="round"/>
+  <path d="M297 295 C430 295 545 343 766 343" fill="none" stroke="#202629" stroke-width="9" stroke-linecap="round"/>
+  <text x="375" y="139" fill="#ac2025" font-family="system-ui" font-size="18" font-weight="700">3.3 V</text>
+  <text x="390" y="205" fill="#54349d" font-family="system-ui" font-size="18" font-weight="700">GP26 / ADC0 reads the wiper</text>
+  <text x="455" y="283" fill="#202629" font-family="system-ui" font-size="18" font-weight="700">GND</text>
+</svg>

@@ -1,0 +1,1091 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reading resistors · which one do I pick?</title>
+  <link rel="stylesheet" href="../assets/course.css">
+  <style>
+    /* ---- page-specific: colour-code interactive ---- */
+    .panel {
+      max-width: 48rem;
+      margin: 1.6rem 0;
+      padding: 1.3rem;
+      border: 1px solid var(--ink);
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .panel h3 {
+      margin-top: 0;
+    }
+
+    /* legend of the twelve colours */
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(4.4rem, 1fr));
+      gap: 0.5rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .legend li {
+      padding: 0.5rem 0.35rem;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.7rem;
+      text-align: center;
+    }
+
+    .legend .digit {
+      display: block;
+      font-size: 1.35rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .legend .digit.none {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .swatch {
+      display: block;
+      width: 1.5rem;
+      height: 2.6rem;
+      margin: 0.35rem auto;
+      border: 1px solid var(--ink);
+      border-radius: 0.12rem;
+    }
+
+    .legend .name {
+      display: block;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .legend .mult {
+      display: block;
+      margin-top: 0.2rem;
+      color: var(--muted);
+    }
+
+    /* input row */
+    .decoder-input {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 0.8rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .field > span {
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      padding: 0.55rem 0.7rem;
+      border: 1px solid var(--ink);
+      border-radius: 0.15rem;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 1rem;
+    }
+
+    input[type="text"] {
+      width: 11rem;
+    }
+
+    input[type="number"] {
+      width: 7rem;
+    }
+
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 0.6rem 0 0;
+    }
+
+    button {
+      padding: 0.35rem 0.6rem;
+      border: 1px solid var(--line);
+      border-radius: 0.15rem;
+      background: var(--paper);
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 0.76rem;
+    }
+
+    button:hover {
+      border-color: var(--ink);
+      background: rgba(159, 52, 31, 0.08);
+    }
+
+    .toggle {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    button[aria-pressed="true"] {
+      border-color: var(--ink);
+      color: white;
+      background: var(--accent);
+    }
+
+    /* the drawn resistor */
+    .resistor-figure {
+      margin: 1.2rem 0 0;
+    }
+
+    .resistor-figure svg {
+      display: block;
+      width: 100%;
+      max-width: 30rem;
+      height: auto;
+    }
+
+    figcaption {
+      margin-top: 0.4rem;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.74rem;
+    }
+
+    /* band-by-band explanation */
+    .bandlist {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+      gap: 0.6rem;
+      margin: 1.1rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .bandlist li {
+      padding: 0.7rem;
+      border: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    .bandlist .role {
+      display: block;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .bandlist .chip {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.45rem 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.86rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .bandlist .chip i {
+      flex: 0 0 auto;
+      width: 0.85rem;
+      height: 1.9rem;
+      border: 1px solid var(--ink);
+      border-radius: 0.1rem;
+    }
+
+    .bandlist .means {
+      display: block;
+      font-size: 0.9rem;
+    }
+
+    .verdict {
+      margin: 1rem 0 0;
+      padding: 0.75rem 0.9rem;
+      border-left: 0.35rem solid var(--signal);
+      background: rgba(255, 255, 255, 0.6);
+      font-size: 0.95rem;
+    }
+
+    .verdict.ok {
+      border-color: var(--safe);
+    }
+
+    .verdict.bad {
+      border-color: var(--accent);
+    }
+
+    .verdict strong {
+      display: block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .readout {
+      margin: 0.9rem 0 0;
+      font-size: 1.5rem;
+    }
+
+    .readout b {
+      font-weight: 500;
+    }
+
+    table {
+      width: 100%;
+      max-width: 48rem;
+      margin: 1.4rem 0;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    caption {
+      margin-bottom: 0.5rem;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-align: left;
+      text-transform: uppercase;
+    }
+
+    th,
+    td {
+      padding: 0.45rem 0.6rem;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      border-bottom: 1px solid var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.74rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    td.num {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: nowrap;
+    }
+
+    tr.mark td {
+      background: rgba(232, 180, 76, 0.22);
+    }
+
+    .bands-inline {
+      display: inline-flex;
+      gap: 0.15rem;
+      vertical-align: -0.35rem;
+    }
+
+    .bands-inline i {
+      width: 0.5rem;
+      height: 1.3rem;
+      border: 1px solid var(--ink);
+    }
+
+    .formula {
+      margin: 1.2rem 0;
+      padding: 1rem 1.2rem;
+      border: 1px solid var(--ink);
+      background: rgba(255, 255, 255, 0.5);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+      line-height: 1.9;
+    }
+
+    @media (max-width: 650px) {
+      .swatch {
+        height: 1.8rem;
+      }
+    }
+
+    @media print {
+      .presets,
+      .toggle {
+        display: none;
+      }
+
+      .panel,
+      .legend li,
+      table {
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · quick reference</p>
+    <h1>Reading resistors</h1>
+    <p class="lead">Two different questions. <em>Which resistor is which?</em> Read its coloured stripes. <em>Which resistor belongs on an LED?</em> Calculate it from voltage, LED forward voltage, and chosen current.</p>
+    <nav>
+      <a href="#answer">0 · Short answer</a>
+      <a href="#spot">1 · Spot the difference</a>
+      <a href="#decoder">2 · Decoder</a>
+      <a href="#why">3 · Choose for an LED</a>
+      <a href="#calc">4 · LED calculator</a>
+      <a href="pico-first-wiring.html">Pico first wiring</a>
+    </nav>
+  </header>
+
+  <!-- ============================================================ -->
+  <h2 id="answer">0 · The short answer for your box</h2>
+
+  <div class="callout safe">
+    <span class="label">Pick this one</span>
+    <p>Use the <strong>1 kΩ</strong> resistor — <span class="bands-inline"><i style="background:#6b4423"></i><i style="background:#1a1a1a"></i><i style="background:#d92b2b"></i><i style="background:#c9a227"></i></span> <strong>brown · black · red · gold</strong> — with a <strong>red</strong> LED.</p>
+    <p>Using a typical 2.0&nbsp;V red LED, the simple estimate is (3.3 − 2.0) ÷ 1000 = <strong>1.3&nbsp;mA</strong>. That is gentle on the Pico and normally visible indoors.</p>
+    <p>Your <strong>100 Ω</strong> resistor is brown · black · brown · gold. The same estimate gives 13&nbsp;mA. That exceeds the RP2350 pad’s default 4&nbsp;mA drive setting, so it is not our beginner default even though it appears inside the tutorial’s broad 50–330&nbsp;Ω range.</p>
+  </div>
+
+  <div class="callout danger">
+    <span class="label">Start with red, not white</span>
+    White and blue LEDs have a forward voltage close to the Pico’s 3.3&nbsp;V output, leaving little predictable voltage across the resistor. They may be faint and make good wiring look broken. Do not “fix” that by removing the resistor or moving the circuit to 5&nbsp;V. <strong>Start with red.</strong>
+  </div>
+
+  <div class="circuit" aria-label="LED long leg orientation in the referenced image">
+    <span class="node">GP15</span>
+    <span class="wire">→</span>
+    <span class="node">1 kΩ</span>
+    <span class="wire">→</span>
+    <span class="node">long leg<br>anode +<br><strong>bottom in image</strong></span>
+    <span class="wire">LED →</span>
+    <span class="node">short leg<br>cathode − → GND</span>
+  </div>
+
+  <p>Everything below is the reasoning: how to read the stripes, why an LED needs current limiting, and why 50–330&nbsp;Ω is not a universal safe range.</p>
+
+  <!-- ============================================================ -->
+  <h2 id="spot">1 · How to spot which resistor is which</h2>
+
+  <p>A resistor has no numbers printed on it. It has 4 or 5 coloured stripes, and those stripes <em>are</em> the number. Reading them takes three steps: find the starting end, translate each colour to a digit, then apply the multiplier.</p>
+
+  <h3>Step 1 — find which end to start from</h3>
+  <p>Read it from the wrong end and 220&nbsp;Ω becomes 1.2&nbsp;Ω. Use these tests, in order:</p>
+  <ol>
+    <li><strong>Look for gold or silver.</strong> That is the tolerance band and it is always <em>last</em>. Put it on the right, read leftwards-to-rightwards from the other end.</li>
+    <li><strong>Look at the gaps.</strong> The value bands are grouped close together; there is a visibly wider gap before the final tolerance band. Wide gap goes on the right.</li>
+    <li><strong>Look at which end the group sits nearer.</strong> The first band is usually closer to its lead than the last band is to its own.</li>
+    <li><strong>Read it both ways and pick the sensible one.</strong> Resistors only come in standard values. Only one direction will land on a real value — the other gives something absurd like 1.2&nbsp;Ω or 91&nbsp;GΩ.</li>
+  </ol>
+
+  <h3>Step 2 — translate the colours</h3>
+  <p>One table does everything. The digit above each swatch is what the colour means in a <em>digit</em> position; the value below is what the same colour means in the <em>multiplier</em> position.</p>
+
+  <div class="panel">
+    <h3>Colour coding</h3>
+    <ul class="legend" id="legend"></ul>
+    <p style="margin-bottom:0;font-size:0.9rem;color:var(--muted)">The two half-multipliers, gold (×0.1) and silver (×0.01), only ever appear in the multiplier position — that is how sub-10&nbsp;Ω values are written.</p>
+  </div>
+  <p>Cross-check: <a href="https://www.vishay.com/docs/49411/resistor_color_code_calculator.pdf">Vishay’s manufacturer colour-code card</a>.</p>
+
+  <h3>Step 3 — know the two layouts</h3>
+  <ul>
+    <li><strong>4 bands</strong> — digit, digit, multiplier, tolerance. Usually a <strong>beige/tan</strong> body, usually a gold ±5% band. This is what a starter kit is full of.</li>
+    <li><strong>5 bands</strong> — digit, digit, digit, multiplier, tolerance. Usually a <strong>pale blue</strong> body and a brown ±1% band. Precision parts.</li>
+  </ul>
+  <p>Body colour can be a clue, not a rule. Count the bands and identify the separated tolerance band.</p>
+
+  <div class="callout">
+    <span class="label">The three confusions that actually bite</span>
+    <p><strong>Brown vs red vs orange.</strong> Under warm indoor light these look nearly identical, and they are digits 1, 2 and 3 — an easy 10× error. Hold the resistor against white paper in daylight, or beside a resistor you have already identified.</p>
+    <p><strong>Gold vs yellow.</strong> Gold is metallic and shiny, yellow is flat. If it is the last band with a gap before it, it is gold.</p>
+    <p><strong>Red vs orange when faded.</strong> Older or heat-stressed resistors fade. When it matters, measure it.</p>
+  </div>
+
+  <div class="callout safe">
+    <span class="label">The check that ends every argument</span>
+    A multimeter set to Ω, one probe on each leg, resistor out of the circuit. That is the ground truth — colour bands are a label, not a measurement. Anything within the tolerance band (±5% on a gold-band part) is a healthy resistor.
+  </div>
+
+  <h3>Two more things the body tells you</h3>
+  <ul>
+    <li><strong>Size means power rating, not value.</strong> A ¼&nbsp;W resistor has a body roughly 6.5&nbsp;×&nbsp;2.3&nbsp;mm. Bigger body, more watts it can dissipate. Nothing in this project gets near ¼&nbsp;W, so any size is fine.</li>
+    <li><strong>A single black band and nothing else</strong> is a 0&nbsp;Ω link — a wire in resistor clothing. Not a resistor you want on an LED.</li>
+    <li><strong>Direction does not matter.</strong> A resistor is symmetrical; you can fit it either way round. Only the LED cares about direction.</li>
+  </ul>
+
+  <!-- ============================================================ -->
+  <h2 id="decoder">2 · Decoder — type a value, see the stripes</h2>
+  <p>Type the resistance you are looking for. Shorthand works: <code>330</code>, <code>1k</code>, <code>4k7</code>, <code>2.2k</code>, <code>1M</code>, <code>0.47</code>.</p>
+
+  <div class="panel">
+    <div class="decoder-input">
+      <label class="field">
+        <span>Input · resistance in Ω</span>
+        <input type="text" id="ohms" value="220" inputmode="text" autocomplete="off" spellcheck="false">
+      </label>
+      <div class="field">
+        <span>Layout</span>
+        <div class="toggle" role="group" aria-label="Band layout">
+          <button type="button" id="b4" aria-pressed="true">4 bands</button>
+          <button type="button" id="b5" aria-pressed="false">5 bands</button>
+        </div>
+      </div>
+      <label class="field">
+        <span>Tolerance</span>
+        <select id="tol"></select>
+      </label>
+    </div>
+
+    <div class="presets" role="group" aria-label="The seven values you own">
+      <button type="button" data-v="100">100 Ω</button>
+      <button type="button" data-v="1k">1 kΩ</button>
+      <button type="button" data-v="4k7">4.7 kΩ</button>
+      <button type="button" data-v="10k">10 kΩ</button>
+      <button type="button" data-v="47k">47 kΩ</button>
+      <button type="button" data-v="100k">100 kΩ</button>
+      <button type="button" data-v="1M">1 MΩ</button>
+      <button type="button" data-v="220">220 Ω <span style="opacity:.55">(not owned)</span></button>
+    </div>
+
+    <div id="out" aria-live="polite">
+      <figure class="resistor-figure">
+        <div id="svgHost"></div>
+        <figcaption id="cap"></figcaption>
+      </figure>
+      <p class="readout" id="readout"></p>
+      <ul class="bandlist" id="bandlist"></ul>
+      <div class="verdict" id="note" hidden></div>
+    </div>
+  </div>
+
+  <h3>The seven resistor values in your box</h3>
+  <p>Your kit has 30 each of seven values. All seven are 4-band, ±5%, so every one of them ends in a <strong>gold</strong> band — and because they are all round decade values, the second digit is always <strong>black</strong> (0) except the 4.7&nbsp;kΩ. That makes them easy to tell apart at a glance: <em>just read band 1 and band 3</em>.</p>
+
+  <table id="ownedTable">
+    <caption>Your inventory · read band 1, ignore band 2, read band 3</caption>
+    <thead>
+      <tr><th>Value</th><th>4-band code</th><th>Bands</th><th>What it is for</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="callout danger">
+    <span class="label">The pair you will mix up</span>
+    <strong>100 Ω</strong> is brown·black·<em>brown</em>·gold and <strong>1 kΩ</strong> is brown·black·<em>red</em>·gold. The only difference is band 3: brown vs red. For the first LED circuit, choose <strong>1 kΩ</strong>. Check band 3 in daylight or against white paper.
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="why">3 · How to choose an LED resistor</h2>
+
+  <h3>Why any resistor at all</h3>
+  <p>An LED is a diode, not a resistor. Its current rises sharply after reaching its <strong>forward voltage</strong>, V<sub>f</sub>. It cannot safely set its own current.</p>
+  <p>Connect one straight from a 3.3&nbsp;V pin to ground and the GPIO pin plus the LED’s nonlinear behaviour determine the current. That can overload either part.</p>
+  <p>The resistor is the part that <em>does</em> obey Ohm's law. Putting one in series makes the resistor — not the LED — decide the current. That is its whole job here, which is why it is called a <strong>current-limiting resistor</strong>.</p>
+
+  <h3>Where the numbers come from</h3>
+  <p>The LED drops its V<sub>f</sub> no matter what. Everything left over lands across the resistor. So:</p>
+
+  <div class="formula">
+    V<sub>resistor</sub> = V<sub>supply</sub> − V<sub>f</sub><br>
+    R = ( V<sub>supply</sub> − V<sub>f</sub> ) ÷ I<sub>target</sub>
+  </div>
+
+  <p>For an estimate: the Pico 2 GPIO uses <strong>3.3&nbsp;V</strong>. A red LED often has V<sub>f</sub> around <strong>2.0&nbsp;V</strong>, but the exact value depends on its datasheet, current, and temperature. That leaves about 1.3&nbsp;V across the resistor.</p>
+
+  <table>
+    <caption>Estimate only · 3.3 V pin and red LED with V<sub>f</sub> ≈ 2.0 V</caption>
+    <thead>
+      <tr><th>Target current</th><th>R = 1.3 V ÷ I</th><th>Nearest real value</th><th>Result</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="num">12 mA</td><td class="num">108 Ω</td><td class="num">120 Ω</td><td>A selectable RP2350 drive level, not the beginner target.</td></tr>
+      <tr><td class="num">8 mA</td><td class="num">163 Ω</td><td class="num">180 Ω</td><td>Another selectable drive level; brighter than needed.</td></tr>
+      <tr class="mark"><td class="num">4 mA</td><td class="num">325 Ω</td><td class="num">330 Ω</td><td>Matches the pad register’s default 4 mA drive setting.</td></tr>
+      <tr><td class="num">2 mA</td><td class="num">650 Ω</td><td class="num">680 Ω</td><td>Gentle indicator current, normally visible.</td></tr>
+      <tr class="mark"><td class="num">1.3 mA</td><td class="num">1 000 Ω</td><td class="num">1 kΩ</td><td>Your owned, cautious lesson value.</td></tr>
+    </tbody>
+  </table>
+
+  <p>The quoted <strong>50–330&nbsp;Ω</strong> range is a tutorial convenience, not a universal electrical rule:</p>
+  <ul>
+    <li><strong>330 Ω makes sense for red.</strong> The estimate is about 3.9&nbsp;mA, close to the RP2350 pad’s default 4&nbsp;mA drive setting.</li>
+    <li><strong>50 Ω does not make sense for every LED.</strong> With the same red-LED estimate it asks for 26&nbsp;mA. Do not use it as a general Pico recommendation.</li>
+    <li><strong>Values above 330 Ω remain valid.</strong> They reduce current and brightness. Your 1&nbsp;kΩ part is intentionally conservative.</li>
+  </ul>
+  <p>The correct method is: find V<sub>f</sub>, choose a modest current, calculate R, then select the next higher standard value. Higher is the safer rounding direction.</p>
+
+  <div class="callout">
+    <span class="label">What “4 mA” and “12 mA” mean on Pico 2</span>
+    The RP2350 pad has selectable 2, 4, 8, and 12&nbsp;mA drive strengths; the register reset value is 4&nbsp;mA. These settings describe output-drive behaviour, not permission to draw unlimited current up to 12&nbsp;mA. For a beginner indicator, design around 2–4&nbsp;mA and stay inside the chip’s 100&nbsp;mA total IOVDD budget. See the <a href="https://datasheets.raspberrypi.com/rp2350/rp2350-datasheet.pdf">RP2350 datasheet</a>, GPIO pad register and electrical-characteristics sections.
+  </div>
+
+  <div class="callout safe">
+    <span class="label">Rules of thumb worth memorising</span>
+    <p><strong>For this lesson: red LED + 1 kΩ.</strong> It uses parts you own and keeps current low.</p>
+    <p><strong>330 Ω</strong> is a useful future purchase for red indicator LEDs at 3.3&nbsp;V.</p>
+    <p><strong>When in doubt, go higher.</strong> Too much resistance costs brightness. Too little can overload the LED or GPIO.</p>
+  </div>
+
+  <h3>The trap: blue and white LEDs on 3.3 V</h3>
+  <p>Blue and white LEDs often have V<sub>f</sub> close to 3.3&nbsp;V. Small changes in the particular LED or GPIO voltage then change the current greatly, so the simple fixed-V<sub>f</sub> estimate becomes unreliable. Do not compensate by removing the resistor. Start with red; revisit other colours after identifying their exact parts or measuring them.</p>
+
+  <!-- ============================================================ -->
+  <h2 id="calc">4 · Calculator — is this resistor right for this LED?</h2>
+
+  <div class="panel">
+    <div class="decoder-input">
+      <label class="field">
+        <span>Supply</span>
+        <select id="vsup">
+          <option value="3.3" selected>3.3 V — Pico GP pin</option>
+          <option value="5">5 V — external source, not Pico GPIO</option>
+          <option value="9">9 V — external source</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>LED colour · V<sub>f</sub></span>
+        <select id="vf">
+          <option value="2.0" selected>Red — 2.0 V</option>
+          <option value="2.1">Yellow — 2.1 V</option>
+          <option value="2.2">Green — 2.2 V</option>
+          <option value="3.1">Blue — 3.1 V</option>
+          <option value="3.2">White — 3.2 V</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Resistor Ω</span>
+        <input type="text" id="rled" value="1k" inputmode="text" autocomplete="off" spellcheck="false">
+      </label>
+      <label class="field">
+        <span>Target current</span>
+        <input type="number" id="targetCurrent" value="3" min="0.5" max="12" step="0.5">
+      </label>
+    </div>
+    <div class="presets" role="group" aria-label="Values you own">
+      <button type="button" data-r="100">100 Ω</button>
+      <button type="button" data-r="1k">1 kΩ</button>
+      <button type="button" data-r="4k7">4.7 kΩ</button>
+      <button type="button" data-r="10k">10 kΩ</button>
+    </div>
+    <p class="readout" id="recommendedOut"></p>
+    <p class="readout" id="calcOut"></p>
+    <div class="verdict" id="calcVerdict"></div>
+    <p style="margin-bottom:0;font-size:0.92rem" id="calcMath"></p>
+  </div>
+
+  <div class="callout danger">
+    <span class="label">Before you move a wire</span>
+    Unplug USB, build the whole path, then reconnect. Trace it every time: <code>GP15 → resistor → LED long leg → LED short leg → GND</code>. See <a href="pico-first-wiring.html">Pico first wiring</a>.
+  </div>
+
+  <footer>
+    <p>Primary references: <a href="https://www.vishay.com/docs/49411/resistor_color_code_calculator.pdf">Vishay resistor colour code</a>, <a href="https://datasheets.raspberrypi.com/rp2350/rp2350-datasheet.pdf">RP2350 electrical specification</a>, and <a href="https://picozero.readthedocs.io/en/latest/recipes.html#leds">picozero LED recipe</a>.</p>
+    <p>Print this page and keep it beside the breadboard. Colour bands are a label; a multimeter is the measurement. When the two disagree, believe the multimeter.</p>
+  </footer>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------------------------------------------------------
+     Colour data. `digit` is null for colours that can only be a
+     multiplier or tolerance band.
+  --------------------------------------------------------------- */
+  var COLOURS = [
+    { name: 'black',  hex: '#1a1a1a', ink: '#fff', digit: 0,    mult: 1,     tol: null },
+    { name: 'brown',  hex: '#6b4423', ink: '#fff', digit: 1,    mult: 10,    tol: 1 },
+    { name: 'red',    hex: '#d92b2b', ink: '#fff', digit: 2,    mult: 100,   tol: 2 },
+    { name: 'orange', hex: '#e8801a', ink: '#000', digit: 3,    mult: 1e3,   tol: null },
+    { name: 'yellow', hex: '#f2d024', ink: '#000', digit: 4,    mult: 1e4,   tol: null },
+    { name: 'green',  hex: '#2e8b3f', ink: '#fff', digit: 5,    mult: 1e5,   tol: 0.5 },
+    { name: 'blue',   hex: '#1f5fbf', ink: '#fff', digit: 6,    mult: 1e6,   tol: 0.25 },
+    { name: 'violet', hex: '#7a3fbf', ink: '#fff', digit: 7,    mult: 1e7,   tol: 0.1 },
+    { name: 'grey',   hex: '#9a9a9a', ink: '#000', digit: 8,    mult: 1e8,   tol: 0.05 },
+    { name: 'white',  hex: '#f7f7f4', ink: '#000', digit: 9,    mult: 1e9,   tol: null },
+    { name: 'gold',   hex: '#c9a227', ink: '#000', digit: null, mult: 0.1,   tol: 5 },
+    { name: 'silver', hex: '#c4c4c4', ink: '#000', digit: null, mult: 0.01,  tol: 10 }
+  ];
+
+  function byName(n) {
+    for (var i = 0; i < COLOURS.length; i++) { if (COLOURS[i].name === n) return COLOURS[i]; }
+    return null;
+  }
+  function byDigit(d) {
+    for (var i = 0; i < COLOURS.length; i++) { if (COLOURS[i].digit === d) return COLOURS[i]; }
+    return null;
+  }
+  /* multiplier colour for 10^e, e from -2 to 9 */
+  function byExp(e) {
+    if (e === -1) return byName('gold');
+    if (e === -2) return byName('silver');
+    return byDigit(e);
+  }
+
+  /* ---------------------------------------------------------------
+     Formatting
+  --------------------------------------------------------------- */
+  function fmtOhms(v) {
+    if (v >= 1e9) return trim(v / 1e9) + ' GΩ';
+    if (v >= 1e6) return trim(v / 1e6) + ' MΩ';
+    if (v >= 1e3) return trim(v / 1e3) + ' kΩ';
+    return trim(v) + ' Ω';
+  }
+  function trim(n) {
+    return parseFloat(n.toPrecision(6)).toString();
+  }
+  function fmtMult(m) {
+    if (m >= 1e3) return '×' + fmtBig(m);
+    return '×' + trim(m);
+  }
+  function fmtBig(m) {
+    var e = Math.round(Math.log10(m));
+    return '10' + sup(e);
+  }
+  function sup(e) {
+    var map = { '0': '⁰', '1': '¹', '2': '²', '3': '³', '4': '⁴', '5': '⁵', '6': '⁶', '7': '⁷', '8': '⁸', '9': '⁹', '-': '⁻' };
+    return String(e).split('').map(function (c) { return map[c] || c; }).join('');
+  }
+
+  /* ---------------------------------------------------------------
+     Parse a human resistance string: "330", "1k", "4k7", "2.2k",
+     "1M", "0.47", "330R", "1 kohm"
+  --------------------------------------------------------------- */
+  var SUF = { r: 1, k: 1e3, m: 1e6, g: 1e9 };
+
+  function parseOhms(raw) {
+    var s = String(raw || '').toLowerCase();
+    s = s.replace(/ohms?/g, '').replace(/[ΩωΩ]/g, '').replace(/\s|,/g, '');
+    if (!s) return null;
+
+    /* "4k7" — suffix acts as the decimal point */
+    var m = s.match(/^(\d+)([rkmg])(\d+)$/);
+    if (m) return parseFloat(m[1] + '.' + m[3]) * SUF[m[2]];
+
+    m = s.match(/^(\d*\.?\d+)([rkmg])?$/);
+    if (!m) return null;
+    var v = parseFloat(m[1]);
+    if (!isFinite(v)) return null;
+    return v * (m[2] ? SUF[m[2]] : 1);
+  }
+
+  /* ---------------------------------------------------------------
+     Value -> bands. `n` = number of significant digits (2 or 3).
+     Returns { digits:[..], exp:e } or null when the value cannot be
+     written exactly with n digits and a 10^-2..10^9 multiplier.
+  --------------------------------------------------------------- */
+  function bandsFor(value, n) {
+    if (!(value > 0)) return null;
+    var lo = Math.pow(10, n - 1), hi = Math.pow(10, n);
+    for (var e = -2; e <= 9; e++) {
+      var mant = value / Math.pow(10, e);
+      var r = Math.round(mant);
+      if (r < lo || r >= hi) continue;
+      if (Math.abs(mant - r) > 1e-6 * r) continue;
+      return { digits: String(r).split('').map(Number), exp: e };
+    }
+    return null;
+  }
+
+  /* E24 — every standard value a ±5% resistor comes in */
+  var E24 = [10, 11, 12, 13, 15, 16, 18, 20, 22, 24, 27, 30, 33, 36, 39, 43, 47, 51, 56, 62, 68, 75, 82, 91];
+
+  function standardValues() {
+    var out = [];
+    for (var e = 0; e <= 6; e++) {
+      for (var i = 0; i < E24.length; i++) out.push(E24[i] * Math.pow(10, e - 1));
+    }
+    return out;
+  }
+  function isStandard(v) {
+    var all = standardValues();
+    for (var i = 0; i < all.length; i++) {
+      if (Math.abs(all[i] - v) < 1e-6 * Math.max(1, v)) return true;
+    }
+    return false;
+  }
+  function nearestStandard(v) {
+    var all = standardValues(), best = null, bd = Infinity;
+    for (var i = 0; i < all.length; i++) {
+      var d = Math.abs(Math.log(all[i] / v));
+      if (d < bd) { bd = d; best = all[i]; }
+    }
+    return best;
+  }
+  function nextStandard(v) {
+    var all = standardValues();
+    for (var i = 0; i < all.length; i++) {
+      if (all[i] >= v) return all[i];
+    }
+    return null;
+  }
+
+  /* ---------------------------------------------------------------
+     Legend
+  --------------------------------------------------------------- */
+  (function legend() {
+    var host = document.getElementById('legend'), html = '';
+    for (var i = 0; i < COLOURS.length; i++) {
+      var c = COLOURS[i];
+      html += '<li>'
+        + '<span class="digit' + (c.digit === null ? ' none' : '') + '">' + (c.digit === null ? '—' : c.digit) + '</span>'
+        + '<span class="swatch" style="background:' + c.hex + '"></span>'
+        + '<span class="name">' + c.name + '</span>'
+        + '<span class="mult">' + fmtMult(c.mult)
+        + (c.tol === null ? '' : '<br>±' + c.tol + '% tolerance') + '</span>'
+        + '</li>';
+    }
+    host.innerHTML = html;
+  })();
+
+  /* ---------------------------------------------------------------
+     Tolerance select
+  --------------------------------------------------------------- */
+  (function tolerances() {
+    var sel = document.getElementById('tol'), html = '';
+    for (var i = 0; i < COLOURS.length; i++) {
+      var c = COLOURS[i];
+      if (c.tol === null) continue;
+      html += '<option value="' + c.name + '"' + (c.name === 'gold' ? ' selected' : '') + '>'
+        + c.name + ' — ±' + c.tol + '%</option>';
+    }
+    sel.innerHTML = html;
+  })();
+
+  /* ---------------------------------------------------------------
+     Draw the resistor
+  --------------------------------------------------------------- */
+  function drawResistor(valueBands, tolBand) {
+    var W = 440, H = 130, cy = 65;
+    var bodyX = 96, bodyW = 248, bodyY = 33, bodyH = 64;
+    var bw = 17;                        /* band width */
+    var gap = 12;                       /* gap between value bands */
+    var groupW = valueBands.length * bw + (valueBands.length - 1) * gap;
+    var startX = bodyX + 22;
+    var tolX = bodyX + bodyW - 22 - bw; /* tolerance band sits at the far end */
+
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Resistor with '
+      + (valueBands.length + 1) + ' colour bands">';
+
+    /* leads */
+    s += '<line x1="6" y1="' + cy + '" x2="' + (bodyX + 4) + '" y2="' + cy + '" stroke="#8c8c8c" stroke-width="4"/>';
+    s += '<line x1="' + (bodyX + bodyW - 4) + '" y1="' + cy + '" x2="' + (W - 6) + '" y2="' + cy + '" stroke="#8c8c8c" stroke-width="4"/>';
+
+    /* body */
+    s += '<rect x="' + bodyX + '" y="' + bodyY + '" width="' + bodyW + '" height="' + bodyH
+      + '" rx="26" fill="#e3cfa6" stroke="#24231f" stroke-width="2"/>';
+
+    /* bands, clipped to the body outline */
+    s += '<clipPath id="bodyClip"><rect x="' + bodyX + '" y="' + bodyY + '" width="' + bodyW
+      + '" height="' + bodyH + '" rx="26"/></clipPath><g clip-path="url(#bodyClip)">';
+
+    for (var i = 0; i < valueBands.length; i++) {
+      var x = startX + i * (bw + gap);
+      s += '<rect x="' + x + '" y="' + bodyY + '" width="' + bw + '" height="' + bodyH
+        + '" fill="' + valueBands[i].hex + '"/>';
+      s += '<text x="' + (x + bw / 2) + '" y="' + (bodyY - 10)
+        + '" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="13" fill="#666257">'
+        + (i + 1) + '</text>';
+    }
+    s += '<rect x="' + tolX + '" y="' + bodyY + '" width="' + bw + '" height="' + bodyH
+      + '" fill="' + tolBand.hex + '"/>';
+    s += '</g>';
+
+    s += '<text x="' + (tolX + bw / 2) + '" y="' + (bodyY - 10)
+      + '" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="13" fill="#666257">tol</text>';
+
+    /* the wide gap that tells you which end is the end */
+    var gapMid = (startX + groupW + tolX) / 2;
+    s += '<line x1="' + (startX + groupW + 4) + '" y1="' + (bodyY + bodyH + 16) + '" x2="' + (tolX - 4)
+      + '" y2="' + (bodyY + bodyH + 16) + '" stroke="#9f341f" stroke-width="1.5"/>';
+    s += '<text x="' + gapMid + '" y="' + (bodyY + bodyH + 32)
+      + '" text-anchor="middle" font-family="ui-monospace, Menlo, monospace" font-size="12" fill="#9f341f">wide gap</text>';
+
+    /* read direction */
+    s += '<text x="' + bodyX + '" y="' + (bodyY - 10)
+      + '" text-anchor="end" font-family="ui-monospace, Menlo, monospace" font-size="12" fill="#9f341f">read →</text>';
+
+    s += '</svg>';
+    return s;
+  }
+
+  /* ---------------------------------------------------------------
+     Decoder wiring
+  --------------------------------------------------------------- */
+  var input = document.getElementById('ohms');
+  var b4 = document.getElementById('b4');
+  var b5 = document.getElementById('b5');
+  var tolSel = document.getElementById('tol');
+  var nDigits = 2;
+
+  function setLayout(n) {
+    nDigits = n;
+    b4.setAttribute('aria-pressed', n === 2 ? 'true' : 'false');
+    b5.setAttribute('aria-pressed', n === 3 ? 'true' : 'false');
+    tolSel.value = n === 3 ? 'brown' : 'gold';
+    render();
+  }
+
+  function render() {
+    var host = document.getElementById('svgHost');
+    var readout = document.getElementById('readout');
+    var list = document.getElementById('bandlist');
+    var note = document.getElementById('note');
+    var cap = document.getElementById('cap');
+
+    var v = parseOhms(input.value);
+    if (v === null || v <= 0) {
+      host.innerHTML = '';
+      cap.textContent = '';
+      readout.innerHTML = '<b>—</b>';
+      list.innerHTML = '';
+      note.hidden = false;
+      note.className = 'verdict bad';
+      note.innerHTML = '<strong>Cannot read that</strong>Type a resistance like <code>330</code>, <code>1k</code>, <code>4k7</code> or <code>0.47</code>.';
+      return;
+    }
+
+    var b = bandsFor(v, nDigits);
+    if (!b) {
+      var alt = bandsFor(v, nDigits === 2 ? 3 : 2);
+      host.innerHTML = '';
+      cap.textContent = '';
+      readout.innerHTML = '<b>' + fmtOhms(v) + '</b>';
+      list.innerHTML = '';
+      note.hidden = false;
+      note.className = 'verdict bad';
+      if (alt) {
+        note.innerHTML = '<strong>Needs the other layout</strong>' + fmtOhms(v)
+          + ' needs ' + (nDigits === 2 ? 'three' : 'two') + ' significant digits, so it can only be written as a '
+          + (nDigits === 2 ? '5' : '4') + '-band resistor. Switch the layout above.';
+      } else {
+        var near = nearestStandard(v);
+        note.innerHTML = '<strong>Not a codeable value</strong>' + fmtOhms(v)
+          + ' cannot be written with these bands. The nearest standard resistor you can actually buy is <b>'
+          + fmtOhms(near) + '</b>.';
+      }
+      return;
+    }
+
+    var valueBands = b.digits.map(byDigit);
+    valueBands.push(byExp(b.exp));
+    var tolBand = byName(tolSel.value);
+
+    host.innerHTML = drawResistor(valueBands, tolBand);
+
+    var names = valueBands.map(function (c) { return c.name; }).concat([tolBand.name]);
+    cap.textContent = names.join(' · ');
+
+    var tolAbs = v * tolBand.tol / 100;
+    readout.innerHTML = '<b>' + fmtOhms(v) + '</b> &nbsp;±' + tolBand.tol + '% '
+      + '<span style="font-size:0.8rem;color:var(--muted)">(' + fmtOhms(v - tolAbs)
+      + ' to ' + fmtOhms(v + tolAbs) + ' is in spec)</span>';
+
+    /* band-by-band cards */
+    var html = '';
+    var digitsStr = b.digits.join('');
+    for (var i = 0; i < b.digits.length; i++) {
+      var c = valueBands[i];
+      var ord = ['1st', '2nd', '3rd'][i];
+      html += card('Band ' + (i + 1) + ' · ' + ord + ' digit', c,
+        'The digit <b>' + b.digits[i] + '</b>');
+    }
+    var mc = valueBands[valueBands.length - 1];
+    html += card('Band ' + valueBands.length + ' · multiplier', mc,
+      'Multiply by <b>' + fmtMult(mc.mult) + '</b>'
+      + (mc.mult >= 1 && mc.mult <= 1e9 && mc.digit !== null
+        ? '<br><span style="color:var(--muted)">= add ' + mc.digit + ' zero' + (mc.digit === 1 ? '' : 's') + '</span>'
+        : ''));
+    html += card('Band ' + (valueBands.length + 1) + ' · tolerance', tolBand,
+      'Accurate to <b>±' + tolBand.tol + '%</b>');
+    list.innerHTML = html;
+
+    /* working-out note */
+    note.hidden = false;
+    note.className = 'verdict ok';
+    var work = '<strong>How that reads</strong>'
+      + '<code>' + digitsStr + '</code> ' + fmtMult(mc.mult) + ' = <b>' + fmtOhms(v) + '</b>. ';
+    /* The "standard value" check is the E24 series, which is what ±5%
+       4-band parts come in. Precision 5-band parts use the finer E96
+       series, so the warning would be wrong there. */
+    if (nDigits === 3) {
+      work += 'Five-band parts come in the finer E96 series, so unusual-looking values like this are normal.';
+    } else if (!isStandard(v)) {
+      work += 'Note: ' + fmtOhms(v) + ' is not a standard stocked value — you are far more likely to have <b>'
+        + fmtOhms(nearestStandard(v)) + '</b> in a kit.';
+    } else {
+      work += 'This is a standard stocked value.';
+    }
+    note.innerHTML = work;
+  }
+
+  function card(role, c, means) {
+    return '<li><span class="role">' + role + '</span>'
+      + '<span class="chip"><i style="background:' + c.hex + '"></i>' + c.name + '</span>'
+      + '<span class="means">' + means + '</span></li>';
+  }
+
+  input.addEventListener('input', render);
+  tolSel.addEventListener('change', render);
+  b4.addEventListener('click', function () { setLayout(2); });
+  b5.addEventListener('click', function () { setLayout(3); });
+
+  var presets = document.querySelectorAll('.presets button[data-v]');
+  for (var p = 0; p < presets.length; p++) {
+    presets[p].addEventListener('click', function () {
+      input.value = this.getAttribute('data-v');
+      var v = parseOhms(input.value);
+      if (v !== null && !bandsFor(v, nDigits)) setLayout(nDigits === 2 ? 3 : 2);
+      else render();
+    });
+  }
+
+  /* ---------------------------------------------------------------
+     Table of values used in this project
+  --------------------------------------------------------------- */
+  (function ownedTable() {
+    var rows = [
+      [100, 'Too low for our beginner red-LED circuit: the simple estimate is ~13 mA.'],
+      [1000, '<b>Use this one for the first LED.</b> The red-LED estimate is ~1.3 mA: modest and normally visible.'],
+      [4700, 'Pull-up / pull-down for buttons and I²C. Not for LEDs.'],
+      [10000, 'The default pull-up / pull-down value. Matches your 10 kΩ potentiometers.'],
+      [47000, 'High-impedance dividers and audio-path work in later phases.'],
+      [100000, 'Audio filters and mixing; matches your 100 kΩ potentiometers.'],
+      [1000000, 'Very high impedance — bias and leak resistors. Never an LED.']
+    ];
+    var body = document.querySelector('#ownedTable tbody'), html = '';
+    for (var i = 0; i < rows.length; i++) {
+      var v = rows[i][0];
+      var b = bandsFor(v, 2);
+      var cols = b.digits.map(byDigit).concat([byExp(b.exp), byName('gold')]);
+      var swatches = '<span class="bands-inline">';
+      var names = [];
+      for (var j = 0; j < cols.length; j++) {
+        swatches += '<i style="background:' + cols[j].hex + '"></i>';
+        names.push(cols[j].name);
+      }
+      swatches += '</span>';
+      html += '<tr><td class="num">' + fmtOhms(v) + '</td>'
+        + '<td>' + names.join(' · ') + '</td>'
+        + '<td>' + swatches + '</td>'
+        + '<td>' + rows[i][1] + '</td></tr>';
+    }
+    body.innerHTML = html;
+  })();
+
+  /* ---------------------------------------------------------------
+     LED calculator
+  --------------------------------------------------------------- */
+  var vsup = document.getElementById('vsup');
+  var vfSel = document.getElementById('vf');
+  var rled = document.getElementById('rled');
+  var targetCurrent = document.getElementById('targetCurrent');
+
+  function calc() {
+    var recommended = document.getElementById('recommendedOut');
+    var out = document.getElementById('calcOut');
+    var verdict = document.getElementById('calcVerdict');
+    var math = document.getElementById('calcMath');
+
+    var Vs = parseFloat(vsup.value);
+    var Vf = parseFloat(vfSel.value);
+    var R = parseOhms(rled.value);
+    var targetmA = parseFloat(targetCurrent.value);
+
+    if (R === null || R <= 0 || !isFinite(targetmA) || targetmA <= 0) {
+      recommended.innerHTML = '<b>—</b>';
+      out.innerHTML = '<b>—</b>';
+      verdict.className = 'verdict bad';
+      verdict.innerHTML = '<strong>Cannot read that</strong>Enter a resistance like <code>330</code> or <code>1k</code>, plus a positive target current.';
+      math.textContent = '';
+      return;
+    }
+
+    var Vr = Vs - Vf;
+    if (Vr <= 0) {
+      recommended.innerHTML = '<b>No resistor can create voltage headroom</b>';
+      out.innerHTML = '<b>0 mA</b>';
+      verdict.className = 'verdict bad';
+      verdict.innerHTML = '<strong>Will not light</strong>This LED needs ' + Vf
+        + ' V to conduct and the supply is only ' + Vs + ' V. No resistor value can fix that — use a higher supply.';
+      math.textContent = '';
+      return;
+    }
+
+    var I = Vr / R;                 /* amps */
+    var mA = I * 1000;
+    var Pr = I * I * R * 1000;      /* mW in the resistor */
+    var onPico = Math.abs(Vs - 3.3) < 0.01;
+    var exactR = Vr / (targetmA / 1000);
+    var suggestedR = nextStandard(exactR);
+
+    recommended.innerHTML = '<span style="font-size:0.75rem;color:var(--muted)">CALCULATED FOR '
+      + targetmA.toFixed(1) + ' mA</span><br><b>' + fmtOhms(exactR) + ' minimum → choose '
+      + (suggestedR ? fmtOhms(suggestedR) : 'a higher standard value') + '</b>';
+
+    out.innerHTML = '<b>' + mA.toFixed(mA < 10 ? 2 : 1) + ' mA</b> through the LED';
+
+    var v, cls;
+    if (mA < 0.25) {
+      cls = 'bad';
+      v = '<strong>Probably too dim</strong>Under 0.25 mA. The result depends strongly on the LED.';
+    } else if (mA <= 4) {
+      cls = 'ok';
+      v = '<strong>Beginner target</strong>At or below 4 mA: aligned with the RP2350 pad register’s default drive setting. Your 1 kΩ red-LED estimate lands here.';
+    } else if (mA <= 8) {
+      cls = '';
+      v = onPico
+        ? '<strong>Above our default target</strong>The RP2350 supports higher configured drive strengths, but this beginner circuit does not need them. Raise the resistor.'
+        : '<strong>Moderate current</strong>Verify the exact LED and source ratings.';
+    } else {
+      cls = 'bad';
+      v = onPico
+        ? '<strong>Too much for this beginner circuit</strong>Above 8 mA and beyond our 2–4 mA design target. Raise the resistor.'
+        : '<strong>Verify before building</strong>Check the exact LED datasheet and source rating. Do not assume a generic 5 mm LED limit.';
+    }
+    verdict.className = 'verdict ' + cls;
+    verdict.innerHTML = v;
+
+    math.innerHTML = 'Working: the LED drops ' + Vf + ' V, leaving <b>' + Vr.toFixed(2)
+      + ' V</b> across the resistor. ' + Vr.toFixed(2) + ' V ÷ ' + fmtOhms(R) + ' = <b>'
+      + mA.toFixed(mA < 10 ? 2 : 1) + ' mA</b>. The resistor turns ' + Pr.toFixed(1)
+      + ' mW into heat, so a ¼ W (250 mW) part is plenty.<br>'
+      + 'Selection: ' + Vr.toFixed(2) + ' V ÷ ' + targetmA.toFixed(1) + ' mA = <b>'
+      + fmtOhms(exactR) + '</b>; round upward to reduce current.';
+  }
+
+  vsup.addEventListener('change', calc);
+  vfSel.addEventListener('change', calc);
+  rled.addEventListener('input', calc);
+  targetCurrent.addEventListener('input', calc);
+
+  var rPresets = document.querySelectorAll('.presets button[data-r]');
+  for (var q = 0; q < rPresets.length; q++) {
+    rPresets[q].addEventListener('click', function () {
+      rled.value = this.getAttribute('data-r');
+      calc();
+    });
+  }
+
+  render();
+  calc();
+})();
+</script>
+</body>
+</html>

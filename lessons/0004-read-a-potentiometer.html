@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 4 — Read a potentiometer</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · lesson 0004</p>
+    <h1>Turn position into a number</h1>
+    <p class="lead">Wire one owned B10K potentiometer and watch the Pico measure its position from 0.0 to 1.0.</p>
+    <p class="meta">15–25 min · one new component · three wires</p>
+    <nav>
+      <a href="0003-toggle-with-one-press.html">← Lesson 3</a>
+      <a href="#wire">Wire</a>
+      <a href="#code">Read</a>
+      <a href="#test">Test</a>
+      <a href="0005-pot-controls-led.html">Lesson 5 →</a>
+    </nav>
+  </header>
+
+  <div class="callout safe"><span class="label">Today’s win</span>A physical knob becomes a software value—the basis of the siren’s Pitch control.</div>
+
+  <h2>1. Know the three pins</h2>
+  <ul class="parts">
+    <li><span class="label">Outside pin</span>3.3 V end</li>
+    <li><span class="label">Centre pin</span>Wiper: moving output</li>
+    <li><span class="label">Outside pin</span>Ground end</li>
+  </ul>
+  <p>Your B10K is a 10 kΩ linear potentiometer. “Linear” means equal turns produce roughly equal changes in the measured value.</p>
+
+  <h2 id="wire">2. Wire it with USB unplugged</h2>
+  <ol>
+    <li>Connect one outside pot pin to Pico <code>3V3(OUT)</code>.</li>
+    <li>Connect the centre pin to <code>GP26 / ADC0</code>.</li>
+    <li>Connect the other outside pin to <code>GND</code>.</li>
+    <li>Trace aloud: “3V3, wiper to GP26, ground.”</li>
+  </ol>
+  <figure class="breadboard-figure">
+    <img src="../assets/pot-wiring.svg" alt="Potentiometer wiring: outside pins to Pico 3V3 and ground; centre pin to GP26 ADC0.">
+    <figcaption>Only GP26, GP27, and GP28 are exposed analogue inputs. We start with GP26. Never connect an ADC pin to more than 3.3 V.</figcaption>
+  </figure>
+  <div class="callout danger"><span class="label">Protect the Pico</span>Use <code>3V3(OUT)</code>, not <code>VBUS</code> or <code>VSYS</code>. Unplug USB before moving wires.</div>
+
+  <h2 id="code">3. Print the position</h2>
+  <p>Reconnect USB. Run <a href="../examples/0004-read-pot/main.py">this <code>main.py</code></a> and open Thonny’s Shell:</p>
+  <pre><code>from picozero import Pot
+from time import sleep
+
+pot = Pot(26)
+
+while True:
+    position = min(int(pot.value * 5), 4)
+    print(position)
+    sleep(0.1)</code></pre>
+  <p><code>pot.value</code> starts as a continuous number from <code>0.0</code> to <code>1.0</code>. Multiplying by five creates five ranges. <code>int()</code> removes the decimal part. <code>min(..., 4)</code> keeps the exact upper endpoint at four instead of five.</p>
+
+  <div class="callout">
+    <span class="label">Why your modulo version wrapped</span>
+    <code>% 5.0</code> means “remainder after division by five.” It does not remove decimals. At the top, <code>5.0 % 5.0</code> becomes <code>0.0</code>.
+  </div>
+
+  <h2 id="test">4. Find all five positions</h2>
+  <div class="task"><span class="label">Measure</span><p>Turn slowly from one end to the other. Confirm the Shell shows 0, 1, 2, 3, then 4.</p></div>
+  <ul>
+    <li>If turning direction feels backwards: unplug USB and exchange only the two outside wires.</li>
+    <li>If value never changes: centre/wiper wire is likely wrong.</li>
+    <li>If adjacent numbers flicker near a boundary: this is normal analogue noise. A later lesson can stabilize it.</li>
+  </ul>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>The Shell reaches every integer from 0 through 4.</li>
+    <li>You can identify both outside pins and the centre wiper.</li>
+    <li>You know GP26 is both GPIO 26 and ADC0.</li>
+  </ul>
+
+  <p><strong>Tell your teaching agent:</strong> whether you can reach all five numbers and whether any boundary flickers.</p>
+  <footer>Primary sources: <a href="https://picozero.readthedocs.io/en/latest/api.html#pot">picozero Pot API</a> and the <a href="https://datasheets.raspberrypi.com/pico/Pico-2-Pinout.pdf">official Pico 2 pinout</a>.</footer>
+</main>
+</body>
+</html>

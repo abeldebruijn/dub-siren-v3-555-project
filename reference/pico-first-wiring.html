@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pico first-wiring reference</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · quick reference</p>
+    <h1>Pico first wiring</h1>
+    <p class="lead">The checks to repeat before every beginner breadboard experiment.</p>
+    <nav>
+      <a href="../lessons/0001-blink-an-external-led.html">Lesson 1</a>
+      <a href="resistor-colour-codes.html">Reading resistors</a>
+      <a href="https://datasheets.raspberrypi.com/pico/Pico-2-Pinout.pdf">Official pinout</a>
+    </nav>
+  </header>
+
+  <h2>Power-off rule</h2>
+  <div class="callout danger">
+    <span class="label">Before moving a wire</span>
+    Unplug USB. Inspect the whole path. Reconnect USB only after the circuit is complete.
+  </div>
+
+  <h2>Names on the board</h2>
+  <ul>
+    <li><strong>GP15</strong>: general-purpose pin 15. Our first controllable output.</li>
+    <li><strong>GND</strong>: ground, the circuit’s 0 V return path.</li>
+    <li><strong>3V3</strong>: regulated 3.3 V. Used later for potentiometers.</li>
+    <li><strong>VBUS</strong>: USB’s 5 V. Do not use it for these beginner control circuits.</li>
+    <li><strong>ADC</strong>: a pin that can measure a variable voltage. Used later for potentiometers.</li>
+  </ul>
+
+  <h2>LED polarity</h2>
+  <div class="circuit" aria-label="LED polarity from positive to ground">
+    <span class="node">positive side</span>
+    <span class="wire">→</span>
+    <span class="node">long leg<br>anode +</span>
+    <span class="wire">LED</span>
+    <span class="node">short leg<br>cathode −</span>
+    <span class="wire">→</span>
+    <span class="node">GND</span>
+  </div>
+  <p>The flat edge on many LED bodies also marks the cathode. If leg lengths disagree with the flat edge, stop and verify the specific LED.</p>
+
+  <h2>Resistor rule</h2>
+  <p>A normal resistor has no polarity. It may face either direction. An LED always needs a series resistor.</p>
+  <p>From the owned values, use <strong>1 kΩ</strong> (brown·black·red·gold) with a <strong>red</strong> LED. The simple estimate is about 1.3 mA: modest and normally visible. Do not confuse it with <strong>100 Ω</strong> (brown·black·brown·gold). See <a href="resistor-colour-codes.html">Reading resistors</a> for the colour tool and calculation.</p>
+
+  <h2>First circuit</h2>
+  <div class="circuit" aria-label="Pico GP15 through resistor and LED to ground">
+    <span class="node">Pico<br>GP15</span>
+    <span class="wire">→</span>
+    <span class="node">1 kΩ<br>resistor</span>
+    <span class="wire">→</span>
+    <span class="node">LED<br>long → short</span>
+    <span class="wire">→</span>
+    <span class="node">Pico<br>GND</span>
+  </div>
+
+  <h2>If nothing happens</h2>
+  <ol>
+    <li>Unplug USB.</li>
+    <li>Rotate the LED 180°; do not rotate the resistor.</li>
+    <li>Confirm each LED leg is in a different breadboard row.</li>
+    <li>Trace GP15 → resistor → LED long leg → LED short leg → GND.</li>
+    <li>Confirm <code>picozero.py</code> exists on the Pico and your script uses <code>LED(15)</code>.</li>
+  </ol>
+
+  <footer>
+    Print this page and keep it beside the breadboard. When uncertain, stop and ask your teaching agent before reconnecting USB.
+  </footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 3 — Toggle the LED</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · lesson 0003</p>
+    <h1>Press once, remember</h1>
+    <p class="lead">Change the button from momentary control into a latching control: press once for on, again for off.</p>
+    <p class="meta">10 min · no wiring changes</p>
+    <nav>
+      <a href="0002-button-controls-led.html">← Lesson 2</a>
+      <a href="#predict">Predict</a>
+      <a href="#code">Code</a>
+      <a href="#test">Test</a>
+      <a href="0004-read-a-potentiometer.html">Lesson 4 →</a>
+    </nav>
+  </header>
+
+  <div class="callout safe"><span class="label">Today’s win</span>The Pico remembers the LED state between presses.</div>
+
+  <h2>1. Keep the circuit</h2>
+  <p>Keep GP15 → 1 kΩ → LED → GND and GP14 → button → GND. No component moves.</p>
+
+  <h2 id="predict">2. Compare two control rules</h2>
+  <div class="task">
+    <span class="label">Retrieve</span>
+    <p>In Lesson 2, what event turned the LED off? Predict what must change if release should do nothing.</p>
+  </div>
+  <p>Momentary means the output follows the button. Toggle means every press changes state and release does nothing.</p>
+
+  <h2 id="code">3. Give press one job</h2>
+  <p>Run <a href="../examples/0003-button-toggle/main.py">this <code>main.py</code></a>:</p>
+  <pre><code>from picozero import Button, LED
+
+led = LED(15)
+button = Button(14)
+
+button.when_pressed = led.toggle</code></pre>
+  <p><code>toggle</code> changes off → on or on → off. There is no <code>when_released</code> action.</p>
+
+  <h2 id="test">4. Test its memory</h2>
+  <ol>
+    <li>Press and release once: LED stays on.</li>
+    <li>Wait five seconds: LED remains on.</li>
+    <li>Press again: LED turns off.</li>
+    <li>Try a long press. It should still change only once.</li>
+  </ol>
+  <details>
+    <summary>It changes twice from one press</summary>
+    <p>The contacts may bounce. Keep <code>Button(14)</code>; picozero debounces it. Reseat the button if the behavior continues.</p>
+  </details>
+
+  <h2>5. Connect it to the siren</h2>
+  <p>The final Trigger is momentary: sound only while held. A power or “hold” control would be latched. Same button; different software rule.</p>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>One press turns the LED on; the next turns it off.</li>
+    <li>You can explain momentary versus toggle.</li>
+    <li>You know omitted release code means release has no assigned action.</li>
+  </ul>
+
+  <p><strong>Tell your teaching agent:</strong> whether short and long presses both toggle once. Ask about anything unexpected.</p>
+  <footer>Primary source: <a href="https://picozero.readthedocs.io/en/latest/api.html#led">picozero LED API</a> and <a href="https://picozero.readthedocs.io/en/latest/api.html#button">Button API</a>.</footer>
+</main>
+</body>
+</html>
