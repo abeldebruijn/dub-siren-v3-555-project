@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 13 - Add Feedback on CH3</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · lesson 0013</p>
+    <h1>Add Feedback on CH3</h1>
+    <p class="lead">Add the fourth potentiometer without adding another Pico selector wire.</p>
+    <p class="meta">25-40 min · one new pot · CH3 = 011</p>
+    <nav>
+      <a href="0012-three-mux-channels.html">← Lesson 12</a>
+      <a href="#idea">Idea</a>
+      <a href="#wire">Wire</a>
+      <a href="#code">Code</a>
+      <a href="#test">Test</a>
+    </nav>
+  </header>
+
+  <div class="callout safe">
+    <span class="label">Today’s win</span>
+    Four pots—Pitch, Amount, Rate and Feedback—share GP28. Feedback appears as a stable independent value in the Shell.
+  </div>
+
+  <h2 id="idea">1. CH3 uses both selector bits</h2>
+  <p>S2 remains grounded. S1 and S0 already provide four combinations, so CH3 needs no new selector wire:</p>
+
+  <table class="truth-table">
+    <thead><tr><th>S2</th><th>S1</th><th>S0</th><th>Channel</th><th>Control</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>0</td><td>0</td><td>CH0 · pin 13</td><td>Pitch</td></tr>
+      <tr><td>0</td><td>0</td><td>1</td><td>CH1 · pin 14</td><td>Amount</td></tr>
+      <tr><td>0</td><td>1</td><td>0</td><td>CH2 · pin 15</td><td>Rate</td></tr>
+      <tr class="current"><td>0</td><td>1</td><td>1</td><td>CH3 · pin 12</td><td>Feedback</td></tr>
+    </tbody>
+  </table>
+
+  <p>CH3 is binary <code>011</code>. S2 is 0, S1 is 1 and S0 is 1.</p>
+
+  <div class="task">
+    <span class="label">Retrieve before wiring</span>
+    Use the operations from <a href="apx1-bit-opperations.html">Appendix 1</a>. Calculate <code>3 &amp; 1</code> for S0 and <code>(3 &gt;&gt; 1) &amp; 1</code> for S1.
+    <details>
+      <summary>Show answer</summary>
+      <p><code>3 &amp; 1 = 1</code> and <code>(3 &gt;&gt; 1) &amp; 1 = 1</code>. Both selector outputs go high.</p>
+    </details>
+  </div>
+
+  <h2 id="wire">2. Add Feedback with USB unplugged</h2>
+  <p>Use one of the two remaining purchased B10K linear potentiometers.</p>
+  <ol>
+    <li>Unplug the Pico’s USB cable.</li>
+    <li>Connect one outside Feedback leg to the same shared 3V3 rail as the other pots.</li>
+    <li>Connect the other outside Feedback leg to the same shared GND rail as the other pots.</li>
+    <li>Connect the Feedback <strong>centre wiper</strong> to <strong>4051 CH3 pin 12</strong>.</li>
+    <li>Keep S0 pin 11 on GP18, S1 pin 10 on GP19 and S2 pin 9 on GND.</li>
+    <li>Keep every Lesson 12 connection unchanged.</li>
+  </ol>
+
+  <figure class="breadboard-figure">
+    <img src="../assets/4051-four-channel-select.svg" alt="Top-view CD74HC4051 pin map showing all pins 1 through 16, with Feedback wiper added to CH3 pin 12.">
+    <figcaption>New wiring is magenta: Feedback’s outside legs go to shared 3V3/GND; its centre wiper goes to CH3 pin 12.</figcaption>
+  </figure>
+
+  <div class="callout danger">
+    <span class="label">Before reconnecting USB</span>
+    Pin 12 is CH3. It sits between Pitch’s CH0 pin 13 and selector S0 pin 11. Do not accidentally connect the Feedback wiper to pin 11.
+  </div>
+
+  <h2 id="code">3. Extend the scheduled scan</h2>
+  <p>Run <a href="../examples/0013-add-feedback-on-ch3/main.py">this <code>main.py</code></a>:</p>
+
+  <pre><code>from machine import Pin
+from picozero import Button, LED, Pot
+from time import sleep_ms, ticks_add, ticks_diff, ticks_ms
+
+led = LED(15)
+button = Button(14)
+mux_adc = Pot(28)
+
+# S2 stays on GND. S1 and S0 can select CH0 through CH3.
+mux_s0 = Pin(18, Pin.OUT)
+mux_s1 = Pin(19, Pin.OUT)
+
+PITCH_CHANNEL = 0
+AMOUNT_CHANNEL = 1
+RATE_CHANNEL = 2
+FEEDBACK_CHANNEL = 3
+
+MUX_SETTLE_MS = 2
+CONTROL_SCAN_MS = 20
+
+pitch_value = 0
+amount_value = 0
+rate_value = 0
+feedback_value = 0
+
+last_pitch_hz = -1
+last_amount = -1
+last_rate = -1
+last_feedback = -1
+last_change = ticks_ms()
+light_on = False
+
+next_control_scan = ticks_ms()
+mux_waiting = False
+mux_channel = PITCH_CHANNEL
+mux_started = ticks_ms()
+
+
+def select_mux_channel(channel):
+    mux_s0.value(channel &amp; 1)
+    mux_s1.value((channel &gt;&gt; 1) &amp; 1)
+
+
+def start_mux_read(channel):
+    global mux_channel, mux_started, mux_waiting
+
+    mux_channel = channel
+    select_mux_channel(channel)
+    mux_started = ticks_ms()
+    mux_waiting = True
+
+
+def finish_mux_read():
+    global amount_value, feedback_value, mux_waiting
+    global next_control_scan, pitch_value, rate_value
+
+    reading = mux_adc.value
+
+    if mux_channel == PITCH_CHANNEL:
+        pitch_value += (reading - pitch_value) * 0.1
+        start_mux_read(AMOUNT_CHANNEL)
+    elif mux_channel == AMOUNT_CHANNEL:
+        amount_value += (reading - amount_value) * 0.1
+        start_mux_read(RATE_CHANNEL)
+    elif mux_channel == RATE_CHANNEL:
+        rate_value += (reading - rate_value) * 0.1
+        start_mux_read(FEEDBACK_CHANNEL)
+    else:
+        feedback_value += (reading - feedback_value) * 0.1
+        mux_waiting = False
+        next_control_scan = ticks_add(ticks_ms(), CONTROL_SCAN_MS)
+
+
+while True:
+    now = ticks_ms()
+
+    # Job 1: scan all four pots through GP28.
+    if not mux_waiting and ticks_diff(now, next_control_scan) &gt;= 0:
+        start_mux_read(PITCH_CHANNEL)
+
+    if mux_waiting and ticks_diff(now, mux_started) &gt;= MUX_SETTLE_MS:
+        finish_mux_read()
+
+    # Print only when one of the controls changes enough to be useful.
+    pitch_hz = int(100 + pitch_value * 900)
+    if (
+        abs(pitch_hz - last_pitch_hz) &gt;= 5
+        or abs(amount_value - last_amount) &gt;= 0.03
+        or abs(rate_value - last_rate) &gt;= 0.03
+        or abs(feedback_value - last_feedback) &gt;= 0.03
+    ):
+        print(
+            "Pitch:", pitch_hz, "Hz",
+            "Amount:", round(amount_value, 2),
+            "Rate:", round(rate_value, 2),
+            "Feedback:", round(feedback_value, 2),
+        )
+        last_pitch_hz = pitch_hz
+        last_amount = amount_value
+        last_rate = rate_value
+        last_feedback = feedback_value
+
+    # Feedback is only measured in this lesson.
+    # Rate controls LED speed; Amount controls LED brightness.
+    if button.is_pressed:
+        interval = int(500 - rate_value * 450)
+
+        if ticks_diff(now, last_change) &gt;= interval:
+            light_on = not light_on
+            last_change = now
+
+        led.value = amount_value if light_on else 0
+    else:
+        led.off()
+        light_on = False
+        last_change = now
+
+    sleep_ms(1)</code></pre>
+
+  <h3>The one new scan step</h3>
+  <pre><code>elif mux_channel == RATE_CHANNEL:
+    rate_value += (reading - rate_value) * 0.1
+    start_mux_read(FEEDBACK_CHANNEL)</code></pre>
+  <p>Lesson 12 ended the scan after Rate. Lesson 13 starts one more read instead. Only after Feedback is read does the code schedule the next complete scan.</p>
+
+  <div class="callout">
+    <span class="label">Why Feedback has no LED effect</span>
+    Feedback will eventually control how much delayed audio returns into the delay input. There is no audio or delay engine yet, so this lesson only proves that the fourth control can be read correctly.
+  </div>
+
+  <h2 id="test">4. Test independence</h2>
+  <ol>
+    <li>Reconnect USB and run the code.</li>
+    <li>Turn Feedback slowly. Only <code>Feedback</code> should move from about 0.00 to 1.00.</li>
+    <li>Turn Pitch. Only the Pitch number should make a large change.</li>
+    <li>Hold Trigger and verify Amount still changes brightness.</li>
+    <li>Verify Rate still changes flash speed.</li>
+    <li>Leave all pots still. Values should remain stable apart from tiny ADC changes.</li>
+  </ol>
+
+  <details>
+    <summary>Feedback works backwards</summary>
+    <p>Unplug USB and swap only Feedback’s two outside wires. Keep the centre wiper on pin 12.</p>
+  </details>
+
+  <details>
+    <summary>Feedback changes another value</summary>
+    <p>Check that its centre wiper reaches pin 12. Then recheck Pitch pin 13, Amount pin 14 and Rate pin 15.</p>
+  </details>
+
+  <details>
+    <summary>Feedback stays near one number</summary>
+    <p>Unplug USB and reseat all three Feedback wires. Confirm the centre leg is the wiper and the two outside legs reach different power rails.</p>
+  </details>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>Four potentiometers share GP28.</li>
+    <li>Feedback’s centre wiper reaches CH3 pin 12.</li>
+    <li>You know CH3 selects S1 = 1 and S0 = 1.</li>
+    <li>Feedback prints independently from Pitch, Amount and Rate.</li>
+    <li>GP10–GP12 remain free.</li>
+  </ul>
+
+  <p><strong>Tell your teaching agent:</strong> whether Feedback moves from about 0.00 to 1.00 clockwise, and whether every control remains independent.</p>
+
+  <footer>Primary source: <a href="https://www.ti.com/lit/ds/symlink/cd74hc4051.pdf">Texas Instruments CD74HC4051 datasheet</a>, pin configuration and channel-selection table. Ask your teaching agent about any line of code or wire that is unclear.</footer>
+</main>
+<script src="../assets/python-highlight.js"></script>
+</body>
+</html>

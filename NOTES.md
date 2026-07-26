@@ -8,3 +8,4 @@
 - Use `picozero` for beginner LED, button, and potentiometer lessons. Reassess firmware/runtime before class-compliant USB-MIDI work.
 - Never assume the breadboard power rails are continuous; test or bridge them when rails are introduced.
 - Keep GP10–GP12 free for the proposed later PCM5102A connection.
+- Explain unfamiliar programming operators with slow, visual, step-by-step examples before relying on shorthand.

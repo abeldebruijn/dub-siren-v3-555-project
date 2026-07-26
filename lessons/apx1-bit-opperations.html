@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Appendix 1 - Bit operations</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · appendix 1</p>
+    <h1>Bit operations, slowly</h1>
+    <p class="lead">Understand exactly how <code>&amp; 1</code> and <code>&gt;&gt; 1</code> turn a channel number into the S0 and S1 signals for the 4051.</p>
+    <p class="meta">15-25 min · interactive · no hardware changes</p>
+    <nav>
+      <a href="0012-three-mux-channels.html">← Lesson 12</a>
+      <a href="#binary">Binary</a>
+      <a href="#and">AND</a>
+      <a href="#shift">Shift</a>
+      <a href="#explore">Explorer</a>
+      <a href="#practice">Practice</a>
+    </nav>
+  </header>
+
+  <div class="callout safe">
+    <span class="label">Today’s win</span>
+    Given any 4051 channel number, you can explain how the code finds the correct S0 and S1 values.
+  </div>
+
+  <h2 id="binary">1. A bit is one on/off value</h2>
+  <p>A normal decimal digit has ten possibilities: 0 through 9. A binary digit—called a <strong>bit</strong>—has only two:</p>
+  <ul>
+    <li><code>0</code> means low or off.</li>
+    <li><code>1</code> means high or on.</li>
+  </ul>
+
+  <p>Each binary position has a value. From right to left, the first three positions are worth 1, 2 and 4:</p>
+
+  <table class="truth-table">
+    <thead><tr><th>Position</th><th>S2</th><th>S1</th><th>S0</th></tr></thead>
+    <tbody>
+      <tr><td>Value when on</td><td>4</td><td>2</td><td>1</td></tr>
+      <tr><td>Channel 2</td><td>0</td><td>1</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <p>Channel 2 is <code>010</code> because <code>0×4 + 1×2 + 0×1 = 2</code>. Conveniently, the three bits directly describe the 4051 selector pins: <code>S2 S1 S0</code>.</p>
+
+  <h2 id="and">2. <code>&amp; 1</code> keeps the rightmost bit</h2>
+  <p><code>&amp;</code> means bitwise AND. At each position, the result is 1 only when <strong>both</strong> input bits are 1.</p>
+
+  <table class="truth-table">
+    <thead><tr><th>Left bit</th><th>Right bit</th><th>AND result</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>0</td><td>1</td><td>0</td></tr>
+      <tr><td>1</td><td>0</td><td>0</td></tr>
+      <tr class="current"><td>1</td><td>1</td><td>1</td></tr>
+    </tbody>
+  </table>
+
+  <p>The number <code>1</code> is binary <code>001</code>. It is used as a <strong>mask</strong>: zeros hide the left positions and the final one keeps the rightmost position.</p>
+
+  <pre><code>channel 2:  010
+mask 1:   &amp; 001
+result:     000
+
+S0 = 0</code></pre>
+
+  <p>For channel 1, the rightmost bit is on:</p>
+
+  <pre><code>channel 1:  001
+mask 1:   &amp; 001
+result:     001
+
+S0 = 1</code></pre>
+
+  <h2 id="shift">3. <code>&gt;&gt; 1</code> moves bits right</h2>
+  <p><code>&gt;&gt;</code> is the right-shift operator. The number after it says how many positions to move. Bits falling off the right edge disappear.</p>
+
+  <pre><code>before shift:  010
+after &gt;&gt; 1:   001
+                  ↑
+          old S1 is now on the right</code></pre>
+
+  <p>After shifting, use the same <code>&amp; 1</code> mask to keep that rightmost bit:</p>
+
+  <pre><code>channel 2:       010
+shift right:     001
+mask 1:        &amp; 001
+result:          001
+
+S1 = 1</code></pre>
+
+  <div class="callout">
+    <span class="label">Read the code from inside out</span>
+    <p>For <code>(channel &gt;&gt; 1) &amp; 1</code>:</p>
+    <ol>
+      <li>Shift <code>channel</code> right by one position.</li>
+      <li>Mask the result with <code>1</code>.</li>
+      <li>Send the resulting 0 or 1 to S1.</li>
+    </ol>
+  </div>
+
+  <h2 id="explore">4. Try every 4051 channel</h2>
+  <div class="bit-explorer" data-bit-explorer>
+    <div class="bit-picker">
+      <label for="channel-number">Channel number</label>
+      <input id="channel-number" data-channel-input type="range" min="0" max="7" step="1" value="2">
+      <output data-channel-number for="channel-number">2</output>
+    </div>
+
+    <p>Binary channel: <strong><code data-channel-binary>010</code></strong></p>
+
+    <div class="bit-digits" aria-live="polite">
+      <div class="bit-digit" data-bit-position="2">
+        <span class="label">S2 · value 4</span>
+        <strong>0</strong>
+      </div>
+      <div class="bit-digit is-on" data-bit-position="1">
+        <span class="label">S1 · value 2</span>
+        <strong>1</strong>
+      </div>
+      <div class="bit-digit" data-bit-position="0">
+        <span class="label">S0 · value 1</span>
+        <strong>0</strong>
+      </div>
+    </div>
+
+    <div class="bit-equations" aria-live="polite">
+      <p class="bit-equation" data-s0-equation>010 &amp; 001 = 000
+S0 = 0</p>
+      <p class="bit-equation" data-s1-equation>010 &gt;&gt; 1 = 001
+001 &amp; 001 = 001
+S1 = 1</p>
+    </div>
+  </div>
+
+  <table class="truth-table">
+    <thead><tr><th>Channel</th><th>Binary</th><th>S2</th><th>S1</th><th>S0</th></tr></thead>
+    <tbody>
+      <tr data-channel-row="0"><td>CH0</td><td>000</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr data-channel-row="1"><td>CH1</td><td>001</td><td>0</td><td>0</td><td>1</td></tr>
+      <tr class="is-selected" data-channel-row="2"><td>CH2</td><td>010</td><td>0</td><td>1</td><td>0</td></tr>
+      <tr data-channel-row="3"><td>CH3</td><td>011</td><td>0</td><td>1</td><td>1</td></tr>
+      <tr data-channel-row="4"><td>CH4</td><td>100</td><td>1</td><td>0</td><td>0</td></tr>
+      <tr data-channel-row="5"><td>CH5</td><td>101</td><td>1</td><td>0</td><td>1</td></tr>
+      <tr data-channel-row="6"><td>CH6</td><td>110</td><td>1</td><td>1</td><td>0</td></tr>
+      <tr data-channel-row="7"><td>CH7</td><td>111</td><td>1</td><td>1</td><td>1</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <span class="label">Why Lesson 12 does not calculate S2</span>
+    S2 is physically connected to GND, so it is always 0. Lesson 12 only needs CH0–CH2 and calculates S0 and S1 in code.
+  </div>
+
+  <h2 id="practice">5. Retrieve it from memory</h2>
+  <div class="task">
+    <span class="label">Question 1</span>
+    Channel 3 is binary <code>011</code>. Before opening the answer, calculate <code>channel &amp; 1</code>.
+    <details>
+      <summary>Show answer</summary>
+      <p><code>011 &amp; 001 = 001</code>, so S0 = 1.</p>
+    </details>
+  </div>
+
+  <div class="task">
+    <span class="label">Question 2</span>
+    For channel 2, what does <code>(channel &gt;&gt; 1) &amp; 1</code> produce?
+    <details>
+      <summary>Show answer</summary>
+      <p><code>010 &gt;&gt; 1 = 001</code>, then <code>001 &amp; 001 = 001</code>, so S1 = 1.</p>
+    </details>
+  </div>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>You know that binary positions are worth 1, 2, 4, 8… from right to left.</li>
+    <li>You can explain why <code>&amp; 1</code> extracts the rightmost bit.</li>
+    <li>You can explain why shifting right exposes the next bit.</li>
+    <li>You can derive S1 and S0 for channels 0–3.</li>
+  </ul>
+
+  <p class="lesson-next"><a href="0012-three-mux-channels.html">Return to Lesson 12 →</a></p>
+  <p><strong>Tell your teaching agent:</strong> calculate S1 and S0 for CH3 without checking the table, and explain each operation in your own words.</p>
+
+  <footer>Primary sources: <a href="https://docs.python.org/3/reference/expressions.html#binary-bitwise-operations">Python language reference: binary bitwise operations</a> and the <a href="https://www.ti.com/lit/ds/symlink/cd74hc4051.pdf">Texas Instruments CD74HC4051 channel-selection table</a>. Ask your teaching agent about any step that remains unclear.</footer>
+</main>
+<script src="../assets/python-highlight.js"></script>
+<script src="../assets/bit-operations-explorer.js"></script>
+</body>
+</html>

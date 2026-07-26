@@ -413,6 +413,105 @@ summary {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
+.lesson-next {
+  margin: 1.6rem 0;
+}
+
+.lesson-next a {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--accent-dark);
+  background: rgba(255, 255, 255, 0.45);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  text-decoration: none;
+}
+
+.lesson-next a:hover,
+.lesson-next a:focus {
+  background: rgba(159, 52, 31, 0.09);
+}
+
+.bit-explorer {
+  max-width: 48rem;
+  margin: 1.5rem 0;
+  padding: 1.2rem;
+  border: 2px solid var(--ink);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.bit-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem 1rem;
+  margin-bottom: 1.2rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.bit-picker input {
+  width: min(100%, 22rem);
+  accent-color: var(--accent);
+}
+
+.bit-picker output {
+  min-width: 2.5rem;
+  padding: 0.2rem 0.55rem;
+  color: white;
+  background: var(--accent);
+  font-weight: 700;
+  text-align: center;
+}
+
+.bit-digits {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(5rem, 1fr));
+  gap: 0.7rem;
+  max-width: 32rem;
+  margin: 1rem 0 1.4rem;
+}
+
+.bit-digit {
+  padding: 0.8rem;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  text-align: center;
+}
+
+.bit-digit strong {
+  display: block;
+  margin: 0.15rem 0;
+  font-size: 2rem;
+}
+
+.bit-digit.is-on {
+  border-color: var(--safe);
+  background: rgba(46, 101, 80, 0.12);
+}
+
+.bit-equations {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.8rem;
+}
+
+.bit-equation {
+  margin: 0;
+  padding: 0.9rem;
+  border-left: 0.35rem solid var(--signal);
+  background: var(--code);
+  color: var(--code-ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: pre-line;
+}
+
+.truth-table tr.is-selected td {
+  background: rgba(232, 180, 76, 0.32);
+  font-weight: 700;
+}
+
 footer {
   max-width: 48rem;
   margin-top: 5rem;
@@ -436,6 +535,10 @@ footer {
   }
 
   .switch-map {
+    grid-template-columns: 1fr;
+  }
+
+  .bit-digits {
     grid-template-columns: 1fr;
   }
 }
