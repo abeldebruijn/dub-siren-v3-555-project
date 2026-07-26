@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 12 - Select three mux channels</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · lesson 0012</p>
+    <h1>Select three mux channels</h1>
+    <p class="lead">Move Rate onto CH2 and use two Pico outputs to select Pitch, Amount or Rate through one ADC input.</p>
+    <p class="meta">30-45 min · two wire moves · binary selector</p>
+    <nav>
+      <a href="0011-scheduled-mux-reading.html">← Lesson 11</a>
+      <a href="0013-add-feedback-on-ch3.html">Lesson 13 →</a>
+      <a href="#bits">Selector bits</a>
+      <a href="#wire">Wire</a>
+      <a href="#code">Code</a>
+      <a href="#test">Test</a>
+    </nav>
+  </header>
+
+  <div class="callout safe">
+    <span class="label">Today’s win</span>
+    Pitch, Amount and Rate all share GP28. GP26 becomes free for a later control.
+  </div>
+
+  <h2 id="bits">1. Two bits select four possibilities</h2>
+  <p>A selector line can hold either <code>0</code> or <code>1</code>. With S0 alone, Lesson 11 could select two channels. Adding S1 gives four combinations:</p>
+
+  <table class="truth-table">
+    <thead><tr><th>S2</th><th>S1</th><th>S0</th><th>Channel</th><th>Control</th></tr></thead>
+    <tbody>
+      <tr class="current"><td>0</td><td>0</td><td>0</td><td>CH0 · pin 13</td><td>Pitch</td></tr>
+      <tr class="current"><td>0</td><td>0</td><td>1</td><td>CH1 · pin 14</td><td>Amount</td></tr>
+      <tr class="current"><td>0</td><td>1</td><td>0</td><td>CH2 · pin 15</td><td>Rate</td></tr>
+      <tr><td>0</td><td>1</td><td>1</td><td>CH3 · pin 12</td><td>Unused</td></tr>
+    </tbody>
+  </table>
+
+  <p>Read the selector values as the binary number <code>S2 S1 S0</code>. CH2 is binary <code>010</code>, so S1 is high while S0 and S2 are low.</p>
+
+  <div class="task">
+    <span class="label">Predict before wiring</span>
+    Without looking at the table: which values should S1 and S0 have for CH1? Say the answer aloud, then check.
+    <details>
+      <summary>Show answer</summary>
+      <p>CH1 is binary <code>01</code>: S1 = 0 and S0 = 1.</p>
+    </details>
+  </div>
+
+  <h2 id="wire">2. Make two changes with USB unplugged</h2>
+  <ol>
+    <li>Unplug the Pico’s USB cable.</li>
+    <li>Move the <strong>Rate centre wiper</strong> away from <code>GP26</code> and connect it to <strong>4051 CH2 pin 15</strong>.</li>
+    <li>Move <strong>4051 S1 pin 10</strong> away from GND and connect it to <code>GP19</code>.</li>
+    <li>Keep S0 pin 11 on GP18 and S2 pin 9 on GND.</li>
+    <li>Keep COMMON pin 3 on GP28.</li>
+    <li>Keep every potentiometer’s two outside legs connected to shared 3V3 and GND.</li>
+    <li>Keep the 4051 power, ENABLE, VEE and 100 nF capacitor exactly as in Lesson 11.</li>
+  </ol>
+
+  <figure class="breadboard-figure">
+    <img src="../assets/4051-three-channel-select.svg" alt="Top-view CD74HC4051 pin map showing all pins 1 through 16, including unused channels and every Lesson 12 connection.">
+    <figcaption>All 16 pins shown. Grey channel pins are unused today; leave them empty. Two changes only: Rate wiper moves GP26 → CH2 pin 15; S1 pin 10 moves GND → GP19.</figcaption>
+  </figure>
+
+  <div class="callout danger">
+    <span class="label">Before reconnecting USB</span>
+    GP26 should now be empty. Check that Rate’s centre wiper reaches pin 15—not VCC pin 16 beside it. S2 pin 9 must remain on GND.
+  </div>
+
+  <h2 id="code">3. Let the channel number set S1 and S0</h2>
+  <p>Run <a href="../examples/0012-three-mux-channels/main.py">this <code>main.py</code></a>. It keeps Lesson 11’s scheduled reading and adds CH2:</p>
+
+  <pre><code>from machine import Pin
+from picozero import Button, LED, Pot
+from time import sleep_ms, ticks_add, ticks_diff, ticks_ms
+
+led = LED(15)
+button = Button(14)
+mux_adc = Pot(28)
+
+# Two selector bits can choose CH0, CH1, CH2 or CH3.
+# S2 remains connected to GND, so CH4-CH7 are not used yet.
+mux_s0 = Pin(18, Pin.OUT)
+mux_s1 = Pin(19, Pin.OUT)
+
+PITCH_CHANNEL = 0
+AMOUNT_CHANNEL = 1
+RATE_CHANNEL = 2
+
+MUX_SETTLE_MS = 2
+CONTROL_SCAN_MS = 20
+
+pitch_value = 0
+amount_value = 0
+rate_value = 0
+
+last_pitch_hz = -1
+last_amount = -1
+last_rate = -1
+last_change = ticks_ms()
+light_on = False
+
+next_control_scan = ticks_ms()
+mux_waiting = False
+mux_channel = PITCH_CHANNEL
+mux_started = ticks_ms()
+
+
+def select_mux_channel(channel):
+    # Channel numbers 0, 1 and 2 are binary 00, 01 and 10.
+    # "&amp; 1" extracts the right-hand bit for S0.
+    mux_s0.value(channel &amp; 1)
+
+    # "&gt;&gt; 1" moves the second bit right; "&amp; 1" extracts it for S1.
+    mux_s1.value((channel &gt;&gt; 1) &amp; 1)
+
+
+def start_mux_read(channel):
+    global mux_channel, mux_started, mux_waiting
+
+    mux_channel = channel
+    select_mux_channel(channel)
+    mux_started = ticks_ms()
+    mux_waiting = True
+
+
+def finish_mux_read():
+    global amount_value, mux_waiting, next_control_scan
+    global pitch_value, rate_value
+
+    reading = mux_adc.value
+
+    if mux_channel == PITCH_CHANNEL:
+        pitch_value += (reading - pitch_value) * 0.1
+        start_mux_read(AMOUNT_CHANNEL)
+    elif mux_channel == AMOUNT_CHANNEL:
+        amount_value += (reading - amount_value) * 0.1
+        start_mux_read(RATE_CHANNEL)
+    else:
+        rate_value += (reading - rate_value) * 0.1
+        mux_waiting = False
+        next_control_scan = ticks_add(ticks_ms(), CONTROL_SCAN_MS)
+
+
+while True:
+    now = ticks_ms()
+
+    # Job 1: scan Pitch, Amount and Rate through the shared ADC.
+    if not mux_waiting and ticks_diff(now, next_control_scan) &gt;= 0:
+        start_mux_read(PITCH_CHANNEL)
+
+    if mux_waiting and ticks_diff(now, mux_started) &gt;= MUX_SETTLE_MS:
+        finish_mux_read()
+
+    # Print only when one of the controls changes enough to be useful.
+    pitch_hz = int(100 + pitch_value * 900)
+    if (
+        abs(pitch_hz - last_pitch_hz) &gt;= 5
+        or abs(amount_value - last_amount) &gt;= 0.03
+        or abs(rate_value - last_rate) &gt;= 0.03
+    ):
+        print(
+            "Pitch:", pitch_hz, "Hz",
+            "Amount:", round(amount_value, 2),
+            "Rate:", round(rate_value, 2),
+        )
+        last_pitch_hz = pitch_hz
+        last_amount = amount_value
+        last_rate = rate_value
+
+    # Job 2: Rate controls LED speed; Amount controls LED brightness.
+    if button.is_pressed:
+        interval = int(500 - rate_value * 450)
+
+        if ticks_diff(now, last_change) &gt;= interval:
+            light_on = not light_on
+            last_change = now
+
+        led.value = amount_value if light_on else 0
+    else:
+        led.off()
+        light_on = False
+        last_change = now
+
+    sleep_ms(1)</code></pre>
+
+  <h3>What the bit operations do</h3>
+  <p><code>channel &amp; 1</code> keeps only the rightmost binary bit for S0. <code>(channel &gt;&gt; 1) &amp; 1</code> first shifts the next bit right, then keeps it for S1.</p>
+  <p class="lesson-next"><a href="apx1-bit-opperations.html">Open Appendix 1: Bit operations →</a></p>
+
+  <table class="truth-table">
+    <thead><tr><th>Channel number</th><th>Binary</th><th>S1 result</th><th>S0 result</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>00</td><td>0</td><td>0</td></tr>
+      <tr><td>1</td><td>01</td><td>0</td><td>1</td></tr>
+      <tr><td>2</td><td>10</td><td>1</td><td>0</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="test">4. Test all three channels independently</h2>
+  <ol>
+    <li>Reconnect USB and run the code.</li>
+    <li>Turn Pitch. Only the printed Pitch value should change.</li>
+    <li>Hold Trigger and turn Amount. LED brightness should change.</li>
+    <li>Keep holding Trigger and turn Rate. LED flash speed should change.</li>
+    <li>Leave every knob still. The three printed values should remain stable apart from tiny changes.</li>
+  </ol>
+
+  <details>
+    <summary>Rate works backwards</summary>
+    <p>The two outside Rate wires are reversed. This is electrically safe. Unplug USB and swap those two outside wires; do not move the centre wiper.</p>
+  </details>
+
+  <details>
+    <summary>Rate changes Amount or Pitch</summary>
+    <p>First check Rate’s centre wiper goes to CH2 pin 15. Then check S1 pin 10 reaches GP19 and S0 pin 11 still reaches GP18.</p>
+  </details>
+
+  <details>
+    <summary>Rate does nothing</summary>
+    <p>Unplug USB. Check that the wiper left GP26 and now reaches CH2 pin 15. Pin 15 sits directly below VCC pin 16 when the chip notch faces up.</p>
+  </details>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>You can explain why two selector bits offer four combinations.</li>
+    <li>Pitch, Amount and Rate all travel through COMMON to GP28.</li>
+    <li>GP18 drives S0 and GP19 drives S1.</li>
+    <li>GP26 is free.</li>
+    <li>All three controls keep their separate jobs.</li>
+  </ul>
+
+  <p><strong>Tell your teaching agent:</strong> whether each knob still performs only its own job, and what binary selector value chooses CH2.</p>
+
+  <footer>Primary source: <a href="https://www.ti.com/lit/ds/symlink/cd74hc4051.pdf">Texas Instruments CD74HC4051 datasheet</a>, pin configuration and channel-selection table. Ask your teaching agent about any line of code or wire that is unclear.</footer>
+</main>
+<script src="../assets/python-highlight.js"></script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 980" role="img" aria-labelledby="title desc">
+  <title id="title">CD74HC4051E full 16-pin map for Lesson 12</title>
+  <desc id="desc">Top view of all pins 1 through 16. Pins 1, 2, 4, 5 and 12 are unused channels. Common pin 3 connects to GP28. Enable pin 6, VEE pin 7, ground pin 8 and S2 pin 9 connect to ground. S1 pin 10 connects to GP19. S0 pin 11 connects to GP18. Pitch, Amount and Rate wipers connect to pins 13, 14 and 15. VCC pin 16 connects to 3V3.</desc>
+  <rect width="1400" height="980" fill="#faf8f1"/>
+  <style>
+    .title{font:700 30px system-ui,-apple-system,sans-serif;fill:#252b2e}
+    .sub{font:17px system-ui,-apple-system,sans-serif;fill:#656b6e}
+    .head{font:700 19px ui-monospace,Menlo,monospace;fill:#252b2e}
+    .label{font:700 16px ui-monospace,Menlo,monospace;fill:#252b2e}
+    .small{font:15px ui-monospace,Menlo,monospace;fill:#656b6e}
+    .chiplabel{font:700 15px ui-monospace,Menlo,monospace}
+    .pinno{font:700 14px ui-monospace,Menlo,monospace;fill:#fff}
+    .unused{fill:#92999b}
+    .white{fill:#fff}.redfill{fill:#d72c2c}.bluefill{fill:#167c9d}
+    .orangefill{fill:#bd6700}.goldfill{fill:#a68700}.purplefill{fill:#674bc2}
+    .cyanfill{fill:#147f98}.greenfill{fill:#2e7650}.blackfill{fill:#252525}
+    .pin{stroke:#777;stroke-width:12;stroke-linecap:round}
+  </style>
+
+  <text x="48" y="50" class="title">Lesson 12 · all CD74HC4051E pins</text>
+  <text x="48" y="81" class="sub">Top view · notch faces up · numbering runs anticlockwise</text>
+
+  <g transform="translate(48 108)">
+    <rect width="630" height="106" rx="10" fill="#fff" stroke="#d7cfbc" stroke-width="2"/>
+    <circle cx="35" cy="34" r="19" fill="#9f341f"/>
+    <text x="29" y="41" font-family="system-ui" font-size="20" font-weight="700" fill="#fff">1</text>
+    <text x="70" y="34" class="head">RATE centre wiper</text>
+    <text x="70" y="68" class="small">move away from GP26</text>
+    <path d="M300 69 H380" stroke="#aaa" stroke-width="7" stroke-linecap="round" stroke-dasharray="8 9"/>
+    <path d="M380 69 H555" stroke="#2e7650" stroke-width="7" stroke-linecap="round"/>
+    <text x="405" y="49" class="label greenfill">CH2 · pin 15</text>
+  </g>
+
+  <g transform="translate(722 108)">
+    <rect width="630" height="106" rx="10" fill="#fff" stroke="#d7cfbc" stroke-width="2"/>
+    <circle cx="35" cy="34" r="19" fill="#9f341f"/>
+    <text x="29" y="41" font-family="system-ui" font-size="20" font-weight="700" fill="#fff">2</text>
+    <text x="70" y="34" class="head">S1 · pin 10</text>
+    <text x="70" y="68" class="small">move away from GND</text>
+    <path d="M300 69 H380" stroke="#aaa" stroke-width="7" stroke-linecap="round" stroke-dasharray="8 9"/>
+    <path d="M380 69 H555" stroke="#a68700" stroke-width="7" stroke-linecap="round"/>
+    <text x="445" y="49" class="label goldfill">GP19</text>
+  </g>
+
+  <g transform="translate(48 292)">
+    <rect width="350" height="474" rx="18" fill="#fff" stroke="#d7cfbc" stroke-width="2"/>
+    <text x="24" y="40" class="head">PICO CONNECTIONS</text>
+
+    <circle cx="28" cy="88" r="8" class="redfill"/>
+    <text x="50" y="94" class="label">3V3 → pin 16 VCC</text>
+
+    <circle cx="28" cy="148" r="8" class="bluefill"/>
+    <text x="50" y="154" class="label">GP28 ← pin 3 COMMON</text>
+
+    <circle cx="28" cy="208" r="8" class="orangefill"/>
+    <text x="50" y="214" class="label">GP18 → pin 11 S0</text>
+
+    <circle cx="28" cy="268" r="8" class="goldfill"/>
+    <text x="50" y="274" class="label">GP19 → pin 10 S1</text>
+
+    <circle cx="28" cy="328" r="8" class="blackfill"/>
+    <text x="50" y="334" class="label">GND → pins 6, 7, 8, 9</text>
+
+    <text x="24" y="396" class="small">GP26 becomes empty.</text>
+    <text x="24" y="426" class="small">GP10–GP12 stay reserved.</text>
+  </g>
+
+  <g transform="translate(1002 292)">
+    <rect width="350" height="474" rx="18" fill="#fff" stroke="#d7cfbc" stroke-width="2"/>
+    <text x="24" y="40" class="head">POT WIPERS</text>
+
+    <circle cx="28" cy="108" r="8" class="greenfill"/>
+    <text x="50" y="114" class="label">RATE → pin 15 CH2</text>
+
+    <circle cx="28" cy="188" r="8" class="cyanfill"/>
+    <text x="50" y="194" class="label">AMOUNT → pin 14 CH1</text>
+
+    <circle cx="28" cy="268" r="8" class="purplefill"/>
+    <text x="50" y="274" class="label">PITCH → pin 13 CH0</text>
+
+    <text x="24" y="350" class="small">Centre legs only.</text>
+    <text x="24" y="380" class="small">Every outside pot leg stays</text>
+    <text x="24" y="407" class="small">on shared 3V3 or GND.</text>
+  </g>
+
+  <g transform="translate(478 252)">
+    <rect width="444" height="594" rx="30" fill="#34393b" stroke="#171a1b" stroke-width="5"/>
+    <path d="M182 0 A40 40 0 0 0 262 0" fill="#faf8f1" stroke="#171a1b" stroke-width="5"/>
+    <circle cx="45" cy="38" r="9" fill="#d8d3c7"/>
+    <text x="104" y="55" font-family="ui-monospace,Menlo,monospace" font-size="23" font-weight="700" fill="#fff">CD74HC4051E</text>
+    <text x="171" y="82" font-family="ui-monospace,Menlo,monospace" font-size="14" fill="#bfc7ca">TOP VIEW</text>
+
+    <g class="pin">
+      <path d="M0 116 H-38 M0 176 H-38 M0 236 H-38 M0 296 H-38"/>
+      <path d="M0 356 H-38 M0 416 H-38 M0 476 H-38 M0 536 H-38"/>
+      <path d="M444 116 H482 M444 176 H482 M444 236 H482 M444 296 H482"/>
+      <path d="M444 356 H482 M444 416 H482 M444 476 H482 M444 536 H482"/>
+    </g>
+
+    <g>
+      <text x="18" y="121" class="pinno">1</text>
+      <text x="48" y="121" class="chiplabel unused">CH4 · UNUSED</text>
+
+      <text x="18" y="181" class="pinno">2</text>
+      <text x="48" y="181" class="chiplabel unused">CH6 · UNUSED</text>
+
+      <text x="18" y="241" class="pinno">3</text>
+      <text x="48" y="241" class="chiplabel bluefill">COMMON → GP28</text>
+
+      <text x="18" y="301" class="pinno">4</text>
+      <text x="48" y="301" class="chiplabel unused">CH7 · UNUSED</text>
+
+      <text x="18" y="361" class="pinno">5</text>
+      <text x="48" y="361" class="chiplabel unused">CH5 · UNUSED</text>
+
+      <text x="18" y="421" class="pinno">6</text>
+      <text x="48" y="421" class="chiplabel white">ENABLE → GND</text>
+
+      <text x="18" y="481" class="pinno">7</text>
+      <text x="48" y="481" class="chiplabel white">VEE → GND</text>
+
+      <text x="18" y="541" class="pinno">8</text>
+      <text x="48" y="541" class="chiplabel white">GND → GND</text>
+    </g>
+
+    <g text-anchor="end">
+      <text x="426" y="121" class="pinno">16</text>
+      <text x="394" y="121" class="chiplabel redfill">VCC → 3V3</text>
+
+      <text x="426" y="181" class="pinno">15</text>
+      <text x="394" y="181" class="chiplabel greenfill">CH2 ← RATE</text>
+
+      <text x="426" y="241" class="pinno">14</text>
+      <text x="394" y="241" class="chiplabel cyanfill">CH1 ← AMOUNT</text>
+
+      <text x="426" y="301" class="pinno">13</text>
+      <text x="394" y="301" class="chiplabel purplefill">CH0 ← PITCH</text>
+
+      <text x="426" y="361" class="pinno">12</text>
+      <text x="394" y="361" class="chiplabel unused">CH3 · UNUSED</text>
+
+      <text x="426" y="421" class="pinno">11</text>
+      <text x="394" y="421" class="chiplabel orangefill">S0 ← GP18</text>
+
+      <text x="426" y="481" class="pinno">10</text>
+      <text x="394" y="481" class="chiplabel goldfill">S1 ← GP19</text>
+
+      <text x="426" y="541" class="pinno">9</text>
+      <text x="394" y="541" class="chiplabel white">S2 → GND</text>
+    </g>
+  </g>
+
+  <g transform="translate(94 884)">
+    <rect width="1212" height="60" rx="9" fill="#fff" stroke="#d7cfbc" stroke-width="2"/>
+    <text x="24" y="37" class="small">Grey pins are unused today. Do not connect them. The 100 nF capacitor remains between pin 16 (VCC) and pin 8 (GND).</text>
+  </g>
+</svg>

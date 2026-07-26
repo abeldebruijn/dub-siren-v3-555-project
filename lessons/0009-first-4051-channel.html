@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 9 — First 74HC4051 channel</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · lesson 0009</p>
+    <h1>Pass Pitch through a switchboard</h1>
+    <p class="lead">Wire the purchased CD74HC4051E as one fixed analogue channel. Pitch still reaches GP28, but now travels through the multiplexer.</p>
+    <p class="meta">30–45 min · first 16-pin IC · one channel only</p>
+    <nav>
+      <a href="0008-add-pitch-pot.html">← Lesson 8</a>
+      <a href="#what">What it does</a>
+      <a href="#orient">Orient</a>
+      <a href="#power">Power</a>
+      <a href="#signal">Signal</a>
+      <a href="#test">Test</a>
+      <a href="0010-two-4051-channels.html">Lesson 10 -></a>
+    </nav>
+  </header>
+
+  <div class="callout safe">
+    <span class="label">Today’s win</span>
+    Pitch passes through channel 0 of the 4051 and still prints 100–1000 Hz. Later, software will select other channels for Feedback and Tempo.
+  </div>
+
+  <div class="callout safe">
+    <span class="label">Revalidated against TI datasheet · July 2026</span>
+    The diagram is correct for the purchased CD74HC4051E: pin 13 is channel 0, pin 3 is COMMON, pins 11/10/9 are S0/S1/S2, pin 6 is active-low ENABLE, and pins 16/8/7 are VCC/GND/VEE.
+  </div>
+
+  <h2 id="what">1. What a multiplexer does</h2>
+  <p>The Pico has one measuring pin available here—GP28—but eventually several potentiometers to measure. The 4051 contains eight electronic switches. It closes <strong>one</strong> switch at a time, connecting one channel to the shared <strong>COMMON</strong> wire.</p>
+  <p>Imagine an eight-position rotary selector turned electronically. The Pico will later say “connect channel 0,” measure it, say “connect channel 1,” measure that, and repeat so quickly that every knob appears continuously available.</p>
+
+  <figure class="breadboard-figure">
+    <img src="../assets/4051-switchboard-concept.svg" alt="Eight channel switches share one common wire. Selector value 000 closes channel zero, connecting Pitch to GP28.">
+    <figcaption>Today only CH0 is connected. The other seven internal switches are open. The signal may travel either direction, but we use channels → COMMON → Pico ADC.</figcaption>
+  </figure>
+
+  <h3>Three select pins make eight choices</h3>
+  <p>Each select pin is one binary digit: ground means <code>0</code>; 3.3 V means <code>1</code>. Three digits produce eight combinations:</p>
+
+  <table class="truth-table">
+    <thead><tr><th>S2</th><th>S1</th><th>S0</th><th>Connected channel</th><th>Physical pin</th></tr></thead>
+    <tbody>
+      <tr class="current"><td>0</td><td>0</td><td>0</td><td>CH0 · Pitch today</td><td>13</td></tr>
+      <tr><td>0</td><td>0</td><td>1</td><td>CH1</td><td>14</td></tr>
+      <tr><td>0</td><td>1</td><td>0</td><td>CH2</td><td>15</td></tr>
+      <tr><td>0</td><td>1</td><td>1</td><td>CH3</td><td>12</td></tr>
+      <tr><td>1</td><td>0</td><td>0</td><td>CH4</td><td>1</td></tr>
+      <tr><td>1</td><td>0</td><td>1</td><td>CH5</td><td>5</td></tr>
+      <tr><td>1</td><td>1</td><td>0</td><td>CH6</td><td>2</td></tr>
+      <tr><td>1</td><td>1</td><td>1</td><td>CH7</td><td>4</td></tr>
+    </tbody>
+  </table>
+
+  <p>All selectors are grounded today, creating <code>000</code>. Therefore only CH0 connects to COMMON. Later, S0–S2 connect to Pico digital outputs so software can change this number.</p>
+
+  <h2>2. Understand today’s one-channel path</h2>
+  <div class="circuit" aria-label="Pitch signal through multiplexer channel zero">
+    <span class="node">Pitch wiper</span>
+    <span class="wire">→</span>
+    <span class="node">CH0 · pin 13</span>
+    <span class="wire">inside 4051</span>
+    <span class="node">COMMON · pin 3</span>
+    <span class="wire">→</span>
+    <span class="node">GP28</span>
+  </div>
+  <p>A multiplexer is a selectable switchboard. Today all three selector pins are held at zero, permanently selecting channel 0. No new Python selection code yet.</p>
+
+  <h2 id="orient">3. Orient the IC with USB unplugged</h2>
+  <ol>
+    <li>Find the semicircular notch at one short end of the CD74HC4051E.</li>
+    <li>Place the IC across the breadboard’s centre trench, notch facing away from you.</li>
+    <li>With the notch at the top, pin 1 is top-left. Numbers run down the left to 8, then up the right from 9 to 16.</li>
+    <li>Leave the DIP-16 socket aside; it is for a later soldered build.</li>
+  </ol>
+
+  <figure class="breadboard-figure">
+    <img src="../assets/4051-channel-zero-pinout.svg" alt="Top-view CD74HC4051 pinout showing power, grounded selectors, Pitch on channel zero pin 13, and common pin 3 to GP28.">
+    <figcaption>Top view, notch up. Grey pins are unused today. Check the printed chip marking contains <strong>74HC4051</strong>, not only the socket’s label.</figcaption>
+  </figure>
+
+  <h2 id="power">4. Why every support wire is needed</h2>
+  <p>Make each connection separately. Do not rely on matching wire colours.</p>
+  <dl class="pin-reasons">
+    <dt>Pin 16 · VCC → 3V3(OUT)</dt>
+    <dd>Powers the chip and defines its upper voltage rail. Our pots also produce at most 3.3 V, so signal and chip use the same safe ceiling.</dd>
+
+    <dt>Pin 8 · GND → GND</dt>
+    <dd>Digital zero reference for the chip’s selector logic. Without a common ground, <code>0</code> and <code>1</code> have no reliable meaning relative to the Pico.</dd>
+
+    <dt>Pin 7 · VEE → GND</dt>
+    <dd>Defines the lowest analogue voltage the switches may pass. The 4051 can support negative signals with a negative VEE supply, but every pot in this project stays between 0 and 3.3 V, so VEE is zero volts.</dd>
+
+    <dt>Pin 6 · ENABLE → GND</dt>
+    <dd>ENABLE has a bar in the datasheet: it is active-low. Ground enables the selected switch. Driving it high would open all eight switches and disconnect COMMON.</dd>
+
+    <dt>Pins 11, 10, 9 · S0, S1, S2 → GND</dt>
+    <dd>These are the three binary selector bits. Grounding all three creates <code>000</code>, selecting CH0. They must never float; an uncertain selector could jump between pots.</dd>
+
+    <dt>100 nF ceramic capacitor · pin 16 to pin 8</dt>
+    <dd>A tiny local energy reservoir. It supplies brief current spikes when internal switches change and carries high-frequency supply noise to ground. Place it close to the IC. It is non-polar.</dd>
+  </dl>
+
+  <h3>Why pin 16 to pin 8 is not a short circuit</h3>
+  <p>A wire is conducting metal from end to end, so a wire between 3V3 and GND would allow continuous current: a short circuit. A capacitor contains two metal plates separated by an electrical insulator. No steady DC path crosses that insulator.</p>
+
+  <figure class="breadboard-figure">
+    <img src="../assets/capacitor-not-a-short.svg" alt="Comparison: a wire between 3V3 and ground creates a dangerous continuous-current short; a capacitor has separated plates, briefly charges, then blocks steady DC.">
+    <figcaption>At power-on the capacitor draws a tiny, brief charging current. Once charged to 3.3 V, steady current stops except for negligible leakage. When noise changes the voltage, the capacitor briefly accepts or returns charge.</figcaption>
+  </figure>
+
+  <p>For this 100 nF capacitor at 3.3 V, the stored charge is only <code>Q = C × V = 330 nC</code>, and stored energy is about <code>0.54 µJ</code>. It is enough to support the IC during tiny fast disturbances, not enough to behave like a large power source.</p>
+
+  <h3>Why this exact capacitor is suitable</h3>
+  <dl class="pin-reasons">
+    <dt><code>K104K10X7RF5UL2</code></dt>
+    <dd>The exact Vishay part you bought. TME specifies 100 nF, 50 V, X7R, ±10%, through-hole, 2.5 mm pitch.</dd>
+
+    <dt>100 nF = 0.1 µF = 100,000 pF</dt>
+    <dd>These are three ways to write the same capacitance. TI explicitly recommends a <strong>0.1 µF bypass capacitor</strong> for a single-supply CD74HC4051. The value is a proven balance: enough charge for logic-switching spikes while remaining effective at high frequencies.</dd>
+
+    <dt>Why not another nF value?</dt>
+    <dd>10 nF stores one tenth as much charge and targets shorter, higher-frequency disturbances. 1 µF stores ten times as much but is generally less effective by itself at the fastest edges. Values are not magic or interchangeable: their impedance changes with frequency. TI says extra values may be placed in parallel, but 100 nF is the correct first capacitor here.</dd>
+
+    <dt>Why ceramic?</dt>
+    <dd>Ceramic capacitors respond quickly, have low internal resistance, are compact, and are non-polar. That makes them standard local bypass parts for digital ICs. Through-hole leads add some inductance, so keep both leads short and place the body close to pins 16 and 8.</dd>
+
+    <dt>What 50 V means</dt>
+    <dd>It is the maximum rated working voltage, not a voltage the capacitor creates. Using it at 3.3 V gives a large safety margin.</dd>
+
+    <dt>What X7R and ±10% mean</dt>
+    <dd>X7R describes a ceramic dielectric whose capacitance remains reasonably stable over a wide temperature range. ±10% means a new 100 nF part may measure roughly 90–110 nF; that is completely acceptable for bypassing.</dd>
+  </dl>
+
+  <div class="callout danger">
+    <span class="label">Stop and count</span>
+    Before reconnecting USB, trace from the notch and count every pin again. Reversing pin 16 and pin 8 can damage the IC. GP10, GP11, and GP12 remain unused for the future DAC.
+  </div>
+
+  <h2 id="signal">5. Why the two signal wires go there</h2>
+  <ol>
+    <li>Remove the Pitch centre-wiper wire from GP28. Keep both outside pot wires on 3V3 and GND; they still create the 0–3.3 V signal.</li>
+    <li>Connect the Pitch centre wiper to <strong>pin 13, CH0</strong>. This makes Pitch the first selectable source.</li>
+    <li>Connect <strong>pin 3, COMMON</strong>, to <strong>GP28 / ADC2</strong>. COMMON is the one shared wire carrying whichever channel is selected to the Pico’s measuring input.</li>
+    <li>Leave Rate, Amount, Trigger, and LED wiring unchanged.</li>
+  </ol>
+  <p>The analogue switches are bidirectional, so the chip does not technically have a fixed input and output. We choose channels as inputs and COMMON as output because many knobs are sharing one Pico ADC.</p>
+
+  <h2>6. Predict before power</h2>
+  <div class="task">
+    <span class="label">Trace aloud</span>
+    <p>“Pitch wiper, pin 13 channel 0, internal switch, pin 3 common, GP28.” Why must pins 9–11 all be grounded?</p>
+  </div>
+
+  <h2 id="test">7. Test only Pitch first</h2>
+  <p>Reconnect USB. Run <a href="../examples/0009-pitch-through-4051/main.py">this small test</a>:</p>
+  <pre><code>from picozero import Pot
+from time import sleep
+
+pitch = Pot(28)
+smoothed_pitch = pitch.value
+last_pitch_hz = -1
+
+while True:
+    smoothed_pitch += (pitch.value - smoothed_pitch) * 0.1
+    pitch_hz = int(100 + smoothed_pitch * 900)
+
+    if abs(pitch_hz - last_pitch_hz) &gt;= 5:
+        print("Pitch through 4051:", pitch_hz, "Hz")
+        last_pitch_hz = pitch_hz
+
+    sleep(0.01)</code></pre>
+
+  <ol>
+    <li>Turn Pitch fully left: expect roughly 100 Hz.</li>
+    <li>Turn fully right: expect roughly 1000 Hz.</li>
+    <li>Leave untouched: smoothing should keep it stable.</li>
+  </ol>
+
+  <details>
+    <summary>Pitch stays near one value</summary>
+    <p>Unplug USB. Confirm Pitch wiper goes to pin 13, COMMON pin 3 goes to GP28, and pins 9–11 all reach GND. Recount from the notch rather than from the breadboard row numbers.</p>
+  </details>
+
+  <details>
+    <summary>Pitch reads zero or behaves randomly</summary>
+    <p>Unplug immediately. Recheck pins 16, 8, 7, and 6. Also check the IC is across the centre trench so opposite pins are not joined by one breadboard strip.</p>
+  </details>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>The IC notch and all sixteen pin numbers make sense.</li>
+    <li>Pitch travels through pin 13 to pin 3 and GP28.</li>
+    <li>Pitch still reaches roughly 100–1000 Hz clockwise.</li>
+    <li>You can explain why selector state 000 chooses channel 0.</li>
+  </ul>
+
+  <p class="lesson-next"><a href="0010-two-4051-channels.html">Lesson 10 -></a></p>
+
+  <p><strong>Tell your teaching agent:</strong> your lowest and highest reading through the 4051, and whether it remains stable untouched.</p>
+
+  <footer>Primary source: <a href="https://www.ti.com/lit/ds/symlink/cd74hc4051.pdf">Texas Instruments CD74HC4051 datasheet</a>, especially the top-view pin configuration and channel-selection table. The official pin names differ slightly from our beginner labels: <code>CH A0</code> is channel 0 and <code>COM OUT/IN</code> is common.</footer>
+</main>
+<script src="../assets/python-highlight.js"></script>
+</body>
+</html>

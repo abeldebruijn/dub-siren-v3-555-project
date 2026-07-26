@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 8 — Add the Pitch potentiometer</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · lesson 0008</p>
+    <h1>Add the Pitch control</h1>
+    <p class="lead">Use the Pico’s final exposed analogue input for a third B10K pot. Convert its position into a planned oscillator frequency.</p>
+    <p class="meta">20–30 min · one new potentiometer · GP28 / ADC2</p>
+    <nav>
+      <a href="0007-two-pots-rate-and-amount.html">← Lesson 7</a>
+      <a href="#wire">Wire</a>
+      <a href="#map">Map pitch</a>
+      <a href="#code">Code</a>
+      <a href="#test">Test</a>
+      <a href="0009-first-4051-channel.html">Lesson 9 -></a>
+    </nav>
+  </header>
+
+  <div class="callout safe">
+    <span class="label">Today’s win</span>
+    Three independent controls work together: Rate changes timing, Amount changes brightness, and Pitch prints 100–1000 Hz.
+  </div>
+
+  <h2>1. Keep Rate and Amount unchanged</h2>
+  <ul class="parts">
+    <li><span class="label">Left</span>Mod Rate · GP26 / ADC0</li>
+    <li><span class="label">Right</span>Mod Amount · GP27 / ADC1</li>
+    <li><span class="label">Add</span>Pitch · GP28 / ADC2</li>
+  </ul>
+  <p>Keep the button on GP14 and LED on GP15 with its 1 kΩ resistor.</p>
+
+  <h2 id="wire">2. Add Pitch with USB unplugged</h2>
+  <ol>
+    <li>Connect Pitch terminal 1, an outside pin, to the shared <code>3V3(OUT)</code>.</li>
+    <li>Connect centre terminal 2 to <code>GP28 / ADC2</code>.</li>
+    <li>Connect terminal 3, the other outside pin, to shared <code>GND</code>.</li>
+  </ol>
+
+  <figure class="breadboard-figure">
+    <img src="../assets/pitch-pot-wiring.svg" alt="Pitch potentiometer viewed from behind: terminal 1 to 3V3, centre terminal 2 to GP28, terminal 3 to ground.">
+    <figcaption>Same clockwise orientation as your working Rate and Amount controls: 3V3 | centre wiper | GND when viewed from behind.</figcaption>
+  </figure>
+
+  <div class="callout danger">
+    <span class="label">Check before USB</span>
+    GP28 may receive only 0–3.3 V. Trace: 3V3 → outside, GP28 → centre, GND → outside. Do not use VBUS or VSYS.
+  </div>
+
+  <h2 id="map">3. Map knob position to pitch</h2>
+  <pre><code>pitch_hz = int(100 + pitch.value * 900)</code></pre>
+  <ul>
+    <li><code>0.0</code> becomes <code>100 Hz</code>.</li>
+    <li><code>0.5</code> becomes <code>550 Hz</code>.</li>
+    <li><code>1.0</code> becomes <code>1000 Hz</code>.</li>
+  </ul>
+  <p>This lesson prints the planned frequency; it does not create audio yet. MIDI or the later sound engine will use this value.</p>
+
+  <h2 id="code">4. Run all three controls</h2>
+  <p>Run <a href="../examples/0008-three-pots-with-pitch/main.py">this <code>main.py</code></a>:</p>
+  <pre><code>from picozero import Button, LED, Pot
+from time import sleep, ticks_diff, ticks_ms
+
+led = LED(15)
+button = Button(14)
+rate = Pot(26)
+amount = Pot(27)
+pitch = Pot(28)
+
+last_change = ticks_ms()
+light_on = False
+smoothed_pitch = pitch.value
+last_pitch_hz = -1
+
+while True:
+    interval = int(500 - rate.value * 450)
+    smoothed_pitch += (pitch.value - smoothed_pitch) * 0.1
+    pitch_hz = int(100 + smoothed_pitch * 900)
+
+    if abs(pitch_hz - last_pitch_hz) &gt;= 5:
+        print("Pitch:", pitch_hz, "Hz")
+        last_pitch_hz = pitch_hz
+
+    if button.is_pressed:
+        now = ticks_ms()
+        if ticks_diff(now, last_change) &gt;= interval:
+            light_on = not light_on
+            last_change = now
+
+        led.value = amount.value if light_on else 0
+    else:
+        led.off()
+        light_on = False
+        last_change = ticks_ms()
+
+    sleep(0.01)</code></pre>
+  <p><code>smoothed_pitch</code> is a low-pass filter. Each loop keeps 90% of the previous result and adds 10% of the new reading. Fast electrical jitter is softened, while a deliberate knob turn still catches up quickly. The five-Hertz print threshold then suppresses the small remainder.</p>
+
+  <div class="callout">
+    <span class="label">Why filtering was added</span>
+    A stationary Pitch pot repeatedly moved between roughly 800 and 814 Hz whether Trigger was pressed or released. That ruled out LED PWM as the main cause and exposed ordinary raw ADC/wiring noise. Filtering belongs in the control software; it should not hide large jumps caused by a loose wire.
+  </div>
+
+  <h2 id="test">5. Prove three-way independence</h2>
+  <ol>
+    <li>Turn Pitch: Shell frequency changes; LED speed and brightness do not.</li>
+    <li>Hold Trigger and turn Rate: speed changes; printed pitch stays nearly fixed.</li>
+    <li>Turn Amount: brightness changes; speed and pitch stay fixed.</li>
+    <li>Release Trigger: LED stops immediately; Pitch can still be read.</li>
+  </ol>
+
+  <div class="task">
+    <span class="label">Retrieve</span>
+    <p>Without looking at the diagram, name the three ADC pins and their assigned controls.</p>
+  </div>
+
+  <details>
+    <summary>Pitch numbers decrease clockwise</summary>
+    <p>Unplug USB and exchange only the Pitch pot’s two outside wires. Keep its centre wire on GP28.</p>
+  </details>
+
+  <details>
+    <summary>Pitch still jumps by more than 10 Hz untouched</summary>
+    <p>Unplug USB and reseat the Pitch pot’s 3V3, GP28, and GND connections. A jump much larger than the original 800–814 Hz range suggests a loose temporary connection rather than normal noise.</p>
+  </details>
+
+  <h2>6. Notice the hardware limit</h2>
+  <p>GP26, GP27, and GP28 are now occupied. The final Feedback and Tempo pots need the purchased 74HC4051 multiplexer. That component lets several pots share one ADC; it comes in a later lesson.</p>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>Pitch reaches roughly 100–1000 Hz clockwise.</li>
+    <li>Rate, Amount, and Pitch change only their own property.</li>
+    <li>Trigger remains responsive.</li>
+    <li>You know all three exposed ADC inputs are now used.</li>
+  </ul>
+
+  <p class="lesson-next"><a href="0009-first-4051-channel.html">Lesson 9 -></a></p>
+
+  <p><strong>Tell your teaching agent:</strong> the lowest and highest Pitch readings, whether clockwise increases them, and whether all three controls remain independent.</p>
+
+  <footer>Primary sources: the <a href="https://datasheets.raspberrypi.com/pico/Pico-2-Pinout.pdf">official Pico 2 pinout</a>, <a href="https://picozero.readthedocs.io/en/latest/api.html#pot">picozero Pot API</a>, and <a href="https://docs.micropython.org/en/latest/library/time.html">MicroPython time functions</a>.</footer>
+</main>
+<script src="../assets/python-highlight.js"></script>
+</body>
+</html>

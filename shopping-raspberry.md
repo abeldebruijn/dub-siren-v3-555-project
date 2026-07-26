@@ -194,7 +194,8 @@ The DAC and output-connector items are not required for the phase-1 USB-MIDI pro
 
 ## Power stability and wiring
 
-- [x] **1 × 100 nF ceramic capacitor — approximately €0.10–€0.50**
+- [x] **1 × Vishay K104K10X7RF5UL2 100 nF ceramic capacitor — approximately €0.10–€0.50**
+  - Specification: 100 nF / 0.1 µF, 50 V, X7R, ±10%, THT, 2.5 mm lead pitch, non-polar.
   - Why needed: sits beside the 4051 power pins and absorbs fast electrical noise caused by digital switching, preventing unstable knob readings.
   - Buy: [TME search](https://www.tme.eu/nl/katalog/keramische-condensatoren_100126/?search=100nF) / [DigiKey search](https://www.digikey.nl/en/products?keywords=100nF%20ceramic%20through%20hole)
   - Where: https://www.tme.eu/nl/en/details/k104k10x7rf5ul2/ceramic-capacitors/vishay/

@@ -9,9 +9,8 @@ pitch = Pot(28)
 
 last_change = ticks_ms()
 light_on = False
-last_pitch_hz = -1
 smoothed_pitch = pitch.value
-
+last_pitch_hz = -1
 
 while True:
     interval = int(500 - rate.value * 450)
@@ -22,7 +21,7 @@ while True:
         print("Pitch:", pitch_hz, "Hz")
         last_pitch_hz = pitch_hz
 
-    if button.is_pressed: # type: ignore
+    if button.is_pressed:
         now = ticks_ms()
         if ticks_diff(now, last_change) >= interval:
             light_on = not light_on

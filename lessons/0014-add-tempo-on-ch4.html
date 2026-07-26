@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 14 - Add Tempo on CH4</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · lesson 0014</p>
+    <h1>Add Tempo on CH4</h1>
+    <p class="lead">Add the fifth and final potentiometer, then activate S2 so the Pico can reach CH4.</p>
+    <p class="meta">30-45 min · final pot · CH4 = 100</p>
+    <nav>
+      <a href="0013-add-feedback-on-ch3.html">← Lesson 13</a>
+      <a href="#idea">Idea</a>
+      <a href="#wire">Wire</a>
+      <a href="#code">Code</a>
+      <a href="#test">Test</a>
+    </nav>
+  </header>
+
+  <div class="callout safe">
+    <span class="label">Today’s win</span>
+    All five purchased potentiometers share GP28. Tempo prints as 40–200 BPM while GP10–GP12 remain reserved.
+  </div>
+
+  <h2 id="idea">1. CH4 needs the third selector bit</h2>
+  <p>CH0–CH3 all begin with S2 = 0. CH4 is the first channel whose S2 bit is 1:</p>
+
+  <table class="truth-table">
+    <thead><tr><th>S2</th><th>S1</th><th>S0</th><th>Channel</th><th>Control</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>0</td><td>0</td><td>CH0 · pin 13</td><td>Pitch</td></tr>
+      <tr><td>0</td><td>0</td><td>1</td><td>CH1 · pin 14</td><td>Amount</td></tr>
+      <tr><td>0</td><td>1</td><td>0</td><td>CH2 · pin 15</td><td>Rate</td></tr>
+      <tr><td>0</td><td>1</td><td>1</td><td>CH3 · pin 12</td><td>Feedback</td></tr>
+      <tr class="current"><td>1</td><td>0</td><td>0</td><td>CH4 · pin 1</td><td>Tempo</td></tr>
+    </tbody>
+  </table>
+
+  <p>CH4 is binary <code>100</code>. S2 goes high; S1 and S0 go low. GP20 will now drive S2.</p>
+
+  <div class="task">
+    <span class="label">Retrieve before wiring</span>
+    Use <a href="apx1-bit-opperations.html">Appendix 1</a>. For channel 4, calculate <code>(channel &gt;&gt; 2) &amp; 1</code>.
+    <details>
+      <summary>Show answer</summary>
+      <p><code>100 &gt;&gt; 2 = 001</code>, then <code>001 &amp; 001 = 001</code>. S2 = 1.</p>
+    </details>
+  </div>
+
+  <div class="callout">
+    <span class="label">Channel number is not pin number</span>
+    CH4 is physical pin 1. The channel names describe the eight internal switches; the DIP pin numbers describe their physical positions around the chip.
+  </div>
+
+  <h2 id="wire">2. Add Tempo with USB unplugged</h2>
+  <p>Use the fifth purchased B10K linear potentiometer.</p>
+  <ol>
+    <li>Unplug the Pico’s USB cable.</li>
+    <li>Connect one outside Tempo leg to shared 3V3.</li>
+    <li>Connect the other outside Tempo leg to shared GND.</li>
+    <li>Connect the Tempo <strong>centre wiper</strong> to <strong>4051 CH4 pin 1</strong>.</li>
+    <li>Move <strong>4051 S2 pin 9</strong> away from GND and connect it to <code>GP20</code>.</li>
+    <li>Keep S0 pin 11 on GP18 and S1 pin 10 on GP19.</li>
+    <li>Keep all other Lesson 13 wiring unchanged.</li>
+  </ol>
+
+  <figure class="breadboard-figure">
+    <img src="../assets/4051-five-channel-select.svg" alt="Top-view CD74HC4051 pin map showing all pins 1 through 16, with Tempo wiper on CH4 pin 1 and S2 pin 9 connected to Pico GP20.">
+    <figcaption>Two additions: Tempo’s centre wiper goes to CH4 pin 1; S2 pin 9 moves from GND to GP20.</figcaption>
+  </figure>
+
+  <div class="callout danger">
+    <span class="label">Before reconnecting USB</span>
+    Pin 1 is beside the pin-1 dot on the left side when the notch faces up. Pin 16 is directly opposite on the right and carries 3V3. Recount before applying power.
+  </div>
+
+  <h2 id="code">3. Add S2 and the fifth scan step</h2>
+  <p>Run <a href="../examples/0014-add-tempo-on-ch4/main.py">this <code>main.py</code></a>:</p>
+
+  <pre><code>from machine import Pin
+from picozero import Button, LED, Pot
+from time import sleep_ms, ticks_add, ticks_diff, ticks_ms
+
+led = LED(15)
+button = Button(14)
+mux_adc = Pot(28)
+
+# Three selector bits can reach all eight 4051 channels.
+mux_s0 = Pin(18, Pin.OUT)
+mux_s1 = Pin(19, Pin.OUT)
+mux_s2 = Pin(20, Pin.OUT)
+
+PITCH_CHANNEL = 0
+AMOUNT_CHANNEL = 1
+RATE_CHANNEL = 2
+FEEDBACK_CHANNEL = 3
+TEMPO_CHANNEL = 4
+
+MUX_SETTLE_MS = 2
+CONTROL_SCAN_MS = 20
+
+pitch_value = 0
+amount_value = 0
+rate_value = 0
+feedback_value = 0
+tempo_value = 0
+
+last_pitch_hz = -1
+last_amount = -1
+last_rate = -1
+last_feedback = -1
+last_tempo_bpm = -1
+last_change = ticks_ms()
+light_on = False
+
+next_control_scan = ticks_ms()
+mux_waiting = False
+mux_channel = PITCH_CHANNEL
+mux_started = ticks_ms()
+
+
+def select_mux_channel(channel):
+    # Extract the three binary bits for S0, S1 and S2.
+    mux_s0.value(channel &amp; 1)
+    mux_s1.value((channel &gt;&gt; 1) &amp; 1)
+    mux_s2.value((channel &gt;&gt; 2) &amp; 1)
+
+
+def start_mux_read(channel):
+    global mux_channel, mux_started, mux_waiting
+
+    mux_channel = channel
+    select_mux_channel(channel)
+    mux_started = ticks_ms()
+    mux_waiting = True
+
+
+def finish_mux_read():
+    global amount_value, feedback_value, mux_waiting
+    global next_control_scan, pitch_value, rate_value, tempo_value
+
+    reading = mux_adc.value
+
+    if mux_channel == PITCH_CHANNEL:
+        pitch_value += (reading - pitch_value) * 0.1
+        start_mux_read(AMOUNT_CHANNEL)
+    elif mux_channel == AMOUNT_CHANNEL:
+        amount_value += (reading - amount_value) * 0.1
+        start_mux_read(RATE_CHANNEL)
+    elif mux_channel == RATE_CHANNEL:
+        rate_value += (reading - rate_value) * 0.1
+        start_mux_read(FEEDBACK_CHANNEL)
+    elif mux_channel == FEEDBACK_CHANNEL:
+        feedback_value += (reading - feedback_value) * 0.1
+        start_mux_read(TEMPO_CHANNEL)
+    else:
+        tempo_value += (reading - tempo_value) * 0.1
+        mux_waiting = False
+        next_control_scan = ticks_add(ticks_ms(), CONTROL_SCAN_MS)
+
+
+while True:
+    now = ticks_ms()
+
+    # Job 1: scan all five pots through GP28.
+    if not mux_waiting and ticks_diff(now, next_control_scan) &gt;= 0:
+        start_mux_read(PITCH_CHANNEL)
+
+    if mux_waiting and ticks_diff(now, mux_started) &gt;= MUX_SETTLE_MS:
+        finish_mux_read()
+
+    # Convert raw 0.0-1.0 values into useful prototype ranges.
+    pitch_hz = int(100 + pitch_value * 900)
+    tempo_bpm = int(40 + tempo_value * 160)
+
+    if (
+        abs(pitch_hz - last_pitch_hz) &gt;= 5
+        or abs(amount_value - last_amount) &gt;= 0.03
+        or abs(rate_value - last_rate) &gt;= 0.03
+        or abs(feedback_value - last_feedback) &gt;= 0.03
+        or abs(tempo_bpm - last_tempo_bpm) &gt;= 2
+    ):
+        print(
+            "Pitch:", pitch_hz, "Hz",
+            "Amount:", round(amount_value, 2),
+            "Rate:", round(rate_value, 2),
+            "Feedback:", round(feedback_value, 2),
+            "Tempo:", tempo_bpm, "BPM",
+        )
+        last_pitch_hz = pitch_hz
+        last_amount = amount_value
+        last_rate = rate_value
+        last_feedback = feedback_value
+        last_tempo_bpm = tempo_bpm
+
+    # Tempo and Feedback are only measured in this lesson.
+    # Rate controls LED speed; Amount controls LED brightness.
+    if button.is_pressed:
+        interval = int(500 - rate_value * 450)
+
+        if ticks_diff(now, last_change) &gt;= interval:
+            light_on = not light_on
+            last_change = now
+
+        led.value = amount_value if light_on else 0
+    else:
+        led.off()
+        light_on = False
+        last_change = now
+
+    sleep_ms(1)</code></pre>
+
+  <h3>The new S2 extraction</h3>
+  <pre><code>mux_s2.value((channel &gt;&gt; 2) &amp; 1)</code></pre>
+  <p>Shift two positions so the S2 bit reaches the right edge, then mask it with <code>1</code>. For channels 0–3 this produces 0; for channel 4 it produces 1.</p>
+
+  <h3>The fifth scan step</h3>
+  <p>After Feedback settles, the code starts Tempo. Only after Tempo is read does the complete five-control scan end.</p>
+
+  <div class="callout">
+    <span class="label">Rate versus Tempo</span>
+    <p><strong>Rate</strong> still controls the modulation LED’s flash speed.</p>
+    <p><strong>Tempo</strong> is currently only printed as a prototype 40–200 BPM value. Later it can control delay timing or a MIDI tempo-related parameter.</p>
+  </div>
+
+  <h2 id="test">4. Test all five controls</h2>
+  <ol>
+    <li>Reconnect USB and run the code.</li>
+    <li>Turn Tempo clockwise. Only Tempo should rise from about 40 to 200 BPM.</li>
+    <li>Turn Feedback. Only Feedback should move from about 0.00 to 1.00.</li>
+    <li>Turn Pitch. Only Pitch should make a large frequency change.</li>
+    <li>Hold Trigger: Amount changes brightness and Rate changes flash speed.</li>
+    <li>Leave every control still. Values should remain stable apart from tiny ADC changes.</li>
+  </ol>
+
+  <details>
+    <summary>Tempo changes Feedback instead</summary>
+    <p>Check Tempo’s centre wiper reaches CH4 pin 1. Recheck Feedback’s centre wiper remains on CH3 pin 12.</p>
+  </details>
+
+  <details>
+    <summary>Tempo stays near 40 BPM</summary>
+    <p>First check S2 pin 9 reaches GP20. Then unplug USB and reseat all three Tempo wires.</p>
+  </details>
+
+  <details>
+    <summary>Older controls stopped working</summary>
+    <p>Check S2 was moved to GP20—not S1 or S0. Recheck S0 pin 11 to GP18 and S1 pin 10 to GP19.</p>
+  </details>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>All five potentiometers share GP28.</li>
+    <li>Tempo’s centre wiper reaches CH4 pin 1.</li>
+    <li>GP18, GP19 and GP20 drive S0, S1 and S2.</li>
+    <li>You know CH4 selects binary 100.</li>
+    <li>All five controls remain independent.</li>
+    <li>GP10–GP12 remain free.</li>
+  </ul>
+
+  <p><strong>Tell your teaching agent:</strong> whether Tempo reaches roughly 40–200 BPM clockwise, and whether all five controls remain independent.</p>
+
+  <footer>Primary sources: the <a href="https://www.ti.com/lit/ds/symlink/cd74hc4051.pdf">Texas Instruments CD74HC4051 datasheet</a> for channel selection and the <a href="https://datasheets.raspberrypi.com/pico/Pico-2-Pinout.pdf">official Raspberry Pi Pico 2 pinout</a> for GP20. Ask your teaching agent about anything unclear.</footer>
+</main>
+<script src="../assets/python-highlight.js"></script>
+</body>
+</html>

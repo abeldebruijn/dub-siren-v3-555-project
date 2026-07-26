@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 11 - Scheduled mux reading</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · lesson 0011</p>
+    <h1>Schedule the mux reads</h1>
+    <p class="lead">Keep the same two-channel 4051 wiring, but stop the control reads from slowing the LED timing so much.</p>
+    <p class="meta">25-40 min · timing · no new wiring</p>
+    <nav>
+      <a href="0010-two-4051-channels.html">← Lesson 10</a>
+      <a href="0012-three-mux-channels.html">Lesson 12 →</a>
+      <a href="#problem">Problem</a>
+      <a href="#idea">Idea</a>
+      <a href="#code">Code</a>
+      <a href="#test">Test</a>
+    </nav>
+  </header>
+
+  <div class="callout safe">
+    <span class="label">Today’s win</span>
+    The LED timing is checked about every 1 ms, while Pitch and Amount are scanned more slowly in the background.
+  </div>
+
+  <h2 id="problem">1. The problem from Lesson 10</h2>
+  <p>Lesson 10 read Pitch, waited 2 ms, read Amount, waited 2 ms, then slept another 10 ms. That made one loop take at least about 14 ms.</p>
+  <p>That is acceptable for learning the 4051, but it means fast LED timing is only checked every loop. A requested 50 ms interval can become noticeably longer because the code checks late.</p>
+
+  <h2 id="idea">2. The new idea</h2>
+  <p>Do not read every control on every loop. Instead:</p>
+  <ol>
+    <li>Set the 4051 to CH0.</li>
+    <li>Keep looping while the ADC settles.</li>
+    <li>After 2 ms, read Pitch.</li>
+    <li>Set the 4051 to CH1.</li>
+    <li>After another 2 ms, read Amount.</li>
+    <li>Wait until the next control scan.</li>
+  </ol>
+  <p>The controls are slow human inputs, so scanning them every 20 ms is still responsive. The LED timing is checked much more often.</p>
+
+  <div class="callout">
+    <span class="label">Important distinction</span>
+    <p><code>sleep(0.002)</code> stops the whole program for 2 ms. A scheduled wait remembers the start time, keeps looping, and only reads the ADC once 2 ms has passed.</p>
+  </div>
+
+  <h2>3. Wiring stays the same</h2>
+  <ul class="parts">
+    <li><span class="label">4051 CH0 pin 13</span>Pitch centre wiper</li>
+    <li><span class="label">4051 CH1 pin 14</span>Amount centre wiper</li>
+    <li><span class="label">4051 COMMON pin 3</span>GP28</li>
+    <li><span class="label">4051 S0 pin 11</span>GP18</li>
+    <li><span class="label">4051 S1/S2</span>GND</li>
+  </ul>
+
+  <h2 id="code">4. Run scheduled mux code</h2>
+  <p>Run <a href="../examples/0011-scheduled-mux-reading/main.py">this <code>main.py</code></a>:</p>
+  <pre><code>from machine import Pin
+from picozero import Button, LED, Pot
+from time import sleep_ms, ticks_add, ticks_diff, ticks_ms
+
+# Parts connected directly to Pico pins.
+led = LED(15)
+button = Button(14)
+rate = Pot(26)       # Rate stays direct: it controls LED flash speed.
+mux_adc = Pot(28)    # Shared ADC input from 4051 COMMON pin 3.
+
+# S0 selects which 4051 channel reaches the shared ADC:
+# 0 selects Pitch on CH0; 1 selects Amount on CH1.
+mux_s0 = Pin(18, Pin.OUT)
+
+# After changing channel, give the voltage 2 ms to settle before reading.
+MUX_SETTLE_MS = 2
+
+# Human hands move slowly. Reading both knobs every 20 ms is responsive enough.
+CONTROL_SCAN_MS = 20
+
+# These variables remember the latest smoothed knob readings.
+pitch_value = 0
+amount_value = 0
+
+# These variables remember the output state.
+last_pitch_hz = -1
+last_change = ticks_ms()
+light_on = False
+
+# These variables remember where the scheduled MUX scan is.
+next_control_scan = ticks_ms()
+mux_waiting = False       # False means no channel is currently settling.
+mux_channel = 0           # Channel currently selected: 0=Pitch, 1=Amount.
+mux_started = ticks_ms()  # Time when that channel was selected.
+
+
+def start_mux_read(channel):
+    # We assign to these outside this function, so Python requires "global".
+    global mux_waiting, mux_channel, mux_started
+
+    # Select a channel, then remember when its settling period started.
+    # We deliberately do not read the ADC yet.
+    mux_channel = channel
+    mux_s0.value(channel)
+    mux_started = ticks_ms()
+    mux_waiting = True
+
+
+def finish_mux_read():
+    # This function runs only after MUX_SETTLE_MS has passed.
+    global amount_value, mux_waiting, next_control_scan, pitch_value
+
+    # Both knobs arrive through the same GP28 ADC input.
+    reading = mux_adc.value
+
+    if mux_channel == 0:
+        # CH0 is Pitch. Smooth it, then immediately begin settling CH1.
+        pitch_value += (reading - pitch_value) * 0.1
+        start_mux_read(1)
+    else:
+        # CH1 is Amount. Smooth it, then end this two-channel scan.
+        amount_value += (reading - amount_value) * 0.1
+        mux_waiting = False
+
+        # Do not start another scan until 20 ms from now.
+        next_control_scan = ticks_add(ticks_ms(), CONTROL_SCAN_MS)
+
+
+while True:
+    # Take one time reading and use it for all timing checks in this loop.
+    now = ticks_ms()
+
+    # Job 1: when the next control scan is due, start with Pitch on CH0.
+    if not mux_waiting and ticks_diff(now, next_control_scan) &gt;= 0:
+        start_mux_read(0)
+
+    # Keep looping while the selected channel settles.
+    # Once 2 ms has passed, finish the read without a blocking sleep(0.002).
+    if mux_waiting and ticks_diff(now, mux_started) &gt;= MUX_SETTLE_MS:
+        finish_mux_read()
+
+    # Pitch is only converted to Hz and printed in this lesson.
+    # It does not control LED speed. Audio comes in a later lesson.
+    pitch_hz = int(100 + pitch_value * 900)
+    if abs(pitch_hz - last_pitch_hz) &gt;= 5:
+        print("Pitch:", pitch_hz, "Hz", "Amount:", round(amount_value, 2))
+        last_pitch_hz = pitch_hz
+
+    # Job 2: update the LED whenever its own timer says it is time.
+    if button.is_pressed:
+        # Rate controls time between LED toggles: 500 ms down to 50 ms.
+        interval = int(500 - rate.value * 450)
+
+        if ticks_diff(now, last_change) &gt;= interval:
+            light_on = not light_on
+            last_change = now
+
+        # Amount controls brightness during the ON half of the flash.
+        led.value = amount_value if light_on else 0
+    else:
+        # Releasing the button stops immediately and resets the flash state.
+        led.off()
+        light_on = False
+        last_change = now
+
+    # Job 3: pace the loop. This small 1 ms pause avoids running needlessly
+    # at full speed while still checking LED timing much faster than Lesson 10.
+    sleep_ms(1)</code></pre>
+
+  <h3>Why <code>global</code> is needed here</h3>
+  <p>Variables such as <code>mux_waiting</code>, <code>mux_channel</code>, and <code>pitch_value</code> are created outside the functions. They hold the current state of the whole program: which mux channel is settling, what the latest knob values are, and when the next scan should happen.</p>
+  <p>Inside a function, Python treats a name as local if you assign to it. So this line inside <code>start_mux_read()</code> would normally create a new private function variable:</p>
+  <pre><code>mux_waiting = True</code></pre>
+  <p>That is not what we want. The main <code>while True</code> loop needs to see that <code>mux_waiting</code> changed. Writing <code>global mux_waiting</code> tells Python: “use the program-level variable, not a new private one.”</p>
+  <p>You only need <code>global</code> for names that the function assigns to. Reading a value usually does not need it. For example, <code>finish_mux_read()</code> reads <code>mux_channel</code> to decide whether the current value is Pitch or Amount, but it does not assign a new value to <code>mux_channel</code>, so <code>mux_channel</code> is not listed in that function’s <code>global</code> line.</p>
+
+  <h3>Why <code>ticks_add</code> and <code>ticks_diff</code> are used</h3>
+  <p>MicroPython tick counters eventually wrap around. <code>ticks_diff</code> compares times safely even near that wrap. <code>ticks_add</code> schedules a future tick safely.</p>
+
+  <h2 id="test">5. Test timing</h2>
+  <ol>
+    <li>Turn Rate fully clockwise for the fastest flash.</li>
+    <li>Hold Trigger. The LED should feel a bit closer to the earlier direct-pot lessons.</li>
+    <li>Turn Pitch. The printed frequency should still change.</li>
+    <li>Turn Amount. LED brightness should still change.</li>
+    <li>Release Trigger. The LED should still stop immediately.</li>
+  </ol>
+
+  <details>
+    <summary>Pitch starts at 100 Hz then catches up</summary>
+    <p>That is expected for this lesson. The smoothed value starts at zero and quickly moves toward the real knob position. The next lesson can clean up startup behavior if needed.</p>
+  </details>
+
+  <details>
+    <summary>Printing makes timing rough</summary>
+    <p>Printing to the shell can briefly slow the loop. For a final instrument, control changes should be sent only when needed, and debug printing should be removed.</p>
+  </details>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>You can explain why blocking sleeps slow the whole loop.</li>
+    <li>You can explain why scheduled waits let other code keep running.</li>
+    <li>Pitch and Amount still work through the 4051.</li>
+    <li>The fastest LED flash feels less affected by mux reading.</li>
+  </ul>
+
+  <p><strong>Tell your teaching agent:</strong> whether the fastest flash feels faster than Lesson 10, and whether Pitch and Amount still stay independent.</p>
+
+  <footer>Primary sources: <a href="https://docs.micropython.org/en/latest/library/time.html">MicroPython time functions</a> and the <a href="https://www.ti.com/lit/ds/symlink/cd74hc4051.pdf">Texas Instruments CD74HC4051 datasheet</a>.</footer>
+</main>
+<script src="../assets/python-highlight.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 520" role="img" aria-labelledby="title desc">
+  <title id="title">The 4051 as an eight-way controlled switch</title>
+  <desc id="desc">Eight channel inputs enter the chip. The selector value zero zero zero closes only the channel zero switch, connecting the Pitch wiper to the common output and Pico GP28. All other channel switches remain open.</desc>
+  <rect width="1050" height="520" fill="#faf8f1"/>
+  <text x="45" y="47" fill="#252b2e" font-family="system-ui" font-size="27" font-weight="700">Think of the 4051 as eight switches sharing one COMMON wire</text>
+
+  <g transform="translate(70 88)" font-family="system-ui">
+    <rect x="250" y="0" width="530" height="360" rx="22" fill="#fff" stroke="#cbc6b8" stroke-width="3"/>
+    <text x="430" y="35" fill="#656b6e" font-size="17" font-weight="700">INSIDE THE 4051</text>
+
+    <!-- channel labels and lines -->
+    <g font-size="17" font-weight="700">
+      <text x="0" y="78" fill="#7357bd">CH0 · Pitch</text>
+      <text x="0" y="118" fill="#7a7f81">CH1 · future</text>
+      <text x="0" y="158" fill="#7a7f81">CH2 · future</text>
+      <text x="0" y="198" fill="#7a7f81">CH3 · future</text>
+      <text x="0" y="238" fill="#7a7f81">CH4 · future</text>
+      <text x="0" y="278" fill="#7a7f81">CH5 · future</text>
+      <text x="0" y="318" fill="#7a7f81">CH6 · future</text>
+      <text x="0" y="358" fill="#7a7f81">CH7 · future</text>
+    </g>
+    <g stroke-width="7" stroke-linecap="round">
+      <path d="M145 72 H355" stroke="#7357bd"/>
+      <path d="M145 112 H315 M145 152 H315 M145 192 H315 M145 232 H315 M145 272 H315 M145 312 H315 M145 352 H315" stroke="#a7aaac"/>
+    </g>
+
+    <!-- switches -->
+    <g fill="none" stroke-width="6" stroke-linecap="round">
+      <path d="M355 72 H405" stroke="#7357bd"/>
+      <circle cx="355" cy="72" r="7" fill="#7357bd" stroke="none"/>
+      <circle cx="405" cy="72" r="7" fill="#7357bd" stroke="none"/>
+
+      <path d="M315 112 L385 92 M315 152 L385 132 M315 192 L385 172 M315 232 L385 212 M315 272 L385 252 M315 312 L385 292 M315 352 L385 332" stroke="#a7aaac"/>
+      <g fill="#a7aaac" stroke="none">
+        <circle cx="315" cy="112" r="7"/><circle cx="405" cy="112" r="7"/>
+        <circle cx="315" cy="152" r="7"/><circle cx="405" cy="152" r="7"/>
+        <circle cx="315" cy="192" r="7"/><circle cx="405" cy="192" r="7"/>
+        <circle cx="315" cy="232" r="7"/><circle cx="405" cy="232" r="7"/>
+        <circle cx="315" cy="272" r="7"/><circle cx="405" cy="272" r="7"/>
+        <circle cx="315" cy="312" r="7"/><circle cx="405" cy="312" r="7"/>
+        <circle cx="315" cy="352" r="7"/><circle cx="405" cy="352" r="7"/>
+      </g>
+    </g>
+
+    <!-- common bus -->
+    <path d="M405 72 V352 M405 72 H610" fill="none" stroke="#a76507" stroke-width="8" stroke-linecap="round"/>
+    <rect x="610" y="47" width="145" height="50" rx="9" fill="#fff0d8" stroke="#d68a18" stroke-width="3"/>
+    <text x="630" y="79" fill="#a76507" font-size="18" font-weight="700">COMMON</text>
+    <path d="M755 72 H855" fill="none" stroke="#a76507" stroke-width="8"/>
+    <rect x="855" y="47" width="110" height="50" rx="9" fill="#e8f4df" stroke="#3c752d" stroke-width="3"/>
+    <text x="880" y="79" fill="#2e6550" font-size="18" font-weight="700">GP28</text>
+
+    <!-- selector -->
+    <rect x="315" y="390" width="210" height="54" rx="10" fill="#34393b"/>
+    <text x="340" y="423" fill="#fff" font-size="18" font-weight="700">S2 S1 S0 = 0 0 0</text>
+    <path d="M420 390 V362" stroke="#34393b" stroke-width="5" marker-end="none"/>
+    <text x="548" y="423" fill="#656b6e" font-size="17">selects only CH0</text>
+  </g>
+</svg>

@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 760" role="img" aria-labelledby="title desc">
+  <title id="title">CD74HC4051 two-channel wiring, top view</title>
+  <desc id="desc">Top view of the CD74HC4051E. Pitch wiper connects to channel 0 pin 13. Amount wiper connects to channel 1 pin 14. Common pin 3 connects to Pico GP28. S0 pin 11 connects to Pico GP18. S1 pin 10 and S2 pin 9 connect to ground. Power and enable pins match lesson 9.</desc>
+  <rect width="1320" height="760" fill="#faf8f1"/>
+  <style>
+    .title{font:700 29px system-ui,-apple-system,sans-serif;fill:#252b2e}
+    .sub{font:17px system-ui,-apple-system,sans-serif;fill:#656b6e}
+    .label{font:700 17px ui-monospace,Menlo,monospace;fill:#202629}
+    .muted{font:16px ui-monospace,Menlo,monospace;fill:#7a7f81}
+    .note{font:15px ui-monospace,Menlo,monospace;fill:#656b6e}
+    .pin{stroke:#777;stroke-width:12;stroke-linecap:round}
+    .chip-text{font:700 27px ui-monospace,Menlo,monospace;fill:#fff}
+    .small-chip{font:16px ui-monospace,Menlo,monospace;fill:#bfc7ca}
+    .pico-text{font:700 19px ui-monospace,Menlo,monospace;fill:#fff}
+    .red{stroke:#d72c2c}
+    .black{stroke:#202020}
+    .blue{stroke:#167c9d}
+    .orange{stroke:#b46a00}
+    .purple{stroke:#674bc2}
+    .wire{fill:none;stroke-width:7;stroke-linecap:round;stroke-linejoin:round}
+  </style>
+
+  <text x="44" y="50" class="title">CD74HC4051 · two selected channels</text>
+  <text x="44" y="82" class="sub">Top view · notch faces up · only S0 changes</text>
+
+  <g transform="translate(70 178)">
+    <rect x="0" y="0" width="245" height="330" rx="22" fill="#0d8140" stroke="#08602f" stroke-width="5"/>
+    <text x="44" y="174" class="chip-text">PICO 2</text>
+    <text x="146" y="76" class="pico-text">3V3</text>
+    <text x="146" y="136" class="pico-text">GP18</text>
+    <text x="146" y="196" class="pico-text">GP28</text>
+    <text x="146" y="256" class="pico-text">GND</text>
+    <circle cx="222" cy="72" r="8" fill="#ffd83d"/>
+    <circle cx="222" cy="132" r="8" fill="#ffd83d"/>
+    <circle cx="222" cy="192" r="8" fill="#ffd83d"/>
+    <circle cx="222" cy="252" r="8" fill="#ffd83d"/>
+  </g>
+
+  <g transform="translate(448 122)">
+    <rect x="0" y="0" width="370" height="510" rx="30" fill="#34393b" stroke="#171a1b" stroke-width="5"/>
+    <path d="M150 0 A35 35 0 0 0 220 0" fill="#faf8f1" stroke="#171a1b" stroke-width="5"/>
+    <circle cx="45" cy="42" r="10" fill="#d8d3c7"/>
+    <text x="75" y="250" class="chip-text">CD74HC4051E</text>
+    <text x="134" y="282" class="small-chip">TOP VIEW</text>
+
+    <g class="pin">
+      <path d="M0 65 H-42 M0 120 H-42 M0 175 H-42 M0 230 H-42 M0 285 H-42 M0 340 H-42 M0 395 H-42 M0 450 H-42"/>
+      <path d="M370 450 H412 M370 395 H412 M370 340 H412 M370 285 H412 M370 230 H412 M370 175 H412 M370 120 H412 M370 65 H412"/>
+    </g>
+
+    <g fill="#fff" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700">
+      <text x="15" y="70">1</text><text x="15" y="125">2</text><text x="15" y="180">3</text><text x="15" y="235">4</text>
+      <text x="15" y="290">5</text><text x="15" y="345">6</text><text x="15" y="400">7</text><text x="15" y="455">8</text>
+      <text x="342" y="455">9</text><text x="336" y="400">10</text><text x="336" y="345">11</text><text x="336" y="290">12</text>
+      <text x="336" y="235">13</text><text x="336" y="180">14</text><text x="336" y="125">15</text><text x="336" y="70">16</text>
+    </g>
+  </g>
+
+  <g>
+    <text x="238" y="145" class="label" fill="#d72c2c">Power</text>
+    <text x="340" y="148" class="label">16 VCC -> 3V3</text>
+    <path d="M292 250 C360 235 504 192 860 187" class="wire red"/>
+
+    <text x="314" y="303" class="label">3 COMMON -> GP28</text>
+    <path d="M292 370 C354 365 390 300 406 297" class="wire blue"/>
+
+    <text x="306" y="486" class="label">6 ENABLE -> GND</text>
+    <text x="326" y="546" class="label">7 VEE -> GND</text>
+    <text x="508" y="690" class="label">8 GND -> GND</text>
+    <path d="M292 430 C370 440 384 462 406 462" class="wire black"/>
+    <path d="M292 430 C365 486 385 520 406 517" class="wire black"/>
+    <path d="M292 430 C424 580 500 570 633 632" class="wire black"/>
+
+    <text x="858" y="187" class="label">16 VCC -> 3V3</text>
+    <text x="858" y="242" class="muted">15 CH2 unused</text>
+    <text x="858" y="297" class="label" fill="#674bc2">14 CH1 &lt;- AMOUNT wiper</text>
+    <text x="858" y="352" class="label" fill="#674bc2">13 CH0 &lt;- PITCH wiper</text>
+    <text x="858" y="407" class="label" fill="#b46a00">11 S0 &lt;- GP18</text>
+    <text x="858" y="462" class="label">10 S1 -> GND</text>
+    <text x="858" y="517" class="label">9 S2 -> GND</text>
+
+    <path d="M292 310 C430 330 635 402 860 407" class="wire orange"/>
+    <path d="M292 430 C480 475 668 512 860 517" class="wire black"/>
+    <path d="M292 430 C500 445 650 455 860 462" class="wire black" opacity="0.75"/>
+  </g>
+
+  <g transform="translate(1100 300)">
+    <rect x="0" y="-48" width="205" height="42" rx="6" fill="#fff" stroke="#d7cfbc"/>
+    <text x="15" y="-22" class="note">Amount centre leg</text>
+    <rect x="0" y="7" width="205" height="42" rx="6" fill="#fff" stroke="#d7cfbc"/>
+    <text x="15" y="34" class="note">Pitch centre leg</text>
+    <path d="M0 -27 C-95 -27 -150 -25 -240 -3" class="wire purple"/>
+    <path d="M0 28 C-95 28 -150 30 -240 52" class="wire purple"/>
+  </g>
+
+  <g transform="translate(1010 78)">
+    <rect x="0" y="0" width="230" height="88" rx="8" fill="#fff" stroke="#d7cfbc"/>
+    <text x="20" y="35" class="note">S0 = 0 reads CH0</text>
+    <text x="20" y="62" class="note">S0 = 1 reads CH1</text>
+  </g>
+
+  <g transform="translate(72 635)">
+    <rect x="0" y="0" width="1175" height="70" rx="8" fill="#fff" stroke="#d7cfbc"/>
+    <text x="22" y="29" class="note">Only centre wiper wires move through the 4051: Pitch -> CH0, Amount -> CH1.</text>
+    <text x="22" y="54" class="note">The outside legs of each potentiometer stay on shared 3V3 and GND.</text>
+  </g>
+</svg>

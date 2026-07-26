@@ -16,6 +16,10 @@
   Official, beginner-friendly electronics and MicroPython guide updated for Pico 2.
 - [picozero documentation](https://picozero.readthedocs.io/en/latest/)
   Raspberry Pi Foundation’s beginner component library. Use for: `LED`, `Button`, `Pot`, and short MicroPython control programs.
+- [Python language reference — binary bitwise operations](https://docs.python.org/3/reference/expressions.html#binary-bitwise-operations)
+  Primary language reference. Use for: `&`, `>>`, masks, and extracting multiplexer selector bits.
+- [Texas Instruments CD74HC4051 datasheet](https://www.ti.com/lit/ds/symlink/cd74hc4051.pdf)
+  Manufacturer pinout and channel-selection reference for the purchased DIP-16 analogue multiplexer.
 - [Vishay resistor colour-code card](https://www.vishay.com/docs/49411/resistor_color_code_calculator.pdf)
   Manufacturer reference for four- and five-band resistor colours, multipliers, and tolerances.
 - [RP2350 datasheet](https://datasheets.raspberrypi.com/rp2350/rp2350-datasheet.pdf)
