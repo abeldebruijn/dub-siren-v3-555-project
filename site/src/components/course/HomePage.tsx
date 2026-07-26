@@ -1,4 +1,4 @@
-import { Cable, CheckCircle2, CircleDot, Play, RotateCcw, Sparkles, Zap } from "lucide-react";
+import { Cable, CheckCircle2, CircleDot, Play, RotateCcw, Zap } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,25 +33,28 @@ export function HomePage() {
 
   return (
     <main className="dark-course min-h-screen overflow-hidden">
-      <section className="hero-cosmos relative mx-auto flex min-h-[760px] w-full max-w-[1500px] items-center justify-center px-5 py-16 text-center md:min-h-[900px]">
+      <section className="hero-cosmos relative flex min-h-[760px] w-full items-center justify-center overflow-hidden px-5 py-16 text-center md:min-h-[900px]">
+        <div className="synthwave-sun" aria-hidden="true" />
+        <div className="synthwave-mountains" aria-hidden="true" />
+        <div className="synthwave-palms" aria-hidden="true">
+          <span className="palm palm-left" />
+          <span className="palm palm-right" />
+        </div>
+        <div className="synthwave-grid" aria-hidden="true" />
         <FloatingObjects />
         <div className="absolute right-3 top-4 z-20 w-[min(30vw,19rem)] min-w-[13rem] md:right-8 md:top-7">
           <SynthConsole />
         </div>
 
         <div className="relative z-10 mx-auto max-w-4xl pt-36 md:pt-8">
-          <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.24em] text-yellow-300 shadow-[0_0_35px_rgba(255,211,71,0.12)] backdrop-blur">
-            <Sparkles className="h-4 w-4" />
-            Raspberry Pi Pico synth course
-          </p>
           <h1 className="hero-title font-display text-[4.2rem] font-black leading-[0.82] tracking-[-0.07em] text-white sm:text-[6.4rem] md:text-[7.6rem] lg:text-[9.4rem]">
-            Dub Siren
-            <span className="block">V3</span>
+            Pico Dub
+            <span className="block">Siren</span>
           </h1>
-          <p className="mx-auto mt-8 max-w-xl text-xl leading-9 text-slate-200 md:text-2xl">
+          <p className="hero-subtitle mx-auto mt-8 max-w-xl text-xl leading-9 text-white md:text-2xl">
             Learn electronics by building a playable siren: LEDs first, then buttons, knobs, multiplexers, and finally a small synth control panel.
           </p>
-          <p className="mx-auto mt-5 max-w-lg text-lg leading-8 text-slate-400">
+          <p className="hero-subtitle mx-auto mt-5 max-w-lg text-lg leading-8 text-slate-200">
             No prior Pico or breadboard experience assumed. Each lesson adds one useful control to the instrument.
           </p>
 
@@ -76,6 +79,8 @@ export function HomePage() {
         <div className="patch-cable" aria-hidden="true" />
       </section>
 
+      <div className="post-hero-grid" aria-hidden="true" />
+
       <section className="course-copy mx-auto max-w-3xl px-6 py-24 text-slate-100">
         <p>
           Building a synthesizer can feel like <em>magic</em> when you have never touched electronics before. The trick is not to start with the whole instrument.
@@ -94,7 +99,6 @@ export function HomePage() {
       <section className="relative mx-auto max-w-5xl px-6 pb-28">
         <div className="rainbow-marks mx-auto mb-24" aria-hidden="true" />
         <div className="mb-14">
-          <p className="hand-label text-yellow-300">The patches</p>
           <h2 className="mt-1 text-5xl font-black tracking-[-0.04em] text-slate-100 md:text-7xl">Fourteen small circuits</h2>
           <p className="mt-6 max-w-2xl text-xl leading-9 text-slate-300">
             Think of each lesson as one patch cable in the final instrument.
@@ -148,13 +152,13 @@ export function HomePage() {
 function FloatingObjects() {
   return (
     <div aria-hidden="true" className="floating-objects">
-      <span className="float-shape shape-star" />
-      <span className="float-shape shape-ball shape-ball-green" />
-      <span className="float-shape shape-ball shape-ball-pink" />
-      <span className="float-shape shape-ball shape-ball-blue" />
+      <span className="float-shape shape-wave shape-sine" />
+      <span className="float-shape shape-wave shape-square" />
+      <span className="float-shape shape-wave shape-saw" />
+      <span className="float-shape shape-wave shape-triangle" />
+      <span className="float-shape shape-wave shape-pulse" />
       <span className="float-shape shape-chip" />
       <span className="float-shape shape-led" />
-      <span className="float-shape shape-resistor" />
     </div>
   );
 }

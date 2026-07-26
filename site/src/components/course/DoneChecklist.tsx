@@ -1,11 +1,11 @@
 import confetti from "canvas-confetti";
-import { CheckCircle2 } from "lucide-react";
+import { Check, CheckCircle2 } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getNextLesson } from "@/lessons";
 import type { DoneItem, LessonMeta } from "@/lessons/types";
 import { isLessonDone, setChecklistItem } from "@/lib/progress";
+import { cn } from "@/lib/utils";
 import { useProgress } from "@/lib/useProgress";
 
 type Props = {
@@ -33,29 +33,37 @@ export function DoneChecklist({ lesson, items }: Props) {
   }, [done]);
 
   return (
-    <Card className="border-2 border-stone-900/10 bg-amber-50/80">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-3">
-          <CheckCircle2 className="h-6 w-6 text-secondary" />
-          Done means
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-5">
+    <section className="done-strip">
+      <div className="mb-6 flex items-center gap-3">
+        <CheckCircle2 className="h-6 w-6 text-green-300" />
+        <h2 className="font-display text-3xl font-bold text-white">Done means</h2>
+      </div>
+      <div className="space-y-5">
         <div className="space-y-3">
-          {items.map((item) => (
-            <label
-              key={item.id}
-              className="flex cursor-pointer items-start gap-3 rounded-2xl border bg-white/70 p-4 transition hover:bg-white"
-            >
-              <input
-                className="mt-1 h-5 w-5 accent-[hsl(var(--secondary))]"
-                type="checkbox"
-                checked={Boolean(checked[item.id])}
-                onChange={(event) => setChecklistItem(lesson.slug, item.id, event.target.checked)}
-              />
-              <span>{item.label}</span>
-            </label>
-          ))}
+          {items.map((item) => {
+            const isChecked = Boolean(checked[item.id]);
+
+            return (
+              <label
+                key={item.id}
+                className={cn(
+                  "done-check-row flex cursor-pointer items-start gap-4",
+                  isChecked && "done-check-row-done",
+                )}
+              >
+                <input
+                  className="sr-only"
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={(event) => setChecklistItem(lesson.slug, item.id, event.target.checked)}
+                />
+                <span className="done-check-box mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center">
+                  {isChecked ? <Check className="h-4 w-4" /> : null}
+                </span>
+                <span className="leading-7">{item.label}</span>
+              </label>
+            );
+          })}
         </div>
 
         {done && nextLesson?.isMigrated ? (
@@ -63,13 +71,13 @@ export function DoneChecklist({ lesson, items }: Props) {
             <a href={`#/lessons/${nextLesson.slug}`}>Lesson {nextLesson.number} →</a>
           </Button>
         ) : done && nextLesson ? (
-          <p className="rounded-2xl border border-dashed bg-white/70 p-4 text-sm text-muted-foreground">
+          <p className="border border-dashed border-white/20 p-4 text-sm text-slate-400">
             Lesson {nextLesson.number} is in the journey, but it has not been migrated to React yet.
           </p>
         ) : (
-          <p className="text-sm text-muted-foreground">The next lesson appears after every box is checked.</p>
+          <p className="text-sm text-slate-400">The next lesson appears after every box is checked.</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

@@ -22,25 +22,23 @@ export function LessonShell({ lesson }: Props) {
   }, [lesson.slug]);
 
   return (
-    <main className="dark-course mx-auto flex w-full max-w-7xl flex-col gap-8 px-5 py-8 md:px-8 md:py-12">
-      <header className="relative overflow-hidden rounded-[2.4rem] border border-slate-700/70 bg-[#0d1117] p-4 shadow-[0_30px_90px_rgba(0,0,0,0.45)]">
-        <div className="grid gap-5 md:grid-cols-[1fr_18rem]">
-          <div>
-            <div className="rounded-[2rem] bg-white/[0.035] p-6 md:p-10">
-              <p className="mb-3 inline-flex rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.22em] text-yellow-300 shadow-sm">
-              Dub Siren V3 · lesson {String(lesson.number).padStart(2, "0")}
+    <main className="dark-course lesson-page min-h-screen w-full">
+      <div className="mx-auto flex w-full max-w-7xl flex-col px-5 py-8 md:px-8 md:py-12">
+        <header className="lesson-page-hero relative overflow-hidden border-b border-slate-700/70 pb-10 pt-6">
+          <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_18rem] md:items-end">
+            <div>
+              <p className="mb-5 font-mono text-xs font-bold uppercase tracking-[0.28em] text-cyan-300">
+                Pico Dub Siren · lesson {String(lesson.number).padStart(2, "0")}
               </p>
-              <h1 className="font-display text-5xl font-black leading-[0.95] text-white md:text-7xl">{lesson.title}</h1>
-              <p className="mt-5 max-w-2xl text-xl leading-8 text-slate-300">{lesson.subtitle}</p>
+              <h1 className="max-w-4xl font-display text-5xl font-black leading-[0.9] text-white md:text-8xl">{lesson.title}</h1>
+              <p className="mt-6 max-w-2xl text-xl leading-8 text-slate-300 md:text-2xl">{lesson.subtitle}</p>
             </div>
-          </div>
-          <nav className="rounded-[2rem] bg-stone-950 p-5 text-stone-50">
-            <div className="mb-6 rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
-              <div className="mb-3 flex items-center justify-between font-mono text-xs uppercase tracking-[0.18em] text-green-300">
+            <nav className="lesson-status-panel text-stone-50">
+              <div className="mb-5 flex items-center justify-between font-mono text-xs uppercase tracking-[0.18em] text-green-300">
                 <span>Patch status</span>
                 <span>{done ? "Done" : "Open"}</span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="mb-6 flex items-center gap-3">
                 <div className="patch-socket flex h-14 w-14 items-center justify-center rounded-full font-mono font-black">{lesson.number}</div>
                 <div>
                   <p className="flex items-center gap-2 font-bold">
@@ -50,30 +48,30 @@ export function LessonShell({ lesson }: Props) {
                   <p className="text-sm text-stone-400">Next lesson unlocks when done.</p>
                 </div>
               </div>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Button asChild variant="outline" className="justify-start border-white/20 bg-white/10 text-white hover:bg-accent hover:text-stone-950">
-                <a href="#/">
-                  <ArrowLeft className="h-4 w-4" />
-                  Journey
-                </a>
-              </Button>
-              {previous?.isMigrated ? (
-                <Button asChild variant="ghost" className="justify-start text-white hover:bg-white/10">
-                  <a href={`#/lessons/${previous.slug}`}>← Lesson {previous.number}</a>
+              <div className="flex flex-col gap-2">
+                <Button asChild variant="outline" className="justify-start border-white/20 bg-transparent text-white hover:bg-accent hover:text-stone-950">
+                  <a href="#/">
+                    <ArrowLeft className="h-4 w-4" />
+                    Journey
+                  </a>
                 </Button>
-              ) : null}
-              {done && next?.isMigrated ? (
-                <Button asChild variant="ghost" className="justify-start text-white hover:bg-white/10">
-                  <a href={`#/lessons/${next.slug}`}>Lesson {next.number} →</a>
-                </Button>
-              ) : null}
-            </div>
-          </nav>
-        </div>
-      </header>
+                {previous?.isMigrated ? (
+                  <Button asChild variant="ghost" className="justify-start text-white hover:bg-white/10">
+                    <a href={`#/lessons/${previous.slug}`}>← Lesson {previous.number}</a>
+                  </Button>
+                ) : null}
+                {done && next?.isMigrated ? (
+                  <Button asChild variant="ghost" className="justify-start text-white hover:bg-white/10">
+                    <a href={`#/lessons/${next.slug}`}>Lesson {next.number} →</a>
+                  </Button>
+                ) : null}
+              </div>
+            </nav>
+          </div>
+        </header>
 
-      {LessonComponent ? <LessonComponent /> : null}
+        {LessonComponent ? <LessonComponent /> : null}
+      </div>
     </main>
   );
 }
