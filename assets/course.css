@@ -226,6 +226,46 @@ nav {
   font-size: 0.78rem;
 }
 
+.truth-table {
+  width: min(100%, 40rem);
+  margin: 1.5rem 0;
+  border-collapse: collapse;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.86rem;
+}
+
+.truth-table th,
+.truth-table td {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--line);
+  text-align: left;
+}
+
+.truth-table th {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.truth-table .current {
+  background: rgba(232, 180, 76, 0.25);
+  font-weight: 700;
+}
+
+.pin-reasons {
+  max-width: 48rem;
+}
+
+.pin-reasons dt {
+  margin-top: 1.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 700;
+}
+
+.pin-reasons dd {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+}
+
 .switch-map {
   display: grid;
   grid-template-columns: repeat(3, minmax(5rem, 8rem));

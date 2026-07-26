@@ -9,9 +9,8 @@ pitch = Pot(28)
 
 last_change = ticks_ms()
 light_on = False
-last_pitch_hz = -1
 smoothed_pitch = pitch.value
-
+last_pitch_hz = -1
 
 while True:
     interval = int(500 - rate.value * 450)

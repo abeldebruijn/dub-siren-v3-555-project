@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 10 - Select two 4051 channels</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · lesson 0010</p>
+    <h1>Select two mux channels</h1>
+    <p class="lead">Move Amount onto CH1 and let the Pico choose between Pitch and Amount through one ADC input.</p>
+    <p class="meta">30-45 min · CH0 + CH1 · first selector pin</p>
+    <nav>
+      <a href="0009-first-4051-channel.html">← Lesson 9</a>
+      <a href="#idea">Idea</a>
+      <a href="#wire">Wire</a>
+      <a href="#code">Code</a>
+      <a href="#test">Test</a>
+    </nav>
+  </header>
+
+  <div class="callout safe">
+    <span class="label">Today’s win</span>
+    Pitch and Amount share GP28. The Pico sets S0 low to read Pitch, then high to read Amount.
+  </div>
+
+  <h2 id="idea">1. The new idea</h2>
+  <p>Lesson 9 used the 4051 as a fixed wire: CH0 was always selected. Today one Pico output controls the lowest selector bit, <code>S0</code>.</p>
+  <table class="truth-table">
+    <thead><tr><th>S2</th><th>S1</th><th>S0</th><th>Connected channel</th><th>Reads</th></tr></thead>
+    <tbody>
+      <tr class="current"><td>0</td><td>0</td><td>0</td><td>CH0 · pin 13</td><td>Pitch</td></tr>
+      <tr class="current"><td>0</td><td>0</td><td>1</td><td>CH1 · pin 14</td><td>Amount</td></tr>
+    </tbody>
+  </table>
+  <p><code>S1</code> and <code>S2</code> stay grounded, so only CH0 and CH1 are reachable. That keeps this lesson small.</p>
+
+  <h2 id="wire">2. Rewire with USB unplugged</h2>
+  <ol>
+    <li>Keep 4051 power from lesson 9: pin 16 to 3V3, pin 8 to GND, pin 7 to GND, pin 6 to GND, capacitor between pin 16 and pin 8.</li>
+    <li>Keep Pitch centre wiper on <strong>CH0 pin 13</strong>.</li>
+    <li>Move Amount centre wiper away from <code>GP27</code> and connect it to <strong>CH1 pin 14</strong>.</li>
+    <li>Keep both outside pins of the Amount pot on shared 3V3 and GND.</li>
+    <li>Keep 4051 COMMON pin 3 connected to <code>GP28</code>.</li>
+    <li>Move <strong>S0 pin 11</strong> away from GND and connect it to <code>GP18</code>.</li>
+    <li>Keep <strong>S1 pin 10</strong> and <strong>S2 pin 9</strong> connected to GND.</li>
+  </ol>
+
+  <figure class="breadboard-figure">
+    <img src="../assets/4051-two-channel-select.svg" alt="CD74HC4051 two-channel wiring: Pitch to CH0 pin 13, Amount to CH1 pin 14, COMMON pin 3 to GP28, S0 pin 11 to GP18, S1 and S2 to ground.">
+    <figcaption>Only the centre wiper wires move through the 4051. The outside pot wires still make the 0-3.3 V voltage range.</figcaption>
+  </figure>
+
+  <div class="callout danger">
+    <span class="label">Before USB</span>
+    Do not leave S0 floating. It must go to GP18. S1 and S2 must stay on GND. GP27 should now be empty; it is no longer reading Amount directly.
+  </div>
+
+  <h2 id="code">3. Read one channel, then the other</h2>
+  <p>Run <a href="../examples/0010-two-4051-channels/main.py">this <code>main.py</code></a>:</p>
+  <pre><code>from machine import Pin
+from picozero import Button, LED, Pot
+from time import sleep, ticks_diff, ticks_ms
+
+led = LED(15)
+button = Button(14)
+rate = Pot(26)
+mux_adc = Pot(28)
+
+mux_s0 = Pin(18, Pin.OUT)
+
+
+def read_mux(channel):
+    mux_s0.value(channel)
+    sleep(0.002)
+    return mux_adc.value
+
+
+pitch_value = read_mux(0)
+amount_value = read_mux(1)
+last_pitch_hz = -1
+last_change = ticks_ms()
+light_on = False
+
+
+while True:
+    pitch_value += (read_mux(0) - pitch_value) * 0.1
+    amount_value += (read_mux(1) - amount_value) * 0.1
+
+    pitch_hz = int(100 + pitch_value * 900)
+    if abs(pitch_hz - last_pitch_hz) &gt;= 5:
+        print("Pitch:", pitch_hz, "Hz", "Amount:", round(amount_value, 2))
+        last_pitch_hz = pitch_hz
+
+    if button.is_pressed:
+        interval = int(500 - rate.value * 450)
+        now = ticks_ms()
+
+        if ticks_diff(now, last_change) &gt;= interval:
+            light_on = not light_on
+            last_change = now
+
+        led.value = amount_value if light_on else 0
+    else:
+        led.off()
+        light_on = False
+        last_change = ticks_ms()
+
+    sleep(0.01)</code></pre>
+
+  <h3>Why the tiny sleep exists</h3>
+  <p>After <code>mux_s0.value(channel)</code>, the 4051 changes its internal switch. The Pico ADC input then needs a very short moment to settle to the newly selected pot voltage. <code>sleep(0.002)</code> is 2 ms; slow for a computer, but very fast for your hand turning a knob.</p>
+
+  <h2 id="test">4. Test independence</h2>
+  <ol>
+    <li>Turn Pitch. The printed <code>Pitch</code> number should change. LED brightness should not.</li>
+    <li>Hold Trigger and turn Amount. LED brightness should change. Printed Pitch should stay nearly fixed.</li>
+    <li>Turn Rate. LED flash speed should change. Pitch and Amount should not swap roles.</li>
+    <li>Shake the breadboard lightly. Values should remain stable like your fixed lesson 9 circuit.</li>
+  </ol>
+
+  <div class="callout">
+    <span class="label">Timing observation</span>
+    <p>Reading the mux makes the loop slower. Each loop reads two mux channels, and each read waits 2 ms for the ADC value to settle. The bottom <code>sleep(0.01)</code> adds another 10 ms, so one loop takes at least about 14 ms before Python overhead and occasional printing.</p>
+    <p>The LED does not toggle exactly every requested interval; the code only checks whether it is time to toggle once per loop. If the Rate knob asks for a 50 ms interval, the next check may happen around 56-64 ms instead. A full blink cycle has two toggles, so 50 ms on plus 50 ms off is roughly a 100 ms cycle, plus this loop timing effect.</p>
+  </div>
+
+  <details>
+    <summary>Pitch and Amount are swapped</summary>
+    <p>Unplug USB. Exchange only the two wiper wires going to CH0 pin 13 and CH1 pin 14.</p>
+  </details>
+
+  <details>
+    <summary>Only Pitch works</summary>
+    <p>Unplug USB. Recheck Amount centre wiper to CH1 pin 14. Also check S0 pin 11 reaches GP18, not GND.</p>
+  </details>
+
+  <details>
+    <summary>Values jump when untouched</summary>
+    <p>Unplug USB and reseat the relevant wiper wire. Large jumps are still usually contact problems. Small one- or two-step changes are normal ADC noise.</p>
+  </details>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>GP28 reads two different pots through the 4051.</li>
+    <li>GP18 controls S0.</li>
+    <li>S1 and S2 stay grounded.</li>
+    <li>Pitch controls printed frequency.</li>
+    <li>Amount controls LED brightness.</li>
+  </ul>
+
+  <p><strong>Tell your teaching agent:</strong> whether Pitch and Amount stay independent, and whether the controls are accidentally swapped.</p>
+
+  <footer>Primary source: <a href="https://www.ti.com/lit/ds/symlink/cd74hc4051.pdf">Texas Instruments CD74HC4051 datasheet</a>, channel-selection table and pin configuration.</footer>
+</main>
+</body>
+</html>

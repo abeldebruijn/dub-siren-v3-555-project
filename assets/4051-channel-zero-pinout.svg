@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 690" role="img" aria-labelledby="title desc">
+  <title id="title">CD74HC4051 channel zero wiring, top view</title>
+  <desc id="desc">The DIP chip is shown from above with its notch at the top. Pin 16 goes to 3V3. Pins 6, 7, 8, 9, 10, and 11 go to ground. Pitch wiper goes to channel zero pin 13. Common pin 3 goes to Pico GP28. A 100 nanofarad capacitor connects pin 16 to pin 8.</desc>
+  <rect width="1100" height="690" fill="#faf8f1"/>
+  <text x="45" y="48" fill="#252b2e" font-family="system-ui" font-size="27" font-weight="700">CD74HC4051 · channel 0 only</text>
+  <text x="45" y="78" fill="#656b6e" font-family="system-ui" font-size="17">Top view · notch faces up · pin numbers run anticlockwise</text>
+
+  <g transform="translate(350 105)" font-family="system-ui">
+    <rect x="0" y="0" width="400" height="510" rx="28" fill="#34393b" stroke="#171a1b" stroke-width="5"/>
+    <path d="M165 0 A35 35 0 0 0 235 0" fill="#faf8f1" stroke="#171a1b" stroke-width="5"/>
+    <circle cx="45" cy="42" r="10" fill="#d8d3c7"/>
+    <text x="111" y="245" fill="#fff" font-size="25" font-weight="700">CD74HC4051E</text>
+    <text x="148" y="276" fill="#bfc7ca" font-size="16">TOP VIEW</text>
+
+    <!-- pins -->
+    <g stroke="#777" stroke-width="12" stroke-linecap="round">
+      <path d="M0 65 H-42 M0 120 H-42 M0 175 H-42 M0 230 H-42 M0 285 H-42 M0 340 H-42 M0 395 H-42 M0 450 H-42"/>
+      <path d="M400 450 H442 M400 395 H442 M400 340 H442 M400 285 H442 M400 230 H442 M400 175 H442 M400 120 H442 M400 65 H442"/>
+    </g>
+
+    <!-- left labels -->
+    <g font-size="16" text-anchor="end">
+      <text x="-58" y="71" fill="#7a7f81">1 · CH4 · unused</text>
+      <text x="-58" y="126" fill="#7a7f81">2 · CH6 · unused</text>
+      <text x="-58" y="181" fill="#a76507" font-weight="700">3 · COMMON → GP28</text>
+      <text x="-58" y="236" fill="#7a7f81">4 · CH7 · unused</text>
+      <text x="-58" y="291" fill="#7a7f81">5 · CH5 · unused</text>
+      <text x="-58" y="346" fill="#202629" font-weight="700">6 · ENABLE → GND</text>
+      <text x="-58" y="401" fill="#202629" font-weight="700">7 · VEE → GND</text>
+      <text x="-58" y="456" fill="#202629" font-weight="700">8 · GND → GND</text>
+    </g>
+
+    <!-- right labels -->
+    <g font-size="16">
+      <text x="458" y="456" fill="#202629" font-weight="700">9 · S2 → GND</text>
+      <text x="458" y="401" fill="#202629" font-weight="700">10 · S1 → GND</text>
+      <text x="458" y="346" fill="#202629" font-weight="700">11 · S0 → GND</text>
+      <text x="458" y="291" fill="#7a7f81">12 · CH3 · unused</text>
+      <text x="458" y="236" fill="#7357bd" font-weight="700">13 · CH0 ← PITCH WIPER</text>
+      <text x="458" y="181" fill="#7a7f81">14 · CH1 · unused</text>
+      <text x="458" y="126" fill="#7a7f81">15 · CH2 · unused</text>
+      <text x="458" y="71" fill="#ac2025" font-weight="700">16 · VCC → 3V3</text>
+    </g>
+
+    <!-- pin numbers on package -->
+    <g fill="#fff" font-size="14" font-weight="700">
+      <text x="15" y="70">1</text><text x="15" y="125">2</text><text x="15" y="180">3</text><text x="15" y="235">4</text>
+      <text x="15" y="290">5</text><text x="15" y="345">6</text><text x="15" y="400">7</text><text x="15" y="455">8</text>
+      <text x="372" y="455">9</text><text x="366" y="400">10</text><text x="366" y="345">11</text><text x="366" y="290">12</text>
+      <text x="366" y="235">13</text><text x="366" y="180">14</text><text x="366" y="125">15</text><text x="366" y="70">16</text>
+    </g>
+  </g>
+
+  <g transform="translate(205 635)" font-family="system-ui">
+    <line x1="0" y1="0" x2="85" y2="0" stroke="#ac2025" stroke-width="7"/>
+    <line x1="155" y1="0" x2="240" y2="0" stroke="#202629" stroke-width="7"/>
+    <rect x="85" y="-18" width="70" height="36" rx="5" fill="#e7d8a9" stroke="#756b4e" stroke-width="3"/>
+    <text x="103" y="6" fill="#252b2e" font-size="14" font-weight="700">100 nF</text>
+    <text x="-55" y="6" fill="#ac2025" font-size="16" font-weight="700">pin 16</text>
+    <text x="252" y="6" fill="#202629" font-size="16" font-weight="700">pin 8</text>
+    <text x="370" y="6" fill="#656b6e" font-size="16">Ceramic capacitor: either direction</text>
+  </g>
+</svg>

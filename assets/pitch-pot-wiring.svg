@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 500" role="img" aria-labelledby="title desc">
+  <title id="title">Pitch potentiometer terminal wiring</title>
+  <desc id="desc">Viewed from behind with terminals facing you. Terminal one connects to 3V3, centre terminal two connects to Pico GP28 ADC2, and terminal three connects to ground.</desc>
+  <rect width="820" height="500" fill="#faf8f1"/>
+  <text x="45" y="48" fill="#252b2e" font-family="system-ui" font-size="27" font-weight="700">PITCH potentiometer · viewed from behind</text>
+  <text x="45" y="78" fill="#656b6e" font-family="system-ui" font-size="17">Shaft points away from you · three terminals face you</text>
+
+  <g transform="translate(55 110)" font-family="system-ui">
+    <rect x="165" y="0" width="300" height="205" rx="35" fill="#b9b5aa" stroke="#56534d" stroke-width="5"/>
+    <circle cx="315" cy="62" r="50" fill="#77736a"/>
+    <circle cx="315" cy="62" r="16" fill="#d8d3c7"/>
+    <text x="276" y="138" fill="#35383a" font-size="17" font-weight="700">BACK</text>
+
+    <line x1="215" y1="205" x2="215" y2="295" stroke="#777" stroke-width="14" stroke-linecap="round"/>
+    <line x1="315" y1="205" x2="315" y2="295" stroke="#777" stroke-width="14" stroke-linecap="round"/>
+    <line x1="415" y1="205" x2="415" y2="295" stroke="#777" stroke-width="14" stroke-linecap="round"/>
+
+    <circle cx="215" cy="248" r="20" fill="#d52d31"/><text x="209" y="255" fill="#fff" font-size="18" font-weight="700">1</text>
+    <circle cx="315" cy="248" r="20" fill="#d68a18"/><text x="309" y="255" fill="#fff" font-size="18" font-weight="700">2</text>
+    <circle cx="415" cy="248" r="20" fill="#202629"/><text x="409" y="255" fill="#fff" font-size="18" font-weight="700">3</text>
+
+    <path d="M215 295 V325" stroke="#d52d31" stroke-width="10"/>
+    <path d="M315 295 V325" stroke="#d68a18" stroke-width="10"/>
+    <path d="M415 295 V325" stroke="#202629" stroke-width="10"/>
+    <rect x="150" y="325" width="130" height="48" rx="9" fill="#fde5e5" stroke="#d52d31" stroke-width="3"/>
+    <rect x="287" y="325" width="150" height="48" rx="9" fill="#fff0d8" stroke="#d68a18" stroke-width="3"/>
+    <rect x="444" y="325" width="120" height="48" rx="9" fill="#e4e6e7" stroke="#202629" stroke-width="3"/>
+    <path d="M415 325 H444" stroke="#202629" stroke-width="10"/>
+    <text x="189" y="356" fill="#ac2025" font-size="19" font-weight="700">3V3</text>
+    <text x="330" y="356" fill="#a76507" font-size="19" font-weight="700">GP28</text>
+    <text x="482" y="356" fill="#202629" font-size="19" font-weight="700">GND</text>
+    <text x="182" y="310" fill="#ac2025" font-size="15">outside</text>
+    <text x="289" y="310" fill="#a76507" font-size="15">centre wiper</text>
+    <text x="431" y="310" fill="#202629" font-size="15">outside</text>
+  </g>
+</svg>
