@@ -319,6 +319,32 @@ pre {
   line-height: 1.55;
 }
 
+pre code {
+  color: var(--code-ink);
+}
+
+.py-keyword {
+  color: #ffb86c;
+}
+
+.py-builtin,
+.py-call {
+  color: #8be9fd;
+}
+
+.py-string {
+  color: #f1fa8c;
+}
+
+.py-number {
+  color: #bd93f9;
+}
+
+.py-comment {
+  color: #9aa39d;
+  font-style: italic;
+}
+
 code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
