@@ -1,0 +1,490 @@
+@import url("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 18% 5%;
+    --foreground: 220 22% 94%;
+    --card: 220 18% 7%;
+    --card-foreground: 220 22% 94%;
+    --popover: 220 18% 7%;
+    --popover-foreground: 220 22% 94%;
+    --primary: 10 89% 50%;
+    --primary-foreground: 42 52% 97%;
+    --secondary: 156 52% 28%;
+    --secondary-foreground: 42 52% 97%;
+    --muted: 218 14% 15%;
+    --muted-foreground: 218 11% 68%;
+    --accent: 48 98% 59%;
+    --accent-foreground: 210 12% 15%;
+    --destructive: 0 74% 44%;
+    --destructive-foreground: 42 52% 97%;
+    --border: 218 16% 25%;
+    --input: 218 16% 25%;
+    --ring: 14 88% 48%;
+    --radius: 1.1rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply min-h-screen bg-background text-foreground font-body;
+    background-image:
+      radial-gradient(circle at 50% 12%, rgba(60, 64, 82, 0.35), transparent 35rem),
+      radial-gradient(circle at 12% 88%, rgba(61, 26, 86, 0.22), transparent 32rem),
+      linear-gradient(180deg, #080b0d 0%, #0c1015 54%, #090b0f 100%);
+    background-size: 100% 100%;
+  }
+
+  a {
+    text-underline-offset: 0.22em;
+  }
+}
+
+@layer components {
+  .workbench-card {
+    @apply rounded-[1.8rem] border border-stone-950/10 bg-card/90 shadow-workbench;
+  }
+
+  .dark-course {
+    background:
+      radial-gradient(circle at 50% 4%, rgba(44, 47, 59, 0.52), transparent 35rem),
+      radial-gradient(circle at 6% 40%, rgba(17, 116, 120, 0.12), transparent 24rem),
+      radial-gradient(circle at 94% 42%, rgba(103, 74, 255, 0.12), transparent 28rem),
+      linear-gradient(180deg, #080b0d 0%, #0b0f14 58%, #080b0d 100%);
+    color: #eef2f6;
+  }
+
+  .hero-cosmos {
+    isolation: isolate;
+  }
+
+  .hero-title {
+    text-shadow:
+      0 5px 0 rgba(74, 82, 101, 0.45),
+      0 28px 90px rgba(0, 0, 0, 0.75);
+    font-variation-settings: "SOFT" 80;
+  }
+
+  .course-copy {
+    font-size: clamp(1.2rem, 1rem + 0.55vw, 1.55rem);
+    line-height: 1.65;
+  }
+
+  .course-copy p {
+    margin-bottom: 2rem;
+  }
+
+  .course-copy em {
+    color: #c7f9dc;
+    font-style: italic;
+  }
+
+  .hand-highlight {
+    position: relative;
+    font-style: italic;
+    font-weight: 800;
+  }
+
+  .hand-highlight::after {
+    content: "";
+    position: absolute;
+    left: -0.1em;
+    right: -0.1em;
+    bottom: 0.02em;
+    height: 0.22em;
+    border-radius: 999px;
+    z-index: -1;
+    opacity: 0.9;
+    transform: rotate(-1.5deg);
+  }
+
+  .hand-highlight.pink {
+    color: #ff78ad;
+  }
+
+  .hand-highlight.pink::after {
+    background: rgba(255, 120, 173, 0.25);
+  }
+
+  .hand-label {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 900;
+    transform: rotate(-5deg);
+    display: inline-block;
+  }
+
+  .rainbow-marks {
+    width: 7rem;
+    height: 0.7rem;
+    background:
+      linear-gradient(120deg, transparent 0 8%, #ff4d7d 8% 14%, transparent 14% 20%, #ffb000 20% 26%, transparent 26% 32%, #f8ff4d 32% 38%, transparent 38% 44%, #61e294 44% 50%, transparent 50% 56%, #21c7ff 56% 62%, transparent 62% 68%, #8370ff 68% 74%, transparent 74% 80%, #ff59f8 80% 86%, transparent 86%);
+    transform: rotate(-3deg);
+  }
+
+  .lesson-stream {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .lesson-row {
+    border-radius: 1.1rem;
+    box-shadow: none;
+  }
+
+  .lesson-number {
+    color: #ffd747;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+  }
+
+  .row-active {
+    border-color: rgba(255, 215, 71, 0.55);
+    background: rgba(255, 215, 71, 0.04);
+  }
+
+  .row-done {
+    border-color: rgba(113, 244, 163, 0.45);
+    background: rgba(113, 244, 163, 0.04);
+  }
+
+  .floating-objects {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .float-shape {
+    position: absolute;
+    display: block;
+    filter: drop-shadow(0 22px 20px rgba(0, 0, 0, 0.48));
+    animation: float-drift 8s ease-in-out infinite;
+  }
+
+  .shape-star {
+    left: 21%;
+    top: 5%;
+    width: 4.6rem;
+    height: 4.6rem;
+    background: linear-gradient(145deg, #ffe25f, #d69a00);
+    clip-path: polygon(50% 0%, 62% 34%, 98% 35%, 69% 56%, 79% 91%, 50% 70%, 21% 91%, 31% 56%, 2% 35%, 38% 34%);
+    transform: rotate(12deg);
+  }
+
+  .shape-ball {
+    border-radius: 50%;
+  }
+
+  .shape-ball-green {
+    left: 17%;
+    top: 25%;
+    width: 4.8rem;
+    height: 4.8rem;
+    background: radial-gradient(circle at 30% 25%, #ecff83, #88b80a 48%, #203300 78%);
+    animation-delay: -2s;
+  }
+
+  .shape-ball-pink {
+    left: 7%;
+    top: 54%;
+    width: 4.2rem;
+    height: 4.2rem;
+    background: radial-gradient(circle at 35% 25%, #ffb7dd, #e647a2 55%, #61143d);
+    animation-delay: -5s;
+  }
+
+  .shape-ball-blue {
+    right: 12%;
+    top: 50%;
+    width: 2.4rem;
+    height: 2.4rem;
+    background: radial-gradient(circle at 35% 25%, #42e5ff, #1471df 60%, #0a2257);
+    animation-delay: -3.5s;
+  }
+
+  .shape-chip {
+    left: 30%;
+    top: 32%;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #132226, #07090a);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transform: rotate(28deg);
+    animation-delay: -1s;
+  }
+
+  .shape-led {
+    right: 20%;
+    top: 18%;
+    width: 4rem;
+    height: 3.2rem;
+    border-radius: 55% 55% 45% 45%;
+    background: radial-gradient(circle at 35% 30%, #ff6f92, #bf1c44 72%);
+    transform: rotate(8deg);
+    animation-delay: -4s;
+  }
+
+  .shape-resistor {
+    left: 5%;
+    top: 18%;
+    width: 2rem;
+    height: 6rem;
+    border-radius: 2rem;
+    background: repeating-linear-gradient(45deg, #8bd8ff 0 0.8rem, #2b94c7 0.8rem 1.4rem);
+    transform: rotate(62deg);
+    animation-delay: -6s;
+  }
+
+  .patch-cable {
+    position: absolute;
+    left: 11%;
+    right: -5%;
+    bottom: -6rem;
+    height: 16rem;
+    border-top: 1.7rem solid transparent;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 12px 11px, #ff6633 0 3px, transparent 4px),
+      radial-gradient(circle at 25px 15px, #775bff 0 3px, transparent 4px),
+      radial-gradient(circle at 39px 10px, #ff2f6d 0 3px, transparent 4px),
+      #121820;
+    background-size: 54px 24px;
+    box-shadow: inset 0 0 0 4px #1d2431, 0 -6px 25px rgba(255, 102, 51, 0.15);
+    clip-path: path("M 0 130 C 180 -35 340 230 520 80 S 880 50 1100 155 L 1100 220 L 0 220 Z");
+    opacity: 0.9;
+    transform: rotate(-2deg);
+  }
+
+  .hero-stage {
+    background:
+      linear-gradient(135deg, rgba(249, 226, 172, 0.92), rgba(244, 185, 98, 0.42)),
+      radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.85), transparent 18rem);
+  }
+
+  .hero-stage::before,
+  .journey-board::before {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .synth-console {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 26px 40px -24px rgba(12, 8, 4, 0.7);
+    transform: rotate(1.2deg);
+  }
+
+  .lesson-hero {
+    background:
+      radial-gradient(circle at 86% 18%, rgba(21, 118, 76, 0.28), transparent 18rem),
+      linear-gradient(135deg, rgba(255, 218, 111, 0.82), rgba(241, 138, 80, 0.3));
+  }
+
+  .synth-console::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 22px 22px;
+    mask-image: linear-gradient(to bottom, black, transparent 85%);
+  }
+
+  .scope-screen {
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 32px rgba(80, 255, 150, 0.12);
+  }
+
+  .scope-screen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent 50%, rgba(255, 255, 255, 0.04) 51%);
+    background-size: 100% 8px;
+    mix-blend-mode: screen;
+  }
+
+  .scope-grid {
+    fill: none;
+    stroke: rgba(86, 255, 153, 0.14);
+    stroke-width: 1;
+  }
+
+  .scope-wave {
+    fill: none;
+    stroke: #7cff9f;
+    stroke-linecap: round;
+    stroke-width: 5;
+    filter: drop-shadow(0 0 10px rgba(124, 255, 159, 0.8));
+    stroke-dasharray: 520;
+    animation: draw-wave 2.8s ease-in-out infinite;
+  }
+
+  .control-tile {
+    transition: transform 180ms ease, background-color 180ms ease;
+  }
+
+  .control-tile:hover {
+    transform: translateY(-3px) rotate(-0.6deg);
+    background-color: rgba(255, 255, 255, 0.11);
+  }
+
+  .info-module {
+    border-width: 2px;
+    box-shadow: 0 16px 40px -30px rgba(48, 32, 14, 0.55);
+  }
+
+  .info-yellow {
+    color: #a16207;
+    background: linear-gradient(135deg, rgba(255, 247, 199, 0.96), rgba(255, 214, 102, 0.45));
+  }
+
+  .info-green {
+    color: #17764c;
+    background: linear-gradient(135deg, rgba(228, 255, 238, 0.96), rgba(104, 211, 145, 0.35));
+  }
+
+  .info-red {
+    color: #d93817;
+    background: linear-gradient(135deg, rgba(255, 237, 227, 0.96), rgba(255, 151, 118, 0.38));
+  }
+
+  .journey-board {
+    position: relative;
+  }
+
+  .lesson-module {
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.92), rgba(255, 249, 236, 0.86)),
+      radial-gradient(circle at 100% 0%, rgba(255, 215, 71, 0.22), transparent 12rem);
+    border: 2px solid rgba(41, 31, 21, 0.12);
+  }
+
+  .lesson-module::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 5.8rem;
+    right: 1.25rem;
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(233, 72, 29, 0.9), rgba(255, 215, 71, 0.9), rgba(21, 118, 76, 0.85));
+    opacity: 0.45;
+  }
+
+  .module-active {
+    border-color: rgba(233, 72, 29, 0.45);
+    background:
+      linear-gradient(135deg, rgba(255, 245, 229, 0.96), rgba(255, 221, 173, 0.75)),
+      radial-gradient(circle at 100% 0%, rgba(233, 72, 29, 0.18), transparent 12rem);
+  }
+
+  .module-done {
+    border-color: rgba(21, 118, 76, 0.45);
+    background:
+      linear-gradient(135deg, rgba(240, 255, 245, 0.98), rgba(210, 246, 224, 0.82)),
+      radial-gradient(circle at 100% 0%, rgba(21, 118, 76, 0.2), transparent 12rem);
+  }
+
+  .patch-socket {
+    color: #fff8e8;
+    background:
+      radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.28), transparent 18%),
+      radial-gradient(circle at center, #241d18 0 39%, #5b4b3f 40% 52%, #211916 53%);
+    box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.25), 0 8px 18px -12px rgba(0, 0, 0, 0.8);
+  }
+
+  .copper-trace {
+    background-image: linear-gradient(90deg, rgba(203, 91, 32, 0.2), rgba(255, 211, 78, 0.32), rgba(203, 91, 32, 0.2));
+  }
+
+  .lesson-prose {
+    @apply text-[1.05rem] leading-8 text-slate-200;
+  }
+
+  .lesson-prose p {
+    @apply mb-4;
+  }
+
+  .lesson-prose h2 {
+    @apply mt-12 mb-4 font-display text-3xl font-bold text-white;
+  }
+
+  .lesson-prose h3 {
+    @apply mt-8 mb-3 font-display text-2xl font-bold text-slate-100;
+  }
+
+  .lesson-prose ol,
+  .lesson-prose ul {
+    @apply mb-6 ml-6 space-y-2;
+  }
+
+  .lesson-prose ol {
+    @apply list-decimal;
+  }
+
+  .lesson-prose ul {
+    @apply list-disc;
+  }
+
+  .lesson-prose code {
+    @apply rounded-md bg-white/10 px-1.5 py-0.5 font-mono text-sm text-yellow-200;
+  }
+
+  .diffs-wrapper [data-diffs] {
+    --diffs-font-family: "JetBrains Mono", monospace;
+  }
+}
+
+@keyframes draw-wave {
+  0%,
+  100% {
+    stroke-dashoffset: 0;
+    transform: translateX(0);
+  }
+  50% {
+    stroke-dashoffset: -160;
+    transform: translateX(-10px);
+  }
+}
+
+@keyframes float-drift {
+  0%,
+  100% {
+    translate: 0 0;
+    rotate: 0deg;
+  }
+  50% {
+    translate: 0 -18px;
+    rotate: 7deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
