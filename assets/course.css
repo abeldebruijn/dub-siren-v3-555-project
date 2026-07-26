@@ -310,6 +310,10 @@ nav {
 }
 
 pre {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0;
   padding: 1.15rem;
   overflow-x: auto;
   border-radius: 0.2rem;
@@ -321,6 +325,29 @@ pre {
 
 pre code {
   color: var(--code-ink);
+}
+
+.code-line-numbers {
+  display: grid;
+  grid-auto-rows: 1.55em;
+  min-width: 4ch;
+  padding-right: 1rem;
+  border-right: 1px solid rgba(242, 234, 216, 0.18);
+  color: rgba(242, 234, 216, 0.42);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  text-align: right;
+  user-select: none;
+}
+
+.code-line-number {
+  height: 1.55em;
+}
+
+.code-with-lines {
+  display: block;
+  min-width: max-content;
+  padding-left: 1rem;
+  white-space: pre;
 }
 
 .py-keyword {

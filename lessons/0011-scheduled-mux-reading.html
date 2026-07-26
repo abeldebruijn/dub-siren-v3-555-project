@@ -169,6 +169,13 @@ while True:
     # at full speed while still checking LED timing much faster than Lesson 10.
     sleep_ms(1)</code></pre>
 
+  <h3>Why <code>global</code> is needed here</h3>
+  <p>Variables such as <code>mux_waiting</code>, <code>mux_channel</code>, and <code>pitch_value</code> are created outside the functions. They hold the current state of the whole program: which mux channel is settling, what the latest knob values are, and when the next scan should happen.</p>
+  <p>Inside a function, Python treats a name as local if you assign to it. So this line inside <code>start_mux_read()</code> would normally create a new private function variable:</p>
+  <pre><code>mux_waiting = True</code></pre>
+  <p>That is not what we want. The main <code>while True</code> loop needs to see that <code>mux_waiting</code> changed. Writing <code>global mux_waiting</code> tells Python: “use the program-level variable, not a new private one.”</p>
+  <p>You only need <code>global</code> for names that the function assigns to. Reading a value usually does not need it. For example, <code>finish_mux_read()</code> reads <code>mux_channel</code> to decide whether the current value is Pitch or Amount, but it does not assign a new value to <code>mux_channel</code>, so <code>mux_channel</code> is not listed in that function’s <code>global</code> line.</p>
+
   <h3>Why <code>ticks_add</code> and <code>ticks_diff</code> are used</h3>
   <p>MicroPython tick counters eventually wrap around. <code>ticks_diff</code> compares times safely even near that wrap. <code>ticks_add</code> schedules a future tick safely.</p>
 

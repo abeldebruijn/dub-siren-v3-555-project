@@ -14,6 +14,7 @@ mux_s1 = Pin(19, Pin.OUT)
 PITCH_CHANNEL = 0
 AMOUNT_CHANNEL = 1
 RATE_CHANNEL = 2
+FEEDBACK_CHANNEL = 3
 
 MUX_SETTLE_MS = 2
 CONTROL_SCAN_MS = 20
@@ -21,10 +22,12 @@ CONTROL_SCAN_MS = 20
 pitch_value = 0
 amount_value = 0
 rate_value = 0
+feedback_value = 0
 
 last_pitch_hz = -1
 last_amount = -1
 last_rate = -1
+last_feedback = -1
 last_change = ticks_ms()
 light_on = False
 
@@ -53,19 +56,22 @@ def start_mux_read(channel):
 
 
 def finish_mux_read():
-    global amount_value, mux_waiting, next_control_scan
-    global pitch_value, rate_value
+    global amount_value, feedback_value, mux_waiting
+    global next_control_scan, pitch_value, rate_value
 
     reading = mux_adc.value
 
     if mux_channel == PITCH_CHANNEL:
-        pitch_value += (reading - pitch_value) * 0.1
+        pitch_value = reading
         start_mux_read(AMOUNT_CHANNEL)
     elif mux_channel == AMOUNT_CHANNEL:
-        amount_value += (reading - amount_value) * 0.1
+        amount_value = reading
         start_mux_read(RATE_CHANNEL)
+    elif mux_channel == RATE_CHANNEL:
+        rate_value = reading
+        start_mux_read(FEEDBACK_CHANNEL)
     else:
-        rate_value += (reading - rate_value) * 0.1
+        feedback_value = reading
         mux_waiting = False
         next_control_scan = ticks_add(ticks_ms(), CONTROL_SCAN_MS)
 
@@ -86,15 +92,18 @@ while True:
         abs(pitch_hz - last_pitch_hz) >= 5
         or abs(amount_value - last_amount) >= 0.03
         or abs(rate_value - last_rate) >= 0.03
+        or abs(feedback_value - last_feedback) >= 0.03
     ):
         print(
             "Pitch:", pitch_hz, "Hz",
             "Amount:", round(amount_value, 2),
             "Rate:", round(rate_value, 2),
+            "Feedback:", round(feedback_value, 2),
         )
         last_pitch_hz = pitch_hz
         last_amount = amount_value
         last_rate = rate_value
+        last_feedback = feedback_value
 
     # Job 2: Rate controls LED speed; Amount controls LED brightness.
     if button.is_pressed: # type: ignore

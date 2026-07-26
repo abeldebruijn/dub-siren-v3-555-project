@@ -99,9 +99,33 @@
     return output;
   }
 
+  function lineNumberHtml(count) {
+    var output = "";
+
+    for (var line = 1; line <= count; line += 1) {
+      output += '<span class="code-line-number">' + line + "</span>";
+    }
+
+    return output;
+  }
+
   document.querySelectorAll("pre code").forEach(function (block) {
     if (block.dataset.highlighted === "python") return;
-    block.innerHTML = highlightPython(block.textContent);
+    var source = block.textContent.replace(/\n$/, "");
+    var lineCount = source === "" ? 1 : source.split("\n").length;
+    var pre = block.parentElement;
+
+    block.innerHTML = highlightPython(source);
     block.dataset.highlighted = "python";
+    block.classList.add("code-with-lines");
+
+    if (pre && pre.tagName === "PRE" && !pre.querySelector(".code-line-numbers")) {
+      var numbers = document.createElement("span");
+      numbers.className = "code-line-numbers";
+      numbers.setAttribute("aria-hidden", "true");
+      numbers.innerHTML = lineNumberHtml(lineCount);
+      pre.insertBefore(numbers, block);
+      pre.classList.add("numbered-code");
+    }
   });
 })();

@@ -22,7 +22,7 @@ while True:
         print("Pitch:", pitch_hz, "Hz")
         last_pitch_hz = pitch_hz
 
-    if button.is_pressed:
+    if button.is_pressed: # type: ignore
         now = ticks_ms()
         if ticks_diff(now, last_change) >= interval:
             light_on = not light_on

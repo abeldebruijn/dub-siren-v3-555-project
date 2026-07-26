@@ -59,7 +59,7 @@ while True:
         print("Pitch:", pitch_hz, "Hz", "Amount:", round(amount_value, 2))
         last_pitch_hz = pitch_hz
 
-    if button.is_pressed:
+    if button.is_pressed: # type: ignore
         interval = int(500 - rate.value * 450)
 
         if ticks_diff(now, last_change) >= interval:
