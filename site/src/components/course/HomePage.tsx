@@ -42,7 +42,7 @@ export function HomePage() {
         </div>
         <div className="synthwave-grid" aria-hidden="true" />
         <FloatingObjects />
-        <div className="absolute right-3 top-4 z-20 w-[min(30vw,19rem)] min-w-[13rem] md:right-8 md:top-7">
+        <div className="absolute right-3 top-4 z-20 hidden w-[min(30vw,19rem)] min-w-[13rem] md:right-8 md:top-7 md:block">
           <SynthConsole />
         </div>
 
