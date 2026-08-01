@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { HomePage } from "./components/course/HomePage";
 import { LessonShell } from "./components/course/LessonShell";
+import { BreadboardPrototypePage } from "./components/breadboard/BreadboardPrototypePage";
 import { lessons } from "./lessons";
 
 function getHashPath() {
@@ -17,11 +18,17 @@ export function App() {
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
 
+  const routePath = path.split("?")[0];
+
   const lesson = useMemo(() => {
-    const match = path.match(/^\/lessons\/([^/]+)$/);
+    const match = routePath.match(/^\/lessons\/([^/]+)$/);
     if (!match) return undefined;
     return lessons.find((item) => item.slug === match[1]);
-  }, [path]);
+  }, [routePath]);
+
+  if (routePath === "/breadboard") {
+    return <BreadboardPrototypePage />;
+  }
 
   if (lesson?.Component) {
     return <LessonShell lesson={lesson} />;
