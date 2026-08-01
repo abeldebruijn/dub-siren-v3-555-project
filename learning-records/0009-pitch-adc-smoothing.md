@@ -1,3 +1,5 @@
-# Low-pass filtering stabilizes Pitch
+# Faulty cable caused the Pitch jumps
 
-The learner confirmed exponential smoothing removed the stationary 800–814 Hz ADC jitter while preserving useful knob response. Future analogue controls should consider filtering and a small change threshold rather than treating every ADC reading as exact.
+Exponential smoothing originally appeared to solve the unstable Pitch readings. The learner later found the actual cause was a faulty cable. After replacing or reseating the connection, direct ADC readings remained stable without smoothing.
+
+Future analogue-input problems should be diagnosed at the wiring and connector level before adding software filtering. Keep small change thresholds for useful Shell output, but add smoothing only when measured noise remains after the physical circuit is verified.

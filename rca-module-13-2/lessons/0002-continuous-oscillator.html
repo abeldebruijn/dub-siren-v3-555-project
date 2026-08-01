@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RCA Lesson 2 - Continuous Prepared Tones</title>
+  <link rel="stylesheet" href="../../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">RCA Module 13.2 · lesson 0002</p>
+    <h1>Keep prepared tones playing</h1>
+    <p class="lead">Prepare small audio blocks first, then stream them without asking MicroPython to calculate sine waves during playback.</p>
+    <p class="meta">20–30 min · same five wires · no new hardware</p>
+    <nav>
+      <a href="0001-first-tones.html">Previous lesson</a>
+      <a href="#prepare">Prepare</a>
+      <a href="#play">Play</a>
+      <a href="#test">Test</a>
+    </nav>
+  </header>
+
+  <div class="callout safe">
+    <span class="label">Today’s win</span>
+    Hear 220, 330, 440, 660, and 880 Hz as one clean stream without background crackling.
+  </div>
+
+  <h2>1. Keep the proven hardware</h2>
+  <p>Do not change the Lesson 1 wiring:</p>
+  <ul class="checklist">
+    <li>GP16 → BCK, M-Bus pin 22</li>
+    <li>GP17 → LRCK, M-Bus pin 24</li>
+    <li>GP18 → DIN, M-Bus pin 23</li>
+    <li>Pico GND → module GND</li>
+    <li>Pico VBUS → module 5V; DC jack empty</li>
+  </ul>
+
+  <h2>2. Audio has a deadline</h2>
+  <p>At 44,100 Hz, the DAC needs 44,100 new stereo frames every second. If the Pico does not deliver them in time, the I²S buffer becomes empty. This is called a <strong>buffer underrun</strong>.</p>
+
+  <div class="circuit">
+    <span class="node">prepared samples</span><span class="wire">→</span>
+    <span class="node">I²S buffer</span><span class="wire">→</span>
+    <span class="node">PCM5102A</span><span class="wire">→</span>
+    <span class="node">speaker</span>
+  </div>
+
+  <p>An underrun creates a tiny interruption. Many interruptions sound like crackling or harsh background noise.</p>
+
+  <div class="callout danger">
+    <span class="label">What the first Lesson 2 code taught us</span>
+    Calculating <code>sin()</code> for every sample while I²S was already playing was too slow in MicroPython. The sample rate was correct; the audio-producing code missed its deadlines.
+  </div>
+
+  <h2 id="prepare">3. Prepare before pressing play</h2>
+  <p>The corrected program creates five tone blocks before it creates the I²S output:</p>
+
+  <pre><code>print("Preparing tone blocks")
+tones = []
+
+for frequency_hz in PITCHES_HZ:
+    tones.append(make_tone(frequency_hz))
+
+audio = I2S(...)</code></pre>
+
+  <p><code>tones</code> is a list containing five arrays. Each array holds 100 ms of one pitch. Sine calculations may take some time here, but that cannot interrupt playback because playback has not started yet.</p>
+
+  <div class="task">
+    <span class="label">Predict</span>
+    Why do we create <code>audio = I2S(...)</code> after preparing the arrays?
+    <details>
+      <summary>Show answer</summary>
+      <p>The DAC does not start waiting for samples until the expensive preparation work is finished.</p>
+    </details>
+  </div>
+
+  <h2>4. Make each block repeat cleanly</h2>
+  <p>A 100 ms block is one tenth of a second. These pitches complete whole numbers of cycles in that time:</p>
+
+  <table>
+    <thead><tr><th>Pitch</th><th>Cycles in 100 ms</th></tr></thead>
+    <tbody>
+      <tr><td>220 Hz</td><td>22</td></tr>
+      <tr><td>330 Hz</td><td>33</td></tr>
+      <tr><td>440 Hz</td><td>44</td></tr>
+      <tr><td>660 Hz</td><td>66</td></tr>
+      <tr><td>880 Hz</td><td>88</td></tr>
+    </tbody>
+  </table>
+
+  <p>The end of each block meets its beginning at the same sine-wave position. Repeating it therefore does not introduce a sudden jump.</p>
+
+  <h2 id="play">5. Play prepared data only</h2>
+  <p>Run <a href="../examples/0002-continuous-oscillator/main.py">the corrected Lesson 2 <code>main.py</code></a>.</p>
+
+  <pre><code>for frequency_hz, tone in zip(PITCHES_HZ, tones):
+    print("Pitch:", frequency_hz, "Hz")
+
+    for _ in range(REPEATS_PER_PITCH):
+        audio.write(tone)</code></pre>
+
+  <p><code>zip()</code> pairs each printed frequency with its prepared array:</p>
+
+  <pre><code>220  ↔ first tone array
+330  ↔ second tone array
+440  ↔ third tone array
+660  ↔ fourth tone array
+880  ↔ fifth tone array</code></pre>
+
+  <p>Each array represents 100 ms. Writing it ten times produces one second:</p>
+
+  <pre><code>100 ms × 10 = 1,000 ms</code></pre>
+
+  <h2 id="test">6. Listen and test</h2>
+  <ol>
+    <li>Begin with speaker volume low.</li>
+    <li>Run the corrected Lesson 2 code.</li>
+    <li>Wait while the Shell says <code>Preparing tone blocks</code>.</li>
+    <li>Listen for five pitches of approximately one second each.</li>
+    <li>Compare the background with the previous noisy version.</li>
+  </ol>
+
+  <details>
+    <summary>I still hear a little steady hiss</summary>
+    <p>Stop the program but leave the powered speaker connected at the same volume. If the hiss remains, it comes from the speaker gain, analogue cable, or power—not from I²S generation.</p>
+  </details>
+
+  <details>
+    <summary>I still hear regular crackling</summary>
+    <p>Run the continuous 440 Hz diagnostic from Lesson 1. If that tone is clean, send your teaching agent a new recording of the corrected Lesson 2 program.</p>
+  </details>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>You heard all five pitch steps.</li>
+    <li>Each pitch lasted approximately one second.</li>
+    <li>The repeated crackling disappeared.</li>
+    <li>You understand what an I²S buffer underrun is.</li>
+    <li>You understand why preparation happens before playback.</li>
+  </ul>
+
+  <p><strong>Tell your teaching agent:</strong> whether the noise disappeared and whether every pitch now lasts about one second.</p>
+
+  <footer>Lesson 2 uses prepared blocks because clear, reliable sound comes before real-time synthesis. A later lesson will introduce an efficient real-time oscillator suitable for the dub siren controls.</footer>
+</main>
+<script src="../../assets/python-highlight.js"></script>
+</body>
+</html>

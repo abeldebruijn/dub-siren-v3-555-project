@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lesson 15 - Read the Mod Type Selector</title>
+  <link rel="stylesheet" href="../assets/course.css">
+</head>
+<body>
+<main>
+  <header>
+    <p class="eyebrow">Dub Siren V3 · lesson 0015</p>
+    <h1>Read the Mod Type selector</h1>
+    <p class="lead">Wire the Lorlin CK1050 as five digital choices and print the selected modulation shape.</p>
+    <p class="meta">30-45 min · rotary switch · active-low inputs</p>
+    <nav>
+      <a href="0014-add-tempo-on-ch4.html">← Lesson 14</a>
+      <a href="#idea">Idea</a>
+      <a href="#wire">Wire</a>
+      <a href="#code">Code</a>
+      <a href="#test">Test</a>
+    </nav>
+  </header>
+
+  <div class="callout safe">
+    <span class="label">Today’s win</span>
+    Turning one selector produces Mod Type 0, 1, 2, 3 or 4. No extra resistors and no extra 3V3 wire are needed.
+  </div>
+
+  <h2 id="idea">1. One common chooses one contact</h2>
+  <p>A rotary selector is different from a potentiometer. A pot produces a continuously changing voltage. This selector makes one direct electrical connection at a time.</p>
+
+  <p>Your CK1050 contains two separate six-position switches, called <strong>poles</strong>:</p>
+  <ul>
+    <li>Pole <strong>A</strong> connects common A to one of contacts 1–6.</li>
+    <li>Pole <strong>C</strong> connects common C to one of contacts 7–12.</li>
+  </ul>
+  <p>We need only five choices, so this lesson uses common A and contacts 1–5. Contact 6 and the complete C pole stay unconnected.</p>
+
+  <table class="truth-table">
+    <thead><tr><th>Physical position</th><th>Contact</th><th>Pico</th><th>Printed value</th><th>Mod shape</th></tr></thead>
+    <tbody>
+      <tr class="current"><td>1</td><td>1</td><td>GP2</td><td>0</td><td>Rising saw</td></tr>
+      <tr><td>2</td><td>2</td><td>GP3</td><td>1</td><td>Falling saw</td></tr>
+      <tr><td>3</td><td>3</td><td>GP4</td><td>2</td><td>Triangle</td></tr>
+      <tr><td>4</td><td>4</td><td>GP5</td><td>3</td><td>Sine</td></tr>
+      <tr><td>5</td><td>5</td><td>GP6</td><td>4</td><td>Square</td></tr>
+    </tbody>
+  </table>
+
+  <div class="task">
+    <span class="label">Predict</span>
+    If common A is wired to GND and the knob selects contact 3, which GPIO is connected to GND?
+    <details>
+      <summary>Show answer</summary>
+      <p>GP4. Physical contact 3 is wired to GP4, so the code prints software value 2 and “Triangle”.</p>
+    </details>
+  </div>
+
+  <h2 id="wire">2. Wire one pole with USB unplugged</h2>
+  <ol>
+    <li>Unplug the Pico’s USB cable.</li>
+    <li>Keep the complete Lesson 14 circuit in place.</li>
+    <li>Find the tiny terminal labels on the CK1050. Use the labels—not a guessed clock position.</li>
+    <li>Connect selector common <strong>A</strong> to the Pico’s shared <strong>GND</strong>.</li>
+    <li>Connect contact <strong>1 → GP2</strong>.</li>
+    <li>Connect contact <strong>2 → GP3</strong>.</li>
+    <li>Connect contact <strong>3 → GP4</strong>.</li>
+    <li>Connect contact <strong>4 → GP5</strong>.</li>
+    <li>Connect contact <strong>5 → GP6</strong>.</li>
+    <li>Leave contact 6, common C and contacts 7–12 unconnected.</li>
+  </ol>
+
+  <figure class="breadboard-figure">
+    <img src="../assets/ck1050-five-position-selector.svg" alt="CK1050 wiring diagram: common A to ground, contacts 1 through 5 to Pico GP2 through GP6, with contact 6 and the second pole unused.">
+    <figcaption>Use pole A only. The terminal drawing is viewed from the front, with the shaft pointing toward you; the rear view is mirrored.</figcaption>
+  </figure>
+
+  <div class="callout danger">
+    <span class="label">No 3V3 on the selector</span>
+    The common goes to GND. Internal pull-ups inside the Pico provide the input’s high state. Connecting 3V3 to a selector contact is unnecessary.
+  </div>
+
+  <div class="callout">
+    <span class="label">PCB terminals</span>
+    The CK1050 has short PCB pins. Do not force a loose Dupont connector onto them. Use secure soldered short wires or a suitable adapter so movement cannot create the faulty-cable behaviour you found earlier.
+  </div>
+
+  <h3>About the sixth click</h3>
+  <p>You may leave the mechanical stop at six positions for this breadboard test. Position 6 will select the intentionally unused contact and print nothing. After the electrical test works, the adjustable stop can restrict travel to five positions for the final panel. Do not force the shaft past a stop.</p>
+
+  <h2 id="code">3. Read five active-low inputs</h2>
+  <p>This diagnostic temporarily replaces the Lesson 14 program so one new component is easy to understand. Run <a href="../examples/0015-read-mod-type-selector/main.py">this <code>main.py</code></a>:</p>
+
+  <pre><code>from machine import Pin
+from time import sleep_ms
+
+# Physical selector positions 1-5 connect to GP2-GP6.
+# Pin.PULL_UP keeps every input at 1 until the selector grounds it.
+selector_inputs = (
+    Pin(2, Pin.IN, Pin.PULL_UP),
+    Pin(3, Pin.IN, Pin.PULL_UP),
+    Pin(4, Pin.IN, Pin.PULL_UP),
+    Pin(5, Pin.IN, Pin.PULL_UP),
+    Pin(6, Pin.IN, Pin.PULL_UP),
+)
+
+mod_names = (
+    "Rising saw",
+    "Falling saw",
+    "Triangle",
+    "Sine",
+    "Square",
+)
+
+
+def read_mod_type():
+    # The selected input reads 0 because common A is connected to GND.
+    for index, input_pin in enumerate(selector_inputs):
+        if input_pin.value() == 0:
+            return index
+
+    # A break-before-make switch briefly selects nothing while turning.
+    return None
+
+
+last_mod_type = None
+
+while True:
+    mod_type = read_mod_type()
+
+    if mod_type is not None and mod_type != last_mod_type:
+        # Wait for the mechanical contact to settle, then verify it again.
+        sleep_ms(10)
+
+        if read_mod_type() == mod_type:
+            last_mod_type = mod_type
+            print("Mod type:", mod_type, mod_names[mod_type])
+
+    sleep_ms(5)</code></pre>
+
+  <h3>Why an unselected input reads 1</h3>
+  <p><code>Pin.PULL_UP</code> activates a weak resistor inside the Pico between that GPIO and 3.3 V. With no external connection, the resistor gently holds the input at logic 1.</p>
+
+  <h3>Why the selected input reads 0</h3>
+  <p>The selector joins common A to one numbered contact. Because common A is connected to GND, the selected GPIO is pulled firmly to 0. This is called <strong>active-low</strong>: 0 means selected.</p>
+
+  <div class="circuit" aria-label="Active-low signal path">
+    <span class="node">internal 3.3 V</span>
+    <span class="wire">→</span>
+    <span class="node">pull-up resistor</span>
+    <span class="wire">→</span>
+    <span class="node">GPIO input</span>
+    <span class="wire">→ selected</span>
+    <span class="node">GND</span>
+  </div>
+
+  <h3>Why the code sometimes finds <code>None</code></h3>
+  <p>The CK1050 is break-before-make. While moving between positions, it disconnects the old contact before connecting the new one. For a tiny moment all five GPIOs can read 1. The function then returns <code>None</code>, and the program keeps the last valid Mod Type.</p>
+
+  <p>The 10 ms wait handles contact bounce: metal contacts can touch and release several times immediately after landing. The program waits, reads again, and accepts only a stable result.</p>
+
+  <h2 id="test">4. Test all five positions</h2>
+  <ol>
+    <li>Reconnect USB and run the code.</li>
+    <li>Turn fully anticlockwise. The Shell should print <code>Mod type: 0 Rising saw</code>.</li>
+    <li>Move clockwise one click at a time. Expect values 1, 2, 3 and 4.</li>
+    <li>Stop on each position and gently move the cable bundle. The value must remain stable.</li>
+    <li>If a sixth click exists, it should print nothing new.</li>
+  </ol>
+
+  <details>
+    <summary>Nothing prints in any position</summary>
+    <p>Check common A reaches GND. Make sure you used A, not common C. Then verify contacts 1–5 reach GP2–GP6.</p>
+  </details>
+
+  <details>
+    <summary>One position never prints</summary>
+    <p>Unplug USB and reseat only that position’s wire. Follow the mapping table: contact 1→GP2 through contact 5→GP6.</p>
+  </details>
+
+  <details>
+    <summary>The order is reversed or scrambled</summary>
+    <p>The datasheet’s contact map is a front view. A rear view is mirrored. Follow the moulded terminal numbers; if necessary, swap only the numbered contact wires until GP2–GP6 follow positions 1–5.</p>
+  </details>
+
+  <details>
+    <summary>Two choices appear while turning</summary>
+    <p>That should not remain after the knob settles. Recheck that each GPIO wire reaches only one contact and inspect for touching bare wire or solder bridges.</p>
+  </details>
+
+  <h2>Done means</h2>
+  <ul class="checklist">
+    <li>Common A reaches GND.</li>
+    <li>Contacts 1–5 reach GP2–GP6 in order.</li>
+    <li>The Shell prints five stable Mod Types, numbered 0–4.</li>
+    <li>You can explain why selected means 0.</li>
+    <li>The unused pole and contact 6 remain disconnected.</li>
+    <li>GP10–GP12 remain free.</li>
+  </ul>
+
+  <p><strong>Tell your teaching agent:</strong> which Mod Type prints at each physical position, and whether your selector currently has five or six clicks.</p>
+
+  <footer>Primary source: the <a href="https://lorlinelectronics.co.uk/wp-content/uploads/2020/11/CK-ROTARY-Nov-2020-1.pdf">official Lorlin CK rotary-switch datasheet</a> for the CK1050 variant, terminal map, adjustable stops and break-before-make behaviour. Ask your teaching agent about anything unclear.</footer>
+</main>
+<script src="../assets/python-highlight.js"></script>
+</body>
+</html>

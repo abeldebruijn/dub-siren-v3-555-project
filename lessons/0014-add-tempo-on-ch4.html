@@ -15,6 +15,7 @@
     <p class="meta">30-45 min · final pot · CH4 = 100</p>
     <nav>
       <a href="0013-add-feedback-on-ch3.html">← Lesson 13</a>
+      <a href="0015-read-mod-type-selector.html">Lesson 15 →</a>
       <a href="#idea">Idea</a>
       <a href="#wire">Wire</a>
       <a href="#code">Code</a>
@@ -147,19 +148,19 @@ def finish_mux_read():
     reading = mux_adc.value
 
     if mux_channel == PITCH_CHANNEL:
-        pitch_value += (reading - pitch_value) * 0.1
+        pitch_value = reading
         start_mux_read(AMOUNT_CHANNEL)
     elif mux_channel == AMOUNT_CHANNEL:
-        amount_value += (reading - amount_value) * 0.1
+        amount_value = reading
         start_mux_read(RATE_CHANNEL)
     elif mux_channel == RATE_CHANNEL:
-        rate_value += (reading - rate_value) * 0.1
+        rate_value = reading
         start_mux_read(FEEDBACK_CHANNEL)
     elif mux_channel == FEEDBACK_CHANNEL:
-        feedback_value += (reading - feedback_value) * 0.1
+        feedback_value = reading
         start_mux_read(TEMPO_CHANNEL)
     else:
-        tempo_value += (reading - tempo_value) * 0.1
+        tempo_value = reading
         mux_waiting = False
         next_control_scan = ticks_add(ticks_ms(), CONTROL_SCAN_MS)
 
@@ -222,6 +223,10 @@ while True:
   <h3>The fifth scan step</h3>
   <p>After Feedback settles, the code starts Tempo. Only after Tempo is read does the complete five-control scan end.</p>
 
+  <h3>Why the values are no longer smoothed</h3>
+  <p>Earlier lessons used exponential smoothing because the Pitch value appeared to jump. You later found the real cause: a faulty cable. With reliable connections, <code>pitch_value = reading</code> gives an immediate response without smoothing delay.</p>
+  <p>The change thresholds around <code>print()</code> remain useful. They reduce repeated Shell output, but they do not alter the control values used by the instrument.</p>
+
   <div class="callout">
     <span class="label">Rate versus Tempo</span>
     <p><strong>Rate</strong> still controls the modulation LED’s flash speed.</p>
@@ -264,6 +269,8 @@ while True:
   </ul>
 
   <p><strong>Tell your teaching agent:</strong> whether Tempo reaches roughly 40–200 BPM clockwise, and whether all five controls remain independent.</p>
+
+  <p class="lesson-next"><a href="0015-read-mod-type-selector.html">Lesson 15 →</a></p>
 
   <footer>Primary sources: the <a href="https://www.ti.com/lit/ds/symlink/cd74hc4051.pdf">Texas Instruments CD74HC4051 datasheet</a> for channel selection and the <a href="https://datasheets.raspberrypi.com/pico/Pico-2-Pinout.pdf">official Raspberry Pi Pico 2 pinout</a> for GP20. Ask your teaching agent about anything unclear.</footer>
 </main>

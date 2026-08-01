@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 660" role="img" aria-labelledby="title desc">
+  <title id="title">Pico 2 to M5Stack RCA Module 13.2 first-tone wiring</title>
+  <desc id="desc">Five separate non-overlapping wires connect Pico VBUS, ground, GP16, GP17 and GP18 to the RCA module 5V, ground, BCK, LRCK and DIN connections. The module DC jack stays empty. Its audio output connects to a powered speaker or amplifier.</desc>
+  <defs>
+    <style>
+      .bg{fill:#f7f3e9}.panel{fill:#fffdf7;stroke:#24231f;stroke-width:3}.pico{fill:#087d46;stroke:#1d4f38;stroke-width:4}.module{fill:#303534;stroke:#171a19;stroke-width:4}.pin{fill:#e8b44c;stroke:#6f4e13;stroke-width:2}.title{font:700 28px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#24231f}.label{font:700 20px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#24231f}.light{fill:#f7f3e9}.small{font:16px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#666257}.small-light{font:16px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#d8d4c8}.note{font:700 17px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#9f341f}.signal{fill:none;stroke-width:8;stroke-linecap:round}.bck{stroke:#be6f00}.lrck{stroke:#836f00}.din{stroke:#087e9b}.ground{stroke:#202423}.power{stroke:#d52b2f}.audio{stroke:#674ea7;stroke-width:7;fill:none;stroke-linecap:round}.jack{fill:#dad5c8;stroke:#24231f;stroke-width:3}
+    </style>
+  </defs>
+  <rect class="bg" width="1180" height="660"/>
+  <text x="42" y="52" class="title">FIRST SOUND · FIVE WIRES · DC JACK EMPTY</text>
+
+  <rect x="42" y="92" width="300" height="470" rx="24" class="pico"/>
+  <text x="92" y="144" class="title light">PICO 2 H</text>
+  <text x="92" y="174" class="small-light">USB supplies VBUS</text>
+
+  <circle cx="312" cy="220" r="10" class="pin"/><text x="80" y="228" class="label light">GP16 · pin 21</text>
+  <circle cx="312" cy="286" r="10" class="pin"/><text x="80" y="294" class="label light">GP17 · pin 22</text>
+  <circle cx="312" cy="352" r="10" class="pin"/><text x="80" y="360" class="label light">GP18 · pin 24</text>
+  <circle cx="312" cy="418" r="10" class="pin"/><text x="80" y="426" class="label light">GND · pin 38</text>
+  <circle cx="312" cy="484" r="10" class="pin"/><text x="80" y="492" class="label light">VBUS · pin 40</text>
+
+  <rect x="654" y="92" width="350" height="470" rx="24" class="module"/>
+  <text x="704" y="142" class="title light">RCA MODULE 13.2</text>
+  <text x="704" y="172" class="small-light">M-Bus signal names</text>
+
+  <circle cx="684" cy="220" r="10" class="pin"/><text x="718" y="228" class="label light">BCK · bus 22</text>
+  <circle cx="684" cy="286" r="10" class="pin"/><text x="718" y="294" class="label light">LRCK · bus 24</text>
+  <circle cx="684" cy="352" r="10" class="pin"/><text x="718" y="360" class="label light">DIN · bus 23</text>
+  <circle cx="684" cy="418" r="10" class="pin"/><text x="718" y="426" class="label light">GND · bus 1</text>
+  <circle cx="684" cy="484" r="10" class="pin"/><text x="718" y="492" class="label light">5V · bus 28</text>
+
+  <path d="M312 220 H684" class="signal bck"/><text x="430" y="209" class="small">bit clock</text>
+  <path d="M312 286 H684" class="signal lrck"/><text x="430" y="275" class="small">left/right clock</text>
+  <path d="M312 352 H684" class="signal din"/><text x="430" y="341" class="small">sample data</text>
+  <path d="M312 418 H684" class="signal ground"/><text x="430" y="407" class="small">shared zero volts</text>
+  <path d="M312 484 H684" class="signal power"/><text x="430" y="473" class="small">USB 5 volts</text>
+
+  <rect x="1044" y="170" width="92" height="86" rx="10" class="jack"/>
+  <circle cx="1090" cy="213" r="20" fill="#9f341f"/>
+  <path d="M1004 213 H1044" class="audio"/>
+  <text x="1028" y="287" class="small">audio L/R</text>
+  <text x="1028" y="308" class="small">or 3.5 mm</text>
+
+  <rect x="654" y="582" width="350" height="52" rx="10" class="panel"/>
+  <text x="680" y="615" class="note">9–24 V DC JACK: LEAVE EMPTY</text>
+  <text x="42" y="608" class="label">Output destination</text>
+  <text x="42" y="635" class="small">Powered speaker, amplifier, or mixer · begin at low volume</text>
+</svg>

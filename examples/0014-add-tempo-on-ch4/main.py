@@ -63,19 +63,19 @@ def finish_mux_read():
     reading = mux_adc.value
 
     if mux_channel == PITCH_CHANNEL:
-        pitch_value += (reading - pitch_value) * 0.1
+        pitch_value = reading
         start_mux_read(AMOUNT_CHANNEL)
     elif mux_channel == AMOUNT_CHANNEL:
-        amount_value += (reading - amount_value) * 0.1
+        amount_value = reading
         start_mux_read(RATE_CHANNEL)
     elif mux_channel == RATE_CHANNEL:
-        rate_value += (reading - rate_value) * 0.1
+        rate_value = reading
         start_mux_read(FEEDBACK_CHANNEL)
     elif mux_channel == FEEDBACK_CHANNEL:
-        feedback_value += (reading - feedback_value) * 0.1
+        feedback_value = reading
         start_mux_read(TEMPO_CHANNEL)
     else:
-        tempo_value += (reading - tempo_value) * 0.1
+        tempo_value = reading
         mux_waiting = False
         next_control_scan = ticks_add(ticks_ms(), CONTROL_SCAN_MS)
 
