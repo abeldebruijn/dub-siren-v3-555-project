@@ -57,27 +57,27 @@ A user-declared mandatory route point anchored to an exact board coordinate; it 
 _Avoid_: Inferred route point
 
 **Chip definition**:
-A reusable description of a chip's identity, pins, aliases, colour, and physical footprint.
+A reusable description of a chip's identity, pins, aliases, colour, height, and width.
 _Avoid_: Chip instance, placement
 
-**Pins per side**:
-The number of physical pins on each of a chip's two pin sides.
+**Chip height**:
+The number of physical pins on each side of a chip and therefore the number of board rows it occupies. An explicit height overrides height inferred as half the highest declared pin number.
 _Avoid_: Width, total pins
 
-**Chip height**:
-The total number of terminal columns covered by a chip body; it may be even or odd.
-_Avoid_: Pins per side
+**Chip width**:
+The total number of terminal columns covered by a chip body. It defaults to two and may be even or odd.
+_Avoid_: Height, pin count
 
 **Chip footprint**:
-The terminal columns covered symmetrically outward from the centre gap, with the two pin columns at its outer edges.
-_Avoid_: Chip height, pin count
+The terminal columns covered symmetrically outward from the centre gap, with the two pin columns at the outer edges, across the board rows occupied by the chip height.
+_Avoid_: Chip width, chip height, pin count
 
 **Covered hole**:
 A hole physically obscured by a chip body; it has no occupant but cannot receive a pin or wire endpoint in the current specification.
 _Avoid_: Occupied hole
 
 **Chip flip**:
-A placement orientation that swaps which terminal receives the extra covered column of an odd-height chip. Without a flip, the right terminal receives the extra column.
+A horizontal mirror of a chip placement. Pin 1 moves from the top-left to the top-right, pin numbering mirrors between terminal sides, and an odd-width footprint's extra covered column moves to the opposite terminal.
 _Avoid_: Rotation
 
 **Chip instance**:
@@ -85,7 +85,7 @@ A named placement of a chip definition, centred across the terminal gap with its
 _Avoid_: Chip definition
 
 **Pin order**:
-Counter-clockwise physical numbering beginning at the top-left, increasing down the left side, continuing at the bottom-right, and increasing up the right side.
+Counter-clockwise physical numbering beginning at the top-left, increasing down the left side, continuing at the bottom-right, and increasing up the right side. A flipped placement mirrors this order horizontally.
 _Avoid_: Alias order
 
 **Pin alias**:
