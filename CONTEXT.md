@@ -140,6 +140,14 @@ _Avoid_: Global left-to-right numbering
 The normative definition of syntax, meaning, validation, and deterministic SVG rendering requirements for breadboard descriptions.
 _Avoid_: Renderer implementation
 
+**Canonical SVG**:
+The single byte-for-byte SVG serialization required for a valid breadboard description, including element order, attributes, numeric formatting, whitespace, identifiers, and colours.
+_Avoid_: Visually equivalent SVG
+
+**Canonical SVG unit**:
+One CSS pixel in the SVG coordinate system. Coordinates use whole or quarter units only; consumers may scale the completed SVG externally.
+_Avoid_: Arbitrary floating-point coordinate
+
 **Electrical simulation**:
 Analysis of circuit behaviour or correctness beyond the structural connections expressed by a breadboard description.
 _Avoid_: Validation
