@@ -148,6 +148,14 @@ _Avoid_: Visually equivalent SVG
 One CSS pixel in the SVG coordinate system. Coordinates use whole or quarter units only; consumers may scale the completed SVG externally.
 _Avoid_: Arbitrary floating-point coordinate
 
+**Diagnostic**:
+A deterministic error or warning identified by a stable symbolic code, severity, source span, and optional related span. Human message wording is informative rather than conformant.
+_Avoid_: Console message
+
+**Conformance fixture**:
+A breadboard description paired with expected ordered diagnostics and, when no errors exist, exact Canonical SVG bytes.
+_Avoid_: Unit test, visual snapshot
+
 **Electrical simulation**:
 Analysis of circuit behaviour or correctness beyond the structural connections expressed by a breadboard description.
 _Avoid_: Validation
