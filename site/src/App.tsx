@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { HomePage } from "./components/course/HomePage";
 import { LessonShell } from "./components/course/LessonShell";
 import { lessons } from "./lessons";
+import { BreadboardPrototypePage } from "./prototypes/breadboard/BreadboardPrototypePage";
 
 function getHashPath() {
   const hash = window.location.hash.replace(/^#/, "");
@@ -25,6 +26,10 @@ export function App() {
 
   if (lesson?.Component) {
     return <LessonShell lesson={lesson} />;
+  }
+
+  if (path === "/prototype/breadboard") {
+    return <BreadboardPrototypePage />;
   }
 
   return <HomePage />;

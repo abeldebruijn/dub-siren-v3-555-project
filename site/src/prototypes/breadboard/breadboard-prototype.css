@@ -1,0 +1,36 @@
+.bp-root { min-height: 100vh; background: #191b18; color: #f4f0e5; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+.bp-shell { width: min(1500px, 100%); margin: 0 auto; padding: 36px 36px 110px; }
+.bp-title { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 5px 30px; margin-bottom: 26px; }
+.bp-title p { grid-column: 1 / -1; margin: 0; color: #e7b54a; font-size: 12px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+.bp-title h1 { margin: 0; font-family: Georgia, serif; font-size: clamp(31px, 4vw, 58px); font-weight: 500; }
+.bp-title span { max-width: 420px; color: #aeb5a8; line-height: 1.5; }
+.bp-split { display: grid; grid-template-columns: minmax(420px, .85fr) minmax(450px, 1.15fr); gap: 22px; align-items: start; }
+.bp-source { overflow: hidden; border: 1px solid #394037; border-radius: 14px; background: #10120f; box-shadow: 0 22px 80px #0005; }
+.bp-source header { display: flex; justify-content: space-between; padding: 12px 16px; background: #252a23; color: #d8d0bd; font-size: 11px; font-weight: 900; letter-spacing: .12em; }
+.bp-source pre { margin: 0; padding: 22px; overflow: auto; color: #dce7cd; font: 13px/1.63 "SFMono-Regular", Consolas, monospace; }
+.bp-source.is-compact pre { max-height: 340px; }
+.bp-canvas { display: grid; place-items: center; min-height: 620px; padding: 18px; border-radius: 16px; background: radial-gradient(circle at 50% 15%, #394238, #232721 58%, #1b1e1a); border: 1px solid #42483f; }
+.bp-board { width: min(100%, 520px); height: auto; filter: drop-shadow(0 26px 24px #0008); }
+.bp-row-numbers { fill: #756e60; font: 700 8px/1 "SFMono-Regular", Consolas, monospace; text-anchor: middle; }
+.bp-pin-numbers { fill: #f6efd8; font: 700 7px/1 "SFMono-Regular", Consolas, monospace; }
+.bp-pin-numbers text:nth-child(even) { text-anchor: end; }
+.bp-connections > g > circle:first-child { fill: #efe7d4; stroke: #3b382f; stroke-width: 1.5; }
+.bp-connection-core { fill: #24231f; opacity: .72; }
+.bp-annotations circle { fill: #e7b54a; stroke: #191b18; stroke-width: 3; }
+.bp-annotations text { fill: #191b18; font-weight: 900; text-anchor: middle; }
+.bp-feature { display: grid; grid-template-columns: minmax(460px, 1.25fr) minmax(290px, .75fr); gap: 22px; margin-bottom: 22px; }
+.bp-callouts { padding: 26px; border-radius: 16px; background: #efe7d4; color: #312e28; }
+.bp-callouts h2 { margin: 0 0 24px; font-family: Georgia, serif; font-size: 30px; }
+.bp-callouts p { display: grid; grid-template-columns: 32px 1fr; margin: 0; padding: 17px 0; border-top: 1px solid #c8bda7; line-height: 1.45; }
+.bp-callouts b { color: #8d5f00; font-size: 20px; }
+.bp-c .bp-source { margin-bottom: 18px; }
+.bp-table { overflow: hidden; margin-bottom: 18px; border: 1px solid #3e463c; border-radius: 12px; background: #10120f; }
+.bp-table header, .bp-table > div { display: grid; grid-template-columns: 1.25fr 1.25fr .55fr 1.25fr; }
+.bp-table span { padding: 12px 14px; border-right: 1px solid #30352e; }
+.bp-table header { background: #e7b54a; color: #242018; font-size: 10px; font-weight: 900; letter-spacing: .12em; }
+.bp-table > div { border-top: 1px solid #30352e; color: #d7ddcf; font: 12px/1.45 "SFMono-Regular", Consolas, monospace; }
+.bp-wide { min-height: 540px; }
+.bp-switcher { position: fixed; z-index: 50; left: 50%; bottom: 22px; transform: translateX(-50%); display: flex; align-items: center; gap: 16px; padding: 8px; border: 1px solid #6b705f; border-radius: 999px; background: #090a09ed; box-shadow: 0 12px 35px #000b; }
+.bp-switcher button { width: 38px; height: 38px; border: 0; border-radius: 50%; background: #e7b54a; color: #1a1812; font-size: 21px; cursor: pointer; }
+.bp-switcher strong { min-width: 190px; text-align: center; font-size: 12px; letter-spacing: .04em; }
+@media (max-width: 900px) { .bp-shell { padding: 24px 16px 100px; } .bp-title { grid-template-columns: 1fr; } .bp-split, .bp-feature { grid-template-columns: 1fr; } .bp-canvas { min-height: auto; } .bp-table { overflow-x: auto; } .bp-table header, .bp-table > div { min-width: 740px; } }
