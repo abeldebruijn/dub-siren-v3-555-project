@@ -8,6 +8,26 @@ A language for describing breadboard layouts that can be rendered as determinist
 A human-readable declaration of a breadboard, its placed components, and its routed wires.
 _Avoid_: Circuit, schematic
 
+**Breadboard compiler**:
+The language pipeline that turns a Breadboard description into diagnostics and, when valid, Canonical SVG.
+_Avoid_: Interpreter
+
+**Breadboard editor**:
+The user-facing course page for editing a Breadboard description, viewing diagnostics and Canonical SVG, and inspecting its intermediate representations.
+_Avoid_: Developer playground
+
+**Surface AST**:
+The parsed representation that preserves declaration order, declared spelling, omitted fields, and source spans before defaults and references are resolved. It excludes whitespace and comments.
+_Avoid_: Canonical Breadboard Model
+
+**Canonical Breadboard Model**:
+The fully validated and resolved representation consumed by Canonical SVG generation.
+_Avoid_: Surface AST
+
+**Desugaring**:
+The deterministic transformation from a Surface AST into a Canonical Breadboard Model by applying defaults and resolving references, selectors, occupancy, routes, and colours.
+_Avoid_: Parsing
+
 **Hole**:
 A concrete physical connection position on a breadboard.
 _Avoid_: Pin, coordinate
