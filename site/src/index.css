@@ -55,6 +55,32 @@
     @apply rounded-[1.8rem] border border-stone-950/10 bg-card/90 shadow-workbench;
   }
 
+  .breadboard-lab {
+    --editor-grid: rgba(148, 163, 184, 0.07);
+    font-family: "Atkinson Hyperlegible", ui-sans-serif, sans-serif;
+  }
+
+  .breadboard-stage {
+    background:
+      radial-gradient(circle at 60% 44%, rgba(244, 238, 224, 0.075), transparent 31rem),
+      linear-gradient(var(--editor-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--editor-grid) 1px, transparent 1px),
+      #080b0f;
+    background-size: auto, 24px 24px, 24px 24px, auto;
+  }
+
+  .breadboard-stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.48) 110%);
+  }
+
+  .breadboard-svg {
+    filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.4));
+  }
+
   .dark-course {
     background:
       radial-gradient(circle at 50% 4%, rgba(44, 47, 59, 0.52), transparent 35rem),

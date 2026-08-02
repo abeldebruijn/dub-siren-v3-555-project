@@ -1,0 +1,4 @@
+breadboard 9stage rows 30
+chip resistor {
+  pin 1 9alias
+}

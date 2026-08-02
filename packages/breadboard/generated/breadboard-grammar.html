@@ -1,0 +1,892 @@
+
+<!-- This is a generated file -->
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+  body {
+    background-color: hsl(30, 20%, 95%)
+  }
+</style>
+
+
+<link rel='stylesheet' href='https://unpkg.com/chevrotain@13.2.0/diagrams/diagrams.css'>
+
+<script src='https://unpkg.com/chevrotain@13.2.0/diagrams/vendor/railroad-diagrams.js'></script>
+<script src='https://unpkg.com/chevrotain@13.2.0/diagrams/src/diagrams_builder.js'></script>
+<script src='https://unpkg.com/chevrotain@13.2.0/diagrams/src/diagrams_behavior.js'></script>
+<script src='https://unpkg.com/chevrotain@13.2.0/diagrams/src/main.js'></script>
+
+<div id="diagrams" align="center"></div>
+
+<script>
+    window.serializedGrammar = [
+  {
+    "type": "Rule",
+    "name": "document",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Repetition",
+        "idx": 0,
+        "definition": [
+          {
+            "type": "Terminal",
+            "name": "Newline",
+            "label": "Newline",
+            "idx": 0,
+            "pattern": "\\r?\\n"
+          }
+        ]
+      },
+      {
+        "type": "Repetition",
+        "idx": 2,
+        "definition": [
+          {
+            "type": "NonTerminal",
+            "name": "statement",
+            "idx": 0
+          },
+          {
+            "type": "Option",
+            "idx": 0,
+            "definition": [
+              {
+                "type": "Terminal",
+                "name": "Newline",
+                "label": "Newline",
+                "idx": 2,
+                "pattern": "\\r?\\n"
+              }
+            ]
+          },
+          {
+            "type": "Repetition",
+            "idx": 3,
+            "definition": [
+              {
+                "type": "Terminal",
+                "name": "Newline",
+                "label": "Newline",
+                "idx": 3,
+                "pattern": "\\r?\\n"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Terminal",
+        "name": "EOF",
+        "label": "EOF",
+        "idx": 0,
+        "pattern": "NOT_APPLICABLE"
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "statement",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Alternation",
+        "idx": 0,
+        "definition": [
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "NonTerminal",
+                "name": "breadboardStatement",
+                "idx": 0
+              }
+            ]
+          },
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "NonTerminal",
+                "name": "chipDefinitionStatement",
+                "idx": 0
+              }
+            ]
+          },
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "NonTerminal",
+                "name": "placementStatement",
+                "idx": 0
+              }
+            ]
+          },
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "NonTerminal",
+                "name": "wireStatement",
+                "idx": 0
+              }
+            ]
+          },
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "NonTerminal",
+                "name": "invalidStatement",
+                "idx": 0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "breadboardStatement",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Terminal",
+        "name": "BreadboardKeyword",
+        "label": "BreadboardKeyword",
+        "idx": 0,
+        "pattern": "breadboard"
+      },
+      {
+        "type": "Option",
+        "idx": 0,
+        "definition": [
+          {
+            "type": "Terminal",
+            "name": "NameLike",
+            "label": "NameLike",
+            "idx": 0,
+            "pattern": "NOT_APPLICABLE"
+          }
+        ]
+      },
+      {
+        "type": "Terminal",
+        "name": "RowsKeyword",
+        "label": "RowsKeyword",
+        "idx": 0,
+        "pattern": "rows"
+      },
+      {
+        "type": "Terminal",
+        "name": "IntegerLiteral",
+        "label": "IntegerLiteral",
+        "idx": 0,
+        "pattern": "\\d+"
+      },
+      {
+        "type": "Option",
+        "idx": 2,
+        "definition": [
+          {
+            "type": "Terminal",
+            "name": "ColumnsKeyword",
+            "label": "ColumnsKeyword",
+            "idx": 0,
+            "pattern": "columns"
+          },
+          {
+            "type": "Terminal",
+            "name": "IntegerLiteral",
+            "label": "IntegerLiteral",
+            "idx": 2,
+            "pattern": "\\d+"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "chipDefinitionStatement",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Terminal",
+        "name": "ChipKeyword",
+        "label": "ChipKeyword",
+        "idx": 0,
+        "pattern": "chip"
+      },
+      {
+        "type": "Terminal",
+        "name": "NameLike",
+        "label": "NameLike",
+        "idx": 0,
+        "pattern": "NOT_APPLICABLE"
+      },
+      {
+        "type": "Terminal",
+        "name": "LeftBrace",
+        "label": "LeftBrace",
+        "idx": 0,
+        "pattern": "\\{"
+      },
+      {
+        "type": "Terminal",
+        "name": "Newline",
+        "label": "Newline",
+        "idx": 0,
+        "pattern": "\\r?\\n"
+      },
+      {
+        "type": "Repetition",
+        "idx": 0,
+        "definition": [
+          {
+            "type": "Alternation",
+            "idx": 0,
+            "definition": [
+              {
+                "type": "Alternative",
+                "definition": [
+                  {
+                    "type": "Terminal",
+                    "name": "Newline",
+                    "label": "Newline",
+                    "idx": 2,
+                    "pattern": "\\r?\\n"
+                  }
+                ]
+              },
+              {
+                "type": "Alternative",
+                "definition": [
+                  {
+                    "type": "NonTerminal",
+                    "name": "chipMemberLine",
+                    "idx": 0
+                  },
+                  {
+                    "type": "Terminal",
+                    "name": "Newline",
+                    "label": "Newline",
+                    "idx": 3,
+                    "pattern": "\\r?\\n"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Terminal",
+        "name": "RightBrace",
+        "label": "RightBrace",
+        "idx": 0,
+        "pattern": "\\}"
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "chipMemberLine",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Alternation",
+        "idx": 0,
+        "definition": [
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "NonTerminal",
+                "name": "heightMember",
+                "idx": 0
+              }
+            ]
+          },
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "NonTerminal",
+                "name": "widthMember",
+                "idx": 0
+              }
+            ]
+          },
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "NonTerminal",
+                "name": "colorMember",
+                "idx": 0
+              }
+            ]
+          },
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "NonTerminal",
+                "name": "pinMember",
+                "idx": 0
+              }
+            ]
+          },
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "NonTerminal",
+                "name": "invalidChipMember",
+                "idx": 0
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "heightMember",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Terminal",
+        "name": "HeightKeyword",
+        "label": "HeightKeyword",
+        "idx": 0,
+        "pattern": "height"
+      },
+      {
+        "type": "Terminal",
+        "name": "IntegerLiteral",
+        "label": "IntegerLiteral",
+        "idx": 0,
+        "pattern": "\\d+"
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "widthMember",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Terminal",
+        "name": "WidthKeyword",
+        "label": "WidthKeyword",
+        "idx": 0,
+        "pattern": "width"
+      },
+      {
+        "type": "Terminal",
+        "name": "IntegerLiteral",
+        "label": "IntegerLiteral",
+        "idx": 0,
+        "pattern": "\\d+"
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "colorMember",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Terminal",
+        "name": "ColorKeyword",
+        "label": "ColorKeyword",
+        "idx": 0,
+        "pattern": "color"
+      },
+      {
+        "type": "NonTerminal",
+        "name": "colorValue",
+        "idx": 0
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "pinMember",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Terminal",
+        "name": "PinKeyword",
+        "label": "PinKeyword",
+        "idx": 0,
+        "pattern": "pin"
+      },
+      {
+        "type": "Terminal",
+        "name": "IntegerLiteral",
+        "label": "IntegerLiteral",
+        "idx": 0,
+        "pattern": "\\d+"
+      },
+      {
+        "type": "Alternation",
+        "idx": 0,
+        "definition": [
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "Terminal",
+                "name": "NameLike",
+                "label": "NameLike",
+                "idx": 0,
+                "pattern": "NOT_APPLICABLE"
+              }
+            ]
+          },
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "Terminal",
+                "name": "IntegerLiteral",
+                "label": "IntegerLiteral",
+                "idx": 2,
+                "pattern": "\\d+"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Repetition",
+        "idx": 0,
+        "definition": [
+          {
+            "type": "Terminal",
+            "name": "Pipe",
+            "label": "Pipe",
+            "idx": 0,
+            "pattern": "\\|"
+          },
+          {
+            "type": "Alternation",
+            "idx": 2,
+            "definition": [
+              {
+                "type": "Alternative",
+                "definition": [
+                  {
+                    "type": "Terminal",
+                    "name": "NameLike",
+                    "label": "NameLike",
+                    "idx": 2,
+                    "pattern": "NOT_APPLICABLE"
+                  }
+                ]
+              },
+              {
+                "type": "Alternative",
+                "definition": [
+                  {
+                    "type": "Terminal",
+                    "name": "IntegerLiteral",
+                    "label": "IntegerLiteral",
+                    "idx": 3,
+                    "pattern": "\\d+"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "placementStatement",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Terminal",
+        "name": "PlaceKeyword",
+        "label": "PlaceKeyword",
+        "idx": 0,
+        "pattern": "place"
+      },
+      {
+        "type": "Terminal",
+        "name": "NameLike",
+        "label": "NameLike",
+        "idx": 0,
+        "pattern": "NOT_APPLICABLE"
+      },
+      {
+        "type": "Terminal",
+        "name": "NameLike",
+        "label": "NameLike",
+        "idx": 2,
+        "pattern": "NOT_APPLICABLE"
+      },
+      {
+        "type": "Terminal",
+        "name": "AtKeyword",
+        "label": "AtKeyword",
+        "idx": 0,
+        "pattern": "at"
+      },
+      {
+        "type": "Terminal",
+        "name": "RowCoordinate",
+        "label": "RowCoordinate",
+        "idx": 0,
+        "pattern": "R\\d+"
+      },
+      {
+        "type": "Option",
+        "idx": 0,
+        "definition": [
+          {
+            "type": "Terminal",
+            "name": "FlipKeyword",
+            "label": "FlipKeyword",
+            "idx": 0,
+            "pattern": "flip"
+          }
+        ]
+      },
+      {
+        "type": "Option",
+        "idx": 2,
+        "definition": [
+          {
+            "type": "Terminal",
+            "name": "ColorKeyword",
+            "label": "ColorKeyword",
+            "idx": 0,
+            "pattern": "color"
+          },
+          {
+            "type": "NonTerminal",
+            "name": "colorValue",
+            "idx": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "wireStatement",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Terminal",
+        "name": "WireKeyword",
+        "label": "WireKeyword",
+        "idx": 0,
+        "pattern": "wire"
+      },
+      {
+        "type": "NonTerminal",
+        "name": "endpoint",
+        "idx": 0
+      },
+      {
+        "type": "Terminal",
+        "name": "Arrow",
+        "label": "Arrow",
+        "idx": 0,
+        "pattern": "-->"
+      },
+      {
+        "type": "NonTerminal",
+        "name": "endpoint",
+        "idx": 2
+      },
+      {
+        "type": "Option",
+        "idx": 0,
+        "definition": [
+          {
+            "type": "Terminal",
+            "name": "ViaKeyword",
+            "label": "ViaKeyword",
+            "idx": 0,
+            "pattern": "via"
+          },
+          {
+            "type": "NonTerminal",
+            "name": "exactRoutePoint",
+            "idx": 0
+          },
+          {
+            "type": "Repetition",
+            "idx": 0,
+            "definition": [
+              {
+                "type": "Terminal",
+                "name": "Comma",
+                "label": "Comma",
+                "idx": 0,
+                "pattern": ","
+              },
+              {
+                "type": "NonTerminal",
+                "name": "exactRoutePoint",
+                "idx": 2
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Option",
+        "idx": 2,
+        "definition": [
+          {
+            "type": "Terminal",
+            "name": "ColorKeyword",
+            "label": "ColorKeyword",
+            "idx": 0,
+            "pattern": "color"
+          },
+          {
+            "type": "NonTerminal",
+            "name": "colorValue",
+            "idx": 0
+          }
+        ]
+      },
+      {
+        "type": "Option",
+        "idx": 3,
+        "definition": [
+          {
+            "type": "Terminal",
+            "name": "SaturationKeyword",
+            "label": "SaturationKeyword",
+            "idx": 0,
+            "pattern": "saturation"
+          },
+          {
+            "type": "Terminal",
+            "name": "PercentageLiteral",
+            "label": "PercentageLiteral",
+            "idx": 0,
+            "pattern": "\\d+%"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "endpoint",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Alternation",
+        "idx": 0,
+        "definition": [
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "NonTerminal",
+                "name": "pinSelector",
+                "idx": 0
+              }
+            ]
+          },
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "Terminal",
+                "name": "Identifier",
+                "label": "Identifier",
+                "idx": 0,
+                "pattern": "[A-Za-z_][A-Za-z0-9_-]*"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "pinSelector",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Terminal",
+        "name": "NameLike",
+        "label": "NameLike",
+        "idx": 0,
+        "pattern": "NOT_APPLICABLE"
+      },
+      {
+        "type": "Terminal",
+        "name": "Dot",
+        "label": "Dot",
+        "idx": 0,
+        "pattern": "\\."
+      },
+      {
+        "type": "Alternation",
+        "idx": 0,
+        "definition": [
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "Terminal",
+                "name": "IntegerLiteral",
+                "label": "IntegerLiteral",
+                "idx": 0,
+                "pattern": "\\d+"
+              }
+            ]
+          },
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "Terminal",
+                "name": "NameLike",
+                "label": "NameLike",
+                "idx": 2,
+                "pattern": "NOT_APPLICABLE"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "exactRoutePoint",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Terminal",
+        "name": "Identifier",
+        "label": "Identifier",
+        "idx": 0,
+        "pattern": "[A-Za-z_][A-Za-z0-9_-]*"
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "colorValue",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Alternation",
+        "idx": 0,
+        "definition": [
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "Terminal",
+                "name": "HexColorLiteral",
+                "label": "HexColorLiteral",
+                "idx": 0,
+                "pattern": "#[0-9A-Fa-f]{6}"
+              }
+            ]
+          },
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "Terminal",
+                "name": "InvalidHexColorLiteral",
+                "label": "InvalidHexColorLiteral",
+                "idx": 0,
+                "pattern": "#[^\\s,}]*"
+              }
+            ]
+          },
+          {
+            "type": "Alternative",
+            "definition": [
+              {
+                "type": "Terminal",
+                "name": "Identifier",
+                "label": "Identifier",
+                "idx": 0,
+                "pattern": "[A-Za-z_][A-Za-z0-9_-]*"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "invalidStatement",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "RepetitionMandatory",
+        "idx": 0,
+        "definition": [
+          {
+            "type": "Terminal",
+            "name": "LineContent",
+            "label": "LineContent",
+            "idx": 0,
+            "pattern": "NOT_APPLICABLE"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": "Rule",
+    "name": "invalidChipMember",
+    "orgText": "",
+    "definition": [
+      {
+        "type": "Terminal",
+        "name": "Identifier",
+        "label": "Identifier",
+        "idx": 0,
+        "pattern": "[A-Za-z_][A-Za-z0-9_-]*"
+      },
+      {
+        "type": "Repetition",
+        "idx": 0,
+        "definition": [
+          {
+            "type": "Terminal",
+            "name": "LineContent",
+            "label": "LineContent",
+            "idx": 0,
+            "pattern": "NOT_APPLICABLE"
+          }
+        ]
+      }
+    ]
+  }
+];
+</script>
+
+<script>
+    var diagramsDiv = document.getElementById("diagrams");
+    main.drawDiagramsFromSerializedGrammar(serializedGrammar, diagramsDiv);
+</script>

@@ -1,0 +1,20 @@
+[
+  {
+    "code": "placement.unknown-chip",
+    "severity": "error",
+    "range": { "start": { "line": 7, "column": 10 }, "end": { "line": 7, "column": 17 } }
+  },
+  {
+    "code": "placement.row-overflow",
+    "severity": "error",
+    "range": { "start": { "line": 8, "column": 19 }, "end": { "line": 8, "column": 20 } }
+  },
+  {
+    "code": "placement.overlap",
+    "severity": "error",
+    "range": { "start": { "line": 10, "column": 1 }, "end": { "line": 10, "column": 20 } },
+    "related": [
+      { "start": { "line": 9, "column": 1 }, "end": { "line": 9, "column": 20 } }
+    ]
+  }
+]

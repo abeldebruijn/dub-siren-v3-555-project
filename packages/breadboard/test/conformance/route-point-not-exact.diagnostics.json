@@ -1,0 +1,7 @@
+[
+  {
+    "code": "route.point-not-exact",
+    "severity": "error",
+    "range": { "start": { "line": 2, "column": 22 }, "end": { "line": 2, "column": 25 } }
+  }
+]

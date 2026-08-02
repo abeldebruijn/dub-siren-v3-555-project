@@ -1,0 +1,10 @@
+breadboard Demo rows 2 columns 2
+chip Tiny {
+  height 2
+  width 2
+  color yellow
+  pin 1 VCC
+  pin 2 OUT
+  pin 4 GND
+}
+place U1 Tiny at R1

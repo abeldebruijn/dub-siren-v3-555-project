@@ -74,6 +74,9 @@ export function HomePage() {
               ) : null}
               {hasProgress ? <ResetJourneyDialog /> : null}
             </div>
+            <a className="mt-4 inline-flex items-center gap-2 font-bold text-cyan-200 underline decoration-cyan-400/50 hover:text-cyan-100" href="#/breadboard">
+              <Cable className="h-4 w-4" /> Open breadboard canvas
+            </a>
           </div>
         </div>
         <div className="patch-cable" aria-hidden="true" />

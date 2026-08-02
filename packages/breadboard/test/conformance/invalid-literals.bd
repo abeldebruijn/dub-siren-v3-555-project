@@ -1,0 +1,6 @@
+breadboard rows 03 columns 0
+chip Good {
+  color chartreuse
+  pin 1 GP0
+}
+wire LP1 --> RG1 saturation 101%

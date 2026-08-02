@@ -1,0 +1,12 @@
+breadboard Stage rows 30 columns 5
+chip Pico {
+  height 20
+  width 4
+  color green
+  pin 1 VBUS | POWER
+  pin 2 GP0
+}
+place board Pico at R1 flip color #123ABC
+wire board.GP0 --> LP1 via LT-R1C1, RT-R1C1 color blue saturation 50%
+wat
+wire LP1 --> RG30

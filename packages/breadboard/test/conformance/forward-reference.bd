@@ -1,0 +1,6 @@
+breadboard rows 3 columns 2
+place U1 Later at R1
+chip Later {
+  height 1
+  pin 1 A
+}

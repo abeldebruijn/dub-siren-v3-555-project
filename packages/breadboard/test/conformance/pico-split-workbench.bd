@@ -1,0 +1,30 @@
+breadboard main rows 32 columns 5
+
+chip Pico2 {
+  height 20
+  width 3
+  color forest
+  pin 1 GP0 | SPI0_RX | UART0_TX
+  pin 2 GP1 | SPI0_CSn | UART0_RX
+  pin 3 GND
+  pin 8 GND
+  pin 40 VBUS
+}
+
+chip OddMux {
+  height 8
+  width 5
+  pin 1 A0
+  pin 8 GND
+  pin 16 VCC
+}
+
+place pico Pico2 at R2
+place mux OddMux at R24 flip color purple
+
+wire LP1 --> LT-R3C5 via LT-R1C5 color orange saturation 45%
+wire P --> P
+wire pico.GP0 --> LT-R23C
+wire pico.GND --> G color blue saturation 40%
+wire LP --> LT-R28C
+wire R22C --> R22C color white

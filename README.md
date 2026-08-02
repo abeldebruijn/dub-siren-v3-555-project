@@ -84,10 +84,25 @@ The longer-term goal is a cost-effective instrument with pitch, modulation, temp
 ## Run the course locally
 
 ```sh
-cd site
 pnpm install
-pnpm dev
+pnpm --filter dub-siren-v3-site dev
 ```
+
+Open the URL printed by Vite. The Breadboard editor lives at `#/breadboard` and compiles entirely in the browser.
+
+## Breadboard compiler and editor
+
+The workspace includes a pure TypeScript Breadboard compiler at [`packages/breadboard/`](packages/breadboard/) and a responsive editor in the course site. The compiler exposes one interface, `compile(source)`, returning the recoverable Surface AST, ordered diagnostics, and—when valid—the Canonical Breadboard Model and byte-canonical SVG.
+
+Use the editor to write Breadboard descriptions, jump from diagnostics to source, inspect the compiler representations, preserve work locally, and download valid SVG diagrams. No source or circuit data leaves the browser.
+
+Release verification runs the compiler conformance suite, checks generated grammar freshness, type-checks the editor, and builds the deployable site:
+
+```sh
+pnpm check:release
+```
+
+See the [compiler package guide](packages/breadboard/README.md) for interface and fixture details.
 
 The React migration is in progress. Lesson 1 is available in the new course interface; the complete numbered lesson set remains available in `lessons/`.
 

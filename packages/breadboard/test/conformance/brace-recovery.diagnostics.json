@@ -1,0 +1,18 @@
+[
+  {
+    "code": "syntax.unexpected-token",
+    "severity": "error",
+    "range": {
+      "start": { "line": 2, "column": 9 },
+      "end": { "line": 2, "column": 9 }
+    }
+  },
+  {
+    "code": "syntax.unexpected-token",
+    "severity": "error",
+    "range": {
+      "start": { "line": 3, "column": 3 },
+      "end": { "line": 3, "column": 12 }
+    }
+  }
+]

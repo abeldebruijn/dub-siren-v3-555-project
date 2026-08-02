@@ -1,0 +1,8 @@
+breadboard rows 6 columns 5
+chip Block {
+  height 2
+  width 4
+  pin 1 A
+}
+place U1 Block at R3
+wire LP3 --> RG3

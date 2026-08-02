@@ -1,0 +1,5 @@
+chip Broken {
+  height
+  mystery 1
+}
+wire LP1 --> RG1

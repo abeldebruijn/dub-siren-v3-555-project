@@ -1,0 +1,10 @@
+[
+  {
+    "code": "syntax.unexpected-token",
+    "severity": "error",
+    "range": {
+      "start": { "line": 11, "column": 1 },
+      "end": { "line": 11, "column": 4 }
+    }
+  }
+]

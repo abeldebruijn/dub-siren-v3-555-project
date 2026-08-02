@@ -1,0 +1,5 @@
+﻿
+wire LP1 --> RG1
+breadboard rows 30
+chip Missing {
+  pin 1 GP0

@@ -1,0 +1,10 @@
+[
+  {
+    "code": "syntax.invalid-alias",
+    "severity": "error",
+    "range": {
+      "start": { "line": 2, "column": 9 },
+      "end": { "line": 2, "column": 12 }
+    }
+  }
+]

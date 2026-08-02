@@ -1,0 +1,12 @@
+breadboard rows 3 columns 3
+chip Gate {
+  height 1
+  pin 1 A
+}
+place U1 Gate at R2
+wire Missing.1 --> LP1
+wire U1.3 --> LP1
+wire U1.NOPE --> LP1
+wire LP9 --> RG1
+wire LT-R2C1 --> RG1
+wire LT-R1C --> LT-R1C

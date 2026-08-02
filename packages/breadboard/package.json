@@ -1,0 +1,30 @@
+{
+  "name": "@dub-siren/breadboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "generate:grammar": "pnpm build && node scripts/generate-grammar.mjs",
+    "check:grammar": "pnpm build && node scripts/generate-grammar.mjs --check",
+    "test": "pnpm build && node scripts/generate-grammar.mjs --check && node --test test/*.test.ts"
+  },
+  "dependencies": {
+    "chevrotain": "13.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

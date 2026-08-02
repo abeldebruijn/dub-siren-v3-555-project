@@ -1,0 +1,27 @@
+[
+  {
+    "code": "route.diagonal",
+    "severity": "error",
+    "range": { "start": { "line": 2, "column": 22 }, "end": { "line": 2, "column": 29 } }
+  },
+  {
+    "code": "route.duplicate-point",
+    "severity": "error",
+    "range": { "start": { "line": 3, "column": 22 }, "end": { "line": 3, "column": 25 } }
+  },
+  {
+    "code": "route.collinear",
+    "severity": "error",
+    "range": { "start": { "line": 4, "column": 22 }, "end": { "line": 4, "column": 29 } }
+  },
+  {
+    "code": "route.reversal",
+    "severity": "error",
+    "range": { "start": { "line": 5, "column": 22 }, "end": { "line": 5, "column": 29 } }
+  },
+  {
+    "code": "route.point-not-hole",
+    "severity": "error",
+    "range": { "start": { "line": 6, "column": 22 }, "end": { "line": 6, "column": 29 } }
+  }
+]

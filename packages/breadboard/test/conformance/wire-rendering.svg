@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="344" height="100" viewBox="0 0 344 100" preserveAspectRatio="xMidYMid meet" overflow="hidden">
+  <title>Breadboard diagram</title>
+  <desc>2 rows, 1 terminal columns, 0 chips, 2 wires.</desc>
+  <g data-layer="board">
+    <rect x="18" y="10" width="308" height="76" rx="24" fill="#F5F2EB" stroke="#CDBF9D" stroke-width="3"/>
+    <rect x="162" y="24" width="20" height="48" rx="8" fill="#D9CFB8"/>
+  </g>
+  <g data-layer="rails">
+    <line x1="62" y1="32" x2="62" y2="64" stroke="#D64545" stroke-width="3"/>
+    <line x1="94" y1="32" x2="94" y2="64" stroke="#252525" stroke-width="3"/>
+    <line x1="250" y1="32" x2="250" y2="64" stroke="#D64545" stroke-width="3"/>
+    <line x1="282" y1="32" x2="282" y2="64" stroke="#252525" stroke-width="3"/>
+  </g>
+  <g data-layer="holes">
+    <circle cx="62" cy="42" r="4.25" fill="#544F45"/>
+    <circle cx="94" cy="42" r="4.25" fill="#544F45"/>
+    <circle cx="120" cy="42" r="4.25" fill="#544F45"/>
+    <circle cx="224" cy="42" r="4.25" fill="#544F45"/>
+    <circle cx="250" cy="42" r="4.25" fill="#544F45"/>
+    <circle cx="282" cy="42" r="4.25" fill="#544F45"/>
+    <circle cx="62" cy="64" r="4.25" fill="#544F45"/>
+    <circle cx="94" cy="64" r="4.25" fill="#544F45"/>
+    <circle cx="120" cy="64" r="4.25" fill="#544F45"/>
+    <circle cx="224" cy="64" r="4.25" fill="#544F45"/>
+    <circle cx="250" cy="64" r="4.25" fill="#544F45"/>
+    <circle cx="282" cy="64" r="4.25" fill="#544F45"/>
+  </g>
+  <g data-layer="labels">
+    <text x="62" y="25" text-anchor="middle" fill="#413B31" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold">LP <tspan font-size="8">+</tspan></text>
+    <text x="94" y="25" text-anchor="middle" fill="#413B31" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold">LG <tspan font-size="8">−</tspan></text>
+    <text x="250" y="25" text-anchor="middle" fill="#413B31" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold">RP <tspan font-size="8">+</tspan></text>
+    <text x="282" y="25" text-anchor="middle" fill="#413B31" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold">RG <tspan font-size="8">−</tspan></text>
+    <text x="120" y="25" text-anchor="middle" fill="#413B31" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold">LT</text>
+    <text x="224" y="25" text-anchor="middle" fill="#413B31" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold">RT</text>
+    <text x="120" y="35" text-anchor="middle" fill="#756E60" font-family="Menlo, Consolas, monospace" font-size="8" font-weight="bold">1</text>
+    <text x="224" y="35" text-anchor="middle" fill="#756E60" font-family="Menlo, Consolas, monospace" font-size="8" font-weight="bold">1</text>
+  </g>
+  <g data-layer="chips"/>
+  <g data-layer="wires">
+    <g data-wire="1">
+      <path d="M 62 42 H 282" fill="none" stroke="#3B382F" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M 62 42 H 282" fill="none" stroke="#E0B929" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g data-wire="2">
+      <path d="M 94 64 H 250" fill="none" stroke="#26619C" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+  <g data-layer="markers">
+    <g data-wire="1">
+      <g>
+        <circle cx="62" cy="42" r="8" fill="#F5F2EB" stroke="#3B382F" stroke-width="1.5"/>
+        <circle cx="62" cy="42" r="5" fill="#E0B929"/>
+        <circle cx="62" cy="42" r="1.75" fill="#3B382F"/>
+      </g>
+      <g>
+        <circle cx="282" cy="42" r="8" fill="#F5F2EB" stroke="#3B382F" stroke-width="1.5"/>
+        <circle cx="282" cy="42" r="5" fill="#E0B929"/>
+        <circle cx="282" cy="42" r="1.75" fill="#3B382F"/>
+      </g>
+    </g>
+    <g data-wire="2">
+      <g>
+        <circle cx="94" cy="64" r="8" fill="#F5F2EB" stroke="#3B382F" stroke-width="1.5"/>
+        <circle cx="94" cy="64" r="5" fill="#26619C"/>
+        <circle cx="94" cy="64" r="1.75" fill="#3B382F"/>
+      </g>
+      <g>
+        <circle cx="250" cy="64" r="8" fill="#F5F2EB" stroke="#3B382F" stroke-width="1.5"/>
+        <circle cx="250" cy="64" r="5" fill="#26619C"/>
+        <circle cx="250" cy="64" r="1.75" fill="#3B382F"/>
+      </g>
+    </g>
+  </g>
+</svg>

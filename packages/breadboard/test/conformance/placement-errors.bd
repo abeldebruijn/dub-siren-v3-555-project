@@ -1,0 +1,10 @@
+breadboard rows 4 columns 3
+chip Unit {
+  height 2
+  width 2
+  pin 1 A
+}
+place U1 Missing at R1
+place U2 Unit at R4
+place U3 Unit at R1
+place U4 Unit at R2

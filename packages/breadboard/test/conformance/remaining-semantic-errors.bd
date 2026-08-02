@@ -1,0 +1,12 @@
+breadboard rows 2 columns 1
+chip Empty {
+  color red
+}
+chip Full {
+  height 1
+  width 2
+  pin 1 A
+}
+place U1 Full at R1
+wire U1.A --> LP1
+wire LT-R2C1 --> LT-R2C1
