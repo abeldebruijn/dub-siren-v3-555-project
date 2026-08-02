@@ -81,7 +81,7 @@ A reusable description of a chip's identity, pins, aliases, colour, height, and 
 _Avoid_: Chip instance, placement
 
 **Chip height**:
-The number of physical pins on each side of a chip and therefore the number of board rows it occupies. An explicit height overrides height inferred as half the highest declared pin number.
+The number of physical pins on each side of a chip and therefore the number of board rows it occupies. An explicit height overrides height inferred by halving the highest declared pin number and rounding up.
 _Avoid_: Width, total pins
 
 **Chip width**:

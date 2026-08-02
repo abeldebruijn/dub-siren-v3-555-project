@@ -325,19 +325,15 @@ function definitionFrom(
   const height =
     heightMember?.kind === "height-member"
       ? heightMember.height.value
-      : highestPin > 0 && highestPin % 2 === 0
-        ? highestPin / 2
+      : highestPin > 0
+        ? Math.ceil(highestPin / 2)
         : null;
   if (height === null) {
     report(
       context,
-      highestPin === 0
-        ? "chip.height-not-inferable"
-        : "chip.inferred-height-not-integral",
+      "chip.height-not-inferable",
       statement.span,
-      highestPin === 0
-        ? "Chip height cannot be inferred without pins"
-        : "Highest pin does not infer an integral height",
+      "Chip height cannot be inferred without pins",
     );
     valid = false;
   }

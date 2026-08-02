@@ -2,7 +2,9 @@ import { compile, type CompileResult, type Diagnostic } from "@dub-siren/breadbo
 import {
   Braces,
   Check,
+  ChevronDown,
   Code2,
+  Copy,
   Download,
   Eye,
   EyeOff,
@@ -12,7 +14,7 @@ import {
   TriangleAlert,
   XCircle,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MutableRefObject, type ReactNode } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +27,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Dialog,
   DialogContent,
@@ -33,6 +36,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetContent,
@@ -45,6 +54,8 @@ import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "dub-siren:breadboard-source:v1";
 const COMPILE_DELAY_MS = 260;
+const EDITOR_TEXT_CLASS =
+  "font-mono text-[13px] font-normal leading-[26px] tracking-normal [font-variant-ligatures:none] md:text-sm md:leading-[26px]";
 
 const EXAMPLE_SOURCE = `breadboard Stage rows 14 columns 5
 chip NE555 {
@@ -302,6 +313,17 @@ function SourceEditor({
   const [scroll, setScroll] = useState({ top: 0, left: 0 });
   const lines = useMemo(() => source.split("\n"), [source]);
 
+  function handleEditorKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "/" || (!event.metaKey && !event.ctrlKey) || event.altKey) return;
+
+    event.preventDefault();
+    const next = toggleLineComments(source, event.currentTarget.selectionStart, event.currentTarget.selectionEnd);
+    onChange(next.source);
+    window.requestAnimationFrame(() => {
+      editorRef.current?.setSelectionRange(next.selectionStart, next.selectionEnd);
+    });
+  }
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       {showHeader ? (
@@ -314,7 +336,7 @@ function SourceEditor({
         </div>
       ) : null}
 
-      <div className="relative min-h-[18rem] flex-1 overflow-hidden bg-[#090d12] font-mono text-[13px] leading-[26px] md:text-sm">
+      <div className="relative min-h-[18rem] flex-1 overflow-hidden bg-[#090d12]">
         <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
           <div
             className="flex min-w-max"
@@ -325,7 +347,7 @@ function SourceEditor({
                 <div key={index} className="h-[26px] pr-3">{index + 1}</div>
               ))}
             </div>
-            <pre className="m-0 min-w-[42rem] whitespace-pre py-4 pl-4 pr-8">
+            <pre className={cn("m-0 min-w-[42rem] whitespace-pre py-4 pl-4 pr-8", EDITOR_TEXT_CLASS)}>
               {lines.map((line, index) => (
                 <span
                   key={index}
@@ -346,35 +368,153 @@ function SourceEditor({
           data-breadboard-editor
           value={source}
           onChange={(event) => onChange(event.target.value)}
+          onKeyDown={handleEditorKeyDown}
           onScroll={(event) => setScroll({ top: event.currentTarget.scrollTop, left: event.currentTarget.scrollLeft })}
           aria-label="Breadboard description source"
+          aria-keyshortcuts="Meta+/ Control+/"
           spellCheck={false}
-          className="absolute inset-0 h-full w-full resize-none overflow-auto whitespace-pre bg-transparent py-4 pl-16 pr-8 font-mono text-[13px] leading-[26px] text-transparent caret-slate-100 outline-none selection:bg-cyan-400/25 md:text-sm"
+          className={cn(
+            "absolute inset-0 h-full w-full resize-none overflow-auto whitespace-pre bg-transparent py-4 pl-16 pr-8 text-transparent caret-slate-100 outline-none selection:bg-cyan-400/25",
+            EDITOR_TEXT_CLASS,
+          )}
         />
       </div>
 
       {diagnostics.length > 0 ? (
         <div className="max-h-48 shrink-0 space-y-2 overflow-y-auto border-t border-white/10 bg-[#0b0f14] p-3">
           {diagnostics.map((diagnostic, index) => (
-            <button
-              type="button"
+            <div
               key={`${diagnostic.code}-${index}`}
-              onClick={() => onDiagnosticClick(diagnostic)}
               className={cn(
-                "flex w-full items-start gap-3 rounded-xl border px-3 py-2.5 text-left transition hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-orange-500",
+                "flex w-full items-center gap-2 rounded-xl border p-1.5 text-left transition",
                 diagnostic.severity === "error" ? "border-red-500/35" : "border-amber-400/35",
               )}
             >
-              {diagnostic.severity === "error" ? <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" /> : <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />}
-              <span className="min-w-0">
-                <span className="block font-mono text-[11px] font-bold text-slate-300">{diagnostic.code} · line {diagnostic.range.start.line}</span>
-                <span className="mt-0.5 block text-sm text-slate-400">{diagnostic.message}</span>
-              </span>
-            </button>
+              <button
+                type="button"
+                onClick={() => onDiagnosticClick(diagnostic)}
+                className="flex min-w-0 flex-1 items-start gap-3 rounded-lg px-1.5 py-1 text-left transition hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                {diagnostic.severity === "error" ? <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" /> : <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />}
+                <span className="min-w-0">
+                  <span className="block font-mono text-[11px] font-bold text-slate-300">{diagnostic.code} · line {diagnostic.range.start.line}</span>
+                  <span className="mt-0.5 block text-sm text-slate-400">{diagnostic.message}</span>
+                </span>
+              </button>
+              <DiagnosticCopyButton diagnostic={diagnostic} />
+            </div>
           ))}
         </div>
       ) : null}
     </div>
+  );
+}
+
+type TextEdit = Readonly<{ position: number; removed: number; inserted: string }>;
+
+function toggleLineComments(source: string, selectionStart: number, selectionEnd: number) {
+  const blockStart = source.lastIndexOf("\n", Math.max(0, selectionStart - 1)) + 1;
+  const effectiveEnd = selectionEnd > selectionStart && source[selectionEnd - 1] === "\n" ? selectionEnd - 1 : selectionEnd;
+  const nextNewline = source.indexOf("\n", effectiveEnd);
+  const blockEnd = nextNewline === -1 ? source.length : nextNewline;
+  const lines = source.slice(blockStart, blockEnd).split("\n");
+  const nonBlankLines = lines.filter((line) => line.trim().length > 0);
+  const shouldUncomment = nonBlankLines.length > 0 && nonBlankLines.every((line) => /^\s*\/\//u.test(line));
+  const edits: TextEdit[] = [];
+  let linePosition = blockStart;
+
+  const nextLines = lines.map((line) => {
+    if (line.trim().length === 0) {
+      linePosition += line.length + 1;
+      return line;
+    }
+
+    const indentation = line.match(/^\s*/u)?.[0] ?? "";
+    const editPosition = linePosition + indentation.length;
+    if (shouldUncomment) {
+      const marker = line.slice(indentation.length).match(/^\/\/ ?/u)?.[0] ?? "//";
+      edits.push({ position: editPosition, removed: marker.length, inserted: "" });
+      linePosition += line.length + 1;
+      return indentation + line.slice(indentation.length + marker.length);
+    }
+
+    edits.push({ position: editPosition, removed: 0, inserted: "// " });
+    linePosition += line.length + 1;
+    return `${indentation}// ${line.slice(indentation.length)}`;
+  });
+
+  const hasSelection = selectionStart !== selectionEnd;
+  return {
+    source: source.slice(0, blockStart) + nextLines.join("\n") + source.slice(blockEnd),
+    selectionStart: mapOffsetThroughEdits(selectionStart, edits, hasSelection ? "left" : "right"),
+    selectionEnd: mapOffsetThroughEdits(selectionEnd, edits, "right"),
+  };
+}
+
+function mapOffsetThroughEdits(offset: number, edits: readonly TextEdit[], affinity: "left" | "right") {
+  let delta = 0;
+  for (const edit of edits) {
+    if (offset < edit.position || (offset === edit.position && affinity === "left")) break;
+    if (offset < edit.position + edit.removed) return edit.position + delta + edit.inserted.length;
+    delta += edit.inserted.length - edit.removed;
+  }
+  return offset + delta;
+}
+
+type DiagnosticCopyPart = "all" | "description" | "line" | "code";
+
+function DiagnosticCopyButton({ diagnostic }: { diagnostic: Diagnostic }) {
+  const [copied, setCopied] = useState(false);
+
+  async function copy(part: DiagnosticCopyPart) {
+    const line = diagnostic.range.start.line;
+    const text = part === "description"
+      ? diagnostic.message
+      : part === "line"
+        ? `line ${line}`
+        : part === "code"
+          ? diagnostic.code
+          : `${diagnostic.code} · line ${line}\n${diagnostic.message}`;
+
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  }
+
+  const buttonClass = "h-8 border border-white/15 bg-white/[0.04] px-2.5 text-xs font-bold text-slate-300 shadow-none hover:translate-y-0 hover:bg-white/10 hover:text-white active:translate-y-0 active:shadow-none";
+
+  return (
+    <ButtonGroup className="shrink-0 self-center">
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className={buttonClass}
+        aria-label={copied ? "Diagnostic copied" : "Copy diagnostic"}
+        onClick={() => void copy("all")}
+      >
+        {copied ? <Check className="h-3.5 w-3.5 text-emerald-300" /> : <Copy className="h-3.5 w-3.5" />}
+        <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button type="button" variant="ghost" size="sm" className={cn(buttonClass, "w-8 px-0")} aria-label="Choose diagnostic part to copy">
+            <ChevronDown className="h-3.5 w-3.5" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="border-white/10 bg-[#11161d] text-slate-200">
+          <DropdownMenuItem onSelect={() => void copy("description")} className="focus:bg-white/10 focus:text-white">
+            Error description
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => void copy("line")} className="focus:bg-white/10 focus:text-white">
+            Line
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => void copy("code")} className="focus:bg-white/10 focus:text-white">
+            Error code
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </ButtonGroup>
   );
 }
 
@@ -444,7 +584,7 @@ function highlightLine(line: string) {
           ? "text-amber-300"
           : /^(?:\d+%?|R\d+|LP\d+|LG\d+|RP\d+|RG\d+|LT-|RT-)/iu.test(token)
             ? "text-cyan-300"
-            : "font-semibold text-fuchsia-300";
+            : "text-fuchsia-300";
     parts.push(<span className={className} key={`${index}-${token}`}>{token}</span>);
     cursor = index + token.length;
   }

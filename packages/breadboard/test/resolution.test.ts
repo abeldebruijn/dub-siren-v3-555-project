@@ -94,7 +94,6 @@ chip Odd {
     "chip.duplicate-pin",
     "chip.member-order",
     "chip.pin-out-of-range",
-    "chip.inferred-height-not-integral",
   ]);
   assert.equal(result.model, null);
   assert.equal(result.svg, null);
@@ -349,6 +348,22 @@ wire A.GND --> LP1
   });
 });
 
+test("inferred chip height rounds up for an odd highest pin", () => {
+  const result = compile(`breadboard rows 5 columns 5
+chip NE555 {
+  pin 1 GND
+  pin 3 OUT
+  pin 9 VCC
+}
+place timer NE555 at R1
+`);
+
+  assert.equal(result.status, "valid");
+  assert.deepEqual(result.diagnostics, []);
+  assert.equal(result.model.chips[0]?.pins.length, 10);
+  assert.equal(result.model.chips[0]?.pins[8]?.number, 9);
+});
+
 test("references to later declarations get a forward-reference diagnostic", () => {
   const result = compile(`breadboard rows 3 columns 2
 place U1 Later at R1
@@ -368,14 +383,14 @@ chip Later {
 test("unresolved declarations suppress dependent placement and selector cascades", () => {
   const result = compile(`breadboard rows 3 columns 2
 chip Bad {
-  pin 3 A
+  color black
 }
 place U1 Bad at R1
 wire U1.1 --> LP1
 `);
 
   assert.equal(result.status, "invalid");
-  assert.deepEqual(codes(result), ["chip.inferred-height-not-integral"]);
+  assert.deepEqual(codes(result), ["chip.height-not-inferable"]);
 });
 
 test("pin selectors reject chip instances declared later", () => {
