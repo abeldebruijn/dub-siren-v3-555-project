@@ -1,0 +1,117 @@
+---
+title: Route pitch through the switch chip
+description: Wire the CD74HC4051 multiplexer as one fixed channel, then explore channel selection and support wiring interactively.
+---
+
+<LessonGate prerequisite="lesson-006">
+
+Wire the purchased CD74HC4051E as one fixed analogue channel. Pitch still reaches GP28, but now travels through the multiplexer. Pitch passes through channel 0 of the 4051 and still prints 100–1000 Hz. Later, software will select other channels for Feedback and Tempo.
+
+:::info Revalidated against TI datasheet · July 2026
+The diagram is correct for the purchased CD74HC4051E: pin 13 is channel 0, pin 3 is COMMON, pins 11/10/9 are S0/S1/S2, pin 6 is active-low ENABLE, and pins 16/8/7 are VCC/GND/VEE.
+:::
+
+## 1. What a multiplexer does
+
+The Pico has one measuring pin available here—GP28—but eventually several potentiometers to measure. The 4051 contains eight electronic switches. It closes **one** switch at a time, connecting one channel to the shared **COMMON** wire.
+
+Imagine an eight-position rotary selector turned electronically. The Pico will later say "connect channel 0," measure it, say "connect channel 1," measure that, and repeat so quickly that every knob appears continuously available.
+
+### Three select pins make eight choices
+
+Each select pin is one binary digit: ground means `0`; 3.3 V means `1`. Three digits produce eight combinations. Today every selector pin is wired to GND, so the circuit is permanently `000`, connecting only CH0. Try the other combinations below to see what a later lesson's software selection will do.
+
+<MuxChannelSelector />
+
+## 2. Understand today's one-channel path
+
+Pitch wiper → CH0 (pin 13) → inside the 4051 → COMMON (pin 3) → GP28.
+
+A multiplexer is a selectable switchboard. Today all three selector pins are held at zero, permanently selecting channel 0. No new Python selection code yet.
+
+## 3. Orient the IC with USB unplugged
+
+1. Find the semicircular notch at one short end of the CD74HC4051E.
+2. Place the IC across the breadboard's centre trench, notch facing away from you.
+3. With the notch at the top, pin 1 is top-left. Numbers run down the left to 8, then up the right from 9 to 16.
+4. Leave the DIP-16 socket aside; it is for a later soldered build.
+
+<LessonSevenCircuit />
+
+Top view, notch up. Check the printed chip marking contains **74HC4051**, not only the socket's label.
+
+## 4. Why every support wire is needed
+
+Make each connection separately. Do not rely on matching wire colours.
+
+<MuxSupportWireExplorer />
+
+### Why pin 16 to pin 8 is not a short circuit
+
+A wire is conducting metal from end to end, so a wire between 3V3 and GND would allow continuous current: a short circuit. A capacitor contains two metal plates separated by an electrical insulator. No steady DC path crosses that insulator.
+
+<figure className="course-figure">
+  <img src="/pico-dub-siren/lessons/capacitor-not-a-short.svg" alt="Comparison: a wire between 3V3 and ground creates a dangerous continuous-current short; a capacitor has separated plates, briefly charges, then blocks steady DC." />
+  <figcaption>At power-on the capacitor draws a tiny, brief charging current. Once charged to 3.3 V, steady current stops except for negligible leakage. When noise changes the voltage, the capacitor briefly accepts or returns charge.</figcaption>
+</figure>
+
+For this 100 nF capacitor at 3.3 V, the stored charge is only `Q = C × V = 330 nC`, and stored energy is about `0.54 µJ`. It is enough to support the IC during tiny fast disturbances, not enough to behave like a large power source.
+
+:::details Why this exact capacitor is suitable
+`K104K10X7RF5UL2` is the exact Vishay part you bought. TME specifies 100 nF, 50 V, X7R, ±10%, through-hole, 2.5 mm pitch.
+
+100 nF = 0.1 µF = 100,000 pF are three ways to write the same capacitance. TI explicitly recommends a **0.1 µF bypass capacitor** for a single-supply CD74HC4051.
+
+10 nF stores one tenth as much charge and targets shorter, higher-frequency disturbances. 1 µF stores ten times as much but is generally less effective by itself at the fastest edges. TI says extra values may be placed in parallel, but 100 nF is the correct first capacitor here.
+
+Ceramic capacitors respond quickly, have low internal resistance, are compact, and are non-polar — standard local bypass parts for digital ICs. The 50 V rating is the maximum working voltage, not a voltage the capacitor creates; using it at 3.3 V gives a large safety margin. X7R means its capacitance stays reasonably stable over a wide temperature range, and ±10% means a new 100 nF part may measure roughly 90–110 nF, which is completely acceptable for bypassing.
+:::
+
+:::danger Stop and count
+Before reconnecting USB, trace from the notch and count every pin again. Reversing pin 16 and pin 8 can damage the IC. GP10, GP11, and GP12 remain unused for the future DAC.
+:::
+
+## 5. Why the two signal wires go there
+
+1. Remove the Pitch centre-wiper wire from GP28. Keep both outside pot wires on 3V3 and GND; they still create the 0–3.3 V signal.
+2. Connect the Pitch centre wiper to **pin 13, CH0**. This makes Pitch the first selectable source.
+3. Connect **pin 3, COMMON**, to **GP28 / ADC2**. COMMON is the one shared wire carrying whichever channel is selected to the Pico's measuring input.
+4. Leave Rate, Amount, Trigger, and LED wiring unchanged.
+
+The analogue switches are bidirectional, so the chip does not technically have a fixed input and output. We choose channels as inputs and COMMON as output because many knobs are sharing one Pico ADC.
+
+## 6. Predict before power
+
+Trace aloud: "Pitch wiper, pin 13 channel 0, internal switch, pin 3 common, GP28." Why must pins 9–11 all be grounded?
+
+## 7. Test only Pitch first
+
+Reconnect USB and run this small test:
+
+<LessonSevenCodeDiff />
+
+1. Turn Pitch fully left: expect roughly 100 Hz.
+2. Turn fully right: expect roughly 1000 Hz.
+3. Leave untouched: the reading should stay stable.
+
+:::details Pitch stays near one value
+Unplug USB. Confirm Pitch wiper goes to pin 13, COMMON pin 3 goes to GP28, and pins 9–11 all reach GND. Recount from the notch rather than from the breadboard row numbers.
+:::
+
+:::details Pitch reads zero or behaves randomly
+Unplug immediately. Recheck pins 16, 8, 7, and 6. Also check the IC is across the centre trench so opposite pins are not joined by one breadboard strip.
+:::
+
+### Why `smoothed_pitch` is gone
+
+Lesson 6's software low-pass filter existed to hide ordinary raw ADC/wiring noise: a stationary Pitch pot could jitter between roughly 800 and 814 Hz on the bare wire straight into GP28. The 100 nF bypass capacitor you just added between pins 16 and 8 absorbs exactly that kind of fast electrical noise in hardware, right at the source, before the signal ever reaches COMMON and GP28.
+
+With the noise already filtered by the capacitor, `smoothed_pitch`'s exponential averaging has nothing left to smooth. Reading `pitch.value` directly responds to a knob turn immediately, with no 90/10 lag catching up behind it. The 5 Hz print threshold stays, since it is not noise suppression, it just keeps the Shell from printing on every single loop tick.
+
+## Test what you know
+
+<LessonSevenQuiz />
+
+<LessonSevenChecklist />
+
+</LessonGate>

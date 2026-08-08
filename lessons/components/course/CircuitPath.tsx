@@ -1,6 +1,6 @@
 import { compile } from "@dub-siren/breadboard";
 import { ArrowUpRight, Maximize2, X } from "lucide-react";
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 
 export const lessonOneSource = `breadboard Lesson1 rows 24 columns 5
 chip Pico2 {
@@ -37,8 +37,17 @@ export default function CircuitPath() {
   );
 }
 
-export function BreadboardDiagram({ source, label, caption }: { source: string; label: string; caption: string }) {
+export type ExtraPinout = {
+  id: string;
+  buttonLabel: string;
+  source: string;
+  title: string;
+  content: ReactNode;
+};
+
+export function BreadboardDiagram({ source, label, caption, extraPinout }: { source: string; label: string; caption: string; extraPinout?: ExtraPinout }) {
   const pinoutDialog = useRef<HTMLDialogElement>(null);
+  const extraDialog = useRef<HTMLDialogElement>(null);
   const result = compile(source);
   const playgroundHref = `/pico-dub-siren/breadboard/playground/?${new URLSearchParams({ source }).toString()}`;
 
@@ -50,9 +59,16 @@ export function BreadboardDiagram({ source, label, caption }: { source: string; 
     <figure className="course-circuit course-breadboard">
       <header className="course-breadboard__header">
         <strong>Breadboard diagram</strong>
-        <button type="button" onClick={() => pinoutDialog.current?.showModal()}>
-          View Pico pinout <Maximize2 aria-hidden="true" />
-        </button>
+        <div className="course-breadboard__header-buttons">
+          {extraPinout ? (
+            <button type="button" onClick={() => extraDialog.current?.showModal()}>
+              {extraPinout.buttonLabel} <Maximize2 aria-hidden="true" />
+            </button>
+          ) : null}
+          <button type="button" onClick={() => pinoutDialog.current?.showModal()}>
+            View Pico pinout <Maximize2 aria-hidden="true" />
+          </button>
+        </div>
       </header>
       <div
         className="course-breadboard__svg"
@@ -90,6 +106,29 @@ export function BreadboardDiagram({ source, label, caption }: { source: string; 
           />
         </div>
       </dialog>
+      {extraPinout ? (
+        <dialog
+          ref={extraDialog}
+          className="course-pinout-dialog"
+          aria-labelledby={`${extraPinout.id}-title`}
+          onClick={(event) => {
+            if (event.target === event.currentTarget) extraDialog.current?.close();
+          }}
+        >
+          <header>
+            <div>
+              <span>{extraPinout.source}</span>
+              <h3 id={`${extraPinout.id}-title`}>{extraPinout.title}</h3>
+            </div>
+            <button type="button" aria-label={`Close ${extraPinout.title}`} onClick={() => extraDialog.current?.close()}>
+              <X aria-hidden="true" />
+            </button>
+          </header>
+          <div className="course-pinout-dialog__image">
+            {extraPinout.content}
+          </div>
+        </dialog>
+      ) : null}
     </figure>
   );
 }

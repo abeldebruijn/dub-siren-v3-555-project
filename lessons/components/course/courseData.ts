@@ -45,6 +45,22 @@ export const lessonFiveDoneItems = [
   { id: "predict-swapped-wipers", label: "You predicted the symptom of swapped centre-wiper connections." },
 ] as const;
 
+export const lessonSixDoneItems = [
+  { id: "pitch-sweeps-range", label: "Pitch reaches roughly 100–1000 Hz turning clockwise." },
+  { id: "three-way-independence", label: "Rate, Amount, and Pitch each change only their own property." },
+  { id: "trigger-stays-responsive", label: "Trigger remains responsive while Pitch is read." },
+  { id: "name-three-adc-pins", label: "You can name all three exposed ADC inputs and their assigned controls." },
+  { id: "explain-smoothing", label: "You can explain why the low-pass filter was added." },
+] as const;
+
+export const lessonSevenDoneItems = [
+  { id: "notch-and-pins", label: "The IC notch and all sixteen pin numbers make sense." },
+  { id: "pitch-through-mux", label: "Pitch travels through pin 13 to pin 3 and GP28." },
+  { id: "pitch-still-sweeps", label: "Pitch still reaches roughly 100–1000 Hz clockwise." },
+  { id: "explain-000", label: "You can explain why selector state 000 chooses channel 0." },
+  { id: "quiz-passed", label: "You scored full marks on the multiplexer quiz." },
+] as const;
+
 export const lessons = [
   ["Make your first light blink", "Wire one safe LED path, then make the Pico pulse it with MicroPython."],
   ["Control the light with a button", "Compare momentary and toggle behavior with one button."],

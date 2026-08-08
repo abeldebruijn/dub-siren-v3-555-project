@@ -30,6 +30,16 @@
     "label": "05 · Control speed and brightness together"
   },
   {
+    "type": "file",
+    "name": "lesson6",
+    "label": "06 · Add a pitch dial"
+  },
+  {
+    "type": "file",
+    "name": "lesson7",
+    "label": "07 · Route pitch through the switch chip"
+  },
+  {
     "type": "dir-section-header",
     "name": "appendix",
     "label": "Appendix",

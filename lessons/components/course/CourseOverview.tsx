@@ -1,5 +1,5 @@
 import { Check, LockKeyhole, RotateCcw } from "lucide-react";
-import { docsBase, lessonFourDoneItems, lessonOneDoneItems, lessonThreeDoneItems, lessonTwoDoneItems, lessons, lessonSlug } from "./courseData";
+import { docsBase, lessonFiveDoneItems, lessonFourDoneItems, lessonOneDoneItems, lessonSixDoneItems, lessonThreeDoneItems, lessonTwoDoneItems, lessons, lessonSlug } from "./courseData";
 import { clearProgress, isLessonDone, useCourseProgress } from "./progress";
 
 export default function CourseOverview() {
@@ -8,6 +8,8 @@ export default function CourseOverview() {
   const lessonTwoDone = isLessonDone(progress, "lesson-002", lessonTwoDoneItems.map(({ id }) => id));
   const lessonThreeDone = isLessonDone(progress, "lesson-003", lessonThreeDoneItems.map(({ id }) => id));
   const lessonFourDone = isLessonDone(progress, "lesson-004", lessonFourDoneItems.map(({ id }) => id));
+  const lessonFiveDone = isLessonDone(progress, "lesson-005", lessonFiveDoneItems.map(({ id }) => id));
+  const lessonSixDone = isLessonDone(progress, "lesson-006", lessonSixDoneItems.map(({ id }) => id));
 
   return (
     <section className="course-roadmap" aria-label="Course lessons">
@@ -28,9 +30,9 @@ export default function CourseOverview() {
         {lessons.map(([title, subtitle], index) => {
           const number = index + 1;
           const slug = lessonSlug(number);
-          const done = (number === 1 && lessonOneDone) || (number === 2 && lessonTwoDone) || (number === 3 && lessonThreeDone) || (number === 4 && lessonFourDone);
-          const available = number === 1 || (number === 2 && lessonOneDone) || (number === 3 && lessonTwoDone) || (number === 4 && lessonThreeDone) || (number === 5 && lessonFourDone);
-          const contentReady = number <= 5;
+          const done = (number === 1 && lessonOneDone) || (number === 2 && lessonTwoDone) || (number === 3 && lessonThreeDone) || (number === 4 && lessonFourDone) || (number === 5 && lessonFiveDone) || (number === 6 && lessonSixDone);
+          const available = number === 1 || (number === 2 && lessonOneDone) || (number === 3 && lessonTwoDone) || (number === 4 && lessonThreeDone) || (number === 5 && lessonFourDone) || (number === 6 && lessonFiveDone) || (number === 7 && lessonSixDone);
+          const contentReady = number <= 7;
           const state = done ? "done" : available && contentReady ? "available" : "locked";
           const content = (
             <>

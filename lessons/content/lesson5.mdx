@@ -17,11 +17,14 @@ Your GP26 potentiometer is now **Mod Rate**. Keep its three wires unchanged. The
 2. Connect its centre wiper to `GP27 / ADC1`.
 3. Connect its other outside pin to the same `GND`.
 4. Leave GP26, GP14, GP15, and the LED resistor unchanged.
+5. Bridge the left and right power rails: one wire from `LP` to `RP`, another from `LG` to `RG`.
 
 <LessonFiveCircuit />
 
+Most breadboards split their power rails at the centre gap, so the left half's rails are not electrically connected to the right half's rails even though they carry the same printed `+`/`−` labels. Mod Rate sits on the left and Mod Amount sits on the right, so without the `LP`→`RP` and `LG`→`RG` bridge, Mod Amount's rail pins would float and never actually reach 3V3 or GND.
+
 :::danger Before reconnecting USB
-Trace both pots separately. Each must read: 3V3 → resistance → GND, with only the centre pin going to an ADC. Never connect VBUS or VSYS to GP26/GP27.
+Trace both pots separately. Each must read: 3V3 → resistance → GND, with only the centre pin going to an ADC. Never connect VBUS or VSYS to GP26/GP27. Also confirm both rail bridges are in place, or verify with a multimeter that your board's rails are already continuous.
 :::
 
 ## 3. Name both analogue inputs
