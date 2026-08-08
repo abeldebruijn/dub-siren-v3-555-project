@@ -11,14 +11,14 @@ The compiler returns ordered diagnostics with a stable code, severity, source ra
 
 ## Errors
 
-Errors prevent the canonical breadboard model and SVG. Common examples are an unknown pin alias, an out-of-range position, an overlapping placement, or an exact hole that is already occupied.
+Errors prevent the canonical breadboard model and SVG. Common examples are an unknown component pin, an invalid value, an unavailable endpoint, a duplicate component name, overlap, or board overflow.
 
 ## Warnings
 
-Warnings preserve the model and SVG. They identify suspicious but drawable situations such as duplicate connectivity or overlapping wire routes.
+Warnings preserve the model and SVG. They identify suspicious but drawable situations such as reversed LED or polarised-capacitor rail polarity, duplicate connectivity, or overlapping wire routes.
 
 <BreadboardExample
   label="Compiler diagnostic example"
-  tip="Fix the alias NOPE by changing it to OUT."
+  tip="Move R1's second endpoint off the positive rail, then target R1.1."
   source={diagnosticProgram}
 />

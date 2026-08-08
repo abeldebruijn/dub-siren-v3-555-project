@@ -7,7 +7,7 @@ import { breadboardProgram } from "../../examples/sources";
 
 # Breadboard
 
-The optional `breadboard` statement controls the board name, row count, and number of terminal columns on each side.
+The optional `breadboard` statement controls the board name, row count, and number of terminal columns on each side. It must be the first declaration in a V0.2 document.
 
 ```text
 breadboard [name] rows <integer> [columns <integer>]
@@ -29,4 +29,4 @@ breadboard [name] rows <integer> [columns <integer>]
 
 ## Omitted declaration
 
-The complete first line may be omitted. The compiler then chooses the default board. Writing the declaration is useful in examples because the intended dimensions remain visible.
+The complete first line may be omitted. The compiler then uses its default board. Writing the declaration is recommended in course examples because dimensions and layout intent remain visible.

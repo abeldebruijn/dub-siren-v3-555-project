@@ -1,35 +1,33 @@
 ---
-title: Breadboard language
-description: Write a small, readable program and compile it into an SVG breadboard diagram.
+title: Breadboard language V0.2
+description: Describe Raspberry Pi Pico breadboard circuits and compile them into deterministic SVG diagrams.
 ---
 
 import { completeProgram } from "../examples/sources";
 
-# Breadboard language
+# Breadboard language V0.2
 
-Breadboard is a small language for describing a breadboard, placing chips, and connecting them with orthogonal wires. The compiler turns the description into a deterministic SVG and reports precise errors and warnings.
+Breadboard is a small language for course diagrams. V0.2 describes one board, singleton chips, discrete components, physical controls, wires, and numbered annotations. The compiler returns precise diagnostics, a canonical model, and deterministic SVG. It does not simulate voltage or current.
 
-## A complete program
+## A complete V0.2 program
 
-This five-row example declares a board, describes a tiny chip, places it, and connects two of its named pins. Change the source and the compiled diagram updates immediately.
+This example places one NE555, an LED, and a resistor; connects ground; and anchors an annotation. Edit any line to see the compiler update.
 
 <BreadboardExample
-  label="Complete Breadboard program"
-  tip="Move U1 to R1, add flip, or reduce the cyan wire to saturation 50%."
+  label="Complete Breadboard V0.2 program"
+  tip="Toggle the LED, move the NE555, or change the resistor to 4.7k."
   source={completeProgram}
 />
 
-## How to read the language
+## Declaration order
 
-Each statement starts on a new line. Keywords and names are case-insensitive. `//` starts a comment. A typical program is read from top to bottom:
+Write declarations from top to bottom:
 
-1. Optionally declare the `breadboard` size.
-2. Declare reusable `chip` definitions.
-3. `place` chip instances on terminal rows.
-4. Add `wire` connections.
+1. Optional `breadboard` declaration.
+2. Components: `chip`, `led`, `capacitor`, `resistor`, `button`, `potentiometer`, and `switch`.
+3. `wire` declarations.
+4. Numbered `annotation` declarations.
 
-Continue with the [complete grammar](./language/grammar.mdx), or open any chapter from the sidebar.
+A component must be declared before another statement references it. Properties inside a component block may appear in any order and cannot repeat.
 
-:::info Installation and configuration
-The compiler currently lives inside this project. Package installation and standalone configuration will be documented when the public package is available.
-:::
+Start with [Breadboard](./language/breadboard.mdx), or use the sidebar to learn positions, components, controls, and references.

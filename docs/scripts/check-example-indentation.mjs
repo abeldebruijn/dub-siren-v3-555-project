@@ -3,8 +3,7 @@ import { readFile } from "node:fs/promises";
 const chipExamplePages = [
   "index.html",
   "language/components.html",
-  "reference/pins-and-aliases.html",
-  "reference/diagnostics.html",
+  "language/pins-and-aliases.html",
   "examples/two-components.html",
 ];
 

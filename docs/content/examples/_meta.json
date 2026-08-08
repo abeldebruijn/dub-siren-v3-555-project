@@ -7,6 +7,11 @@
   {
     "type": "file",
     "name": "common-connections",
-    "label": "Common wire connections"
+    "label": "Common wire connects"
+  },
+  {
+    "type": "file",
+    "name": "discrete-components",
+    "label": "LEDs, buttons, capacitors, and resistors"
   }
 ]

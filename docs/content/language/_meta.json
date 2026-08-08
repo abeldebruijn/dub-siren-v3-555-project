@@ -1,13 +1,18 @@
 [
   {
     "type": "file",
-    "name": "grammar",
-    "label": "Complete grammar"
+    "name": "breadboard",
+    "label": "Breadboard"
   },
   {
     "type": "file",
-    "name": "breadboard",
-    "label": "Breadboard"
+    "name": "positions",
+    "label": "Positions and shortcuts"
+  },
+  {
+    "type": "file",
+    "name": "pins-and-aliases",
+    "label": "Pins and aliases"
   },
   {
     "type": "file",
@@ -18,5 +23,20 @@
     "type": "file",
     "name": "wires",
     "label": "Wires"
+  },
+  {
+    "type": "file",
+    "name": "leds-and-buttons",
+    "label": "LEDs and buttons"
+  },
+  {
+    "type": "file",
+    "name": "capacitors-and-resistors",
+    "label": "Capacitors and resistors"
+  },
+  {
+    "type": "file",
+    "name": "switches-and-potentiometers",
+    "label": "Switches and potentiometers"
   }
 ]

@@ -7,7 +7,7 @@ import { automaticWireProgram, viaWireProgram } from "../../examples/sources";
 
 # Wires
 
-Wires connect two resolved electrical groups. They only use horizontal and vertical segments.
+Wires connect two resolved electrical groups. They use horizontal and vertical segments and may reference board positions or previously declared component pins.
 
 ```text
 wire <endpoint> --> <endpoint>
@@ -28,7 +28,7 @@ Without `via`, the compiler selects endpoints and finds a deterministic orthogon
 
 ## Via points
 
-Every `via` point must be an exact coordinate such as `LT-R1C1` or `RG5`. Via points guide the visible path; they do not create an electrical connection at that intermediate hole.
+Every `via` point must be an exact coordinate such as `LT-R1C1` or `RG5`. Via points are ordered visual anchors; they do not create electrical connections at intermediate holes. Pin references and shortcuts are not valid via points.
 
 <BreadboardExample
   label="Wire with exact via points"

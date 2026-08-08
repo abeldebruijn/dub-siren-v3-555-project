@@ -1,15 +1,15 @@
 ---
 title: Components and placement
-description: Declare reusable chips, their dimensions, pins, aliases, and placements.
+description: Declare singleton chips, place controls, and address component terminals.
 ---
 
 import { componentProgram } from "../../examples/sources";
 
 # Components and placement
 
-A chip declaration describes a reusable footprint. A separate placement gives it an instance name and a top row.
+V0.2 components are declared and placed once. All component names share one case-insensitive namespace. The old reusable `chip` plus separate `place` form is no longer valid.
 
-## Chip declaration
+## Singleton chip
 
 ```text
 chip <name> {
@@ -17,25 +17,33 @@ chip <name> {
   [width <integer>]
   [color <colour>]
   pin <number> <alias> [| <alias> ...]
-}
+} at R<row> [flip]
 ```
 
-Members use the order shown above. Pin numbers must be ascending, but pins may be omitted. `width` is optional and defaults to `2`. `height` overrides the inferred height; otherwise it is calculated from the highest pin number.
-
-## Placement
-
-```text
-place <instance> <chip-name> at R<row> [flip] [color <colour>]
-```
-
-The row is the top of the footprint. `flip` places pin 1 on the right instead of the left. A placement colour overrides the chip's declared colour.
+`at R<row>` is required. Width defaults to `2`. Height may be explicit or inferred from an even highest pin number. Pins may be sparse. `flip` mirrors the physical footprint without changing numbers or aliases.
 
 <BreadboardExample
-  label="Chip declaration and placement"
-  tip="Add flip, change forest to black, or move U1 to R1."
+  label="Singleton chip and annotation"
+  tip="Remove height to infer it from pin 8, or remove flip."
   source={componentProgram}
 />
 
-## Occupancy
+## Other component forms
 
-Chip pins occupy their physical terminal holes, and the body covers the holes underneath it. Overlapping placements are errors. Stacking components in a future z-direction is intentionally out of scope for now.
+- `led`, `capacitor`, and `resistor` use `from <endpoint> to <endpoint>`.
+- `button`, `potentiometer`, and `switch` use `at R<row>` with optional placement modifiers.
+- `annotation <number> at <endpoint>` adds a non-electrical numbered marker.
+
+All placements reserve their physical leg holes. Chip bodies reserve covered terminal holes. Control bodies are visual and reserve only their legs. Overlap, board overflow, unavailable endpoints, and duplicate names are errors.
+
+## References
+
+Use a component name followed by a numeric pin or named terminal:
+
+```text
+wire NE555.3 --> D1.1
+wire NE555.OUT --> S1.left1
+annotation 1 at P1.wiper
+```
+
+Component references resolve to a free hole in the terminal's electrical group; they do not reuse the occupied leg hole.

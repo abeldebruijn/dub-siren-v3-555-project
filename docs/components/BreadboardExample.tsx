@@ -113,8 +113,8 @@ export default function BreadboardExample({
           <header className="bb-example__toolbar">
             <span className="bb-example__panel-title">output</span>
             <div className="bb-example__actions bb-example__actions--output">
-              <CompileStatus diagnostics={result.diagnostics} valid={result.status === "valid"} />
               <div className="bb-example__copy-split">
+                <CompileStatus diagnostics={result.diagnostics} valid={result.status === "valid"} />
                 <button
                   className="bb-example__copy-primary"
                   type="button"

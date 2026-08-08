@@ -1,16 +1,16 @@
 ---
 title: Two connected components
-description: Connect named pins on two placed chip instances.
+description: Connect named pins on two singleton chip declarations.
 ---
 
 import { twoComponentsProgram } from "../../examples/sources";
 
 # Two connected components
 
-Aliases keep a connection readable even when the physical pin numbers differ between components.
+V0.2 declares each chip once with its placement. Aliases keep the connection readable even when physical pin numbers differ.
 
 <BreadboardExample
-  label="Two connected chip instances"
+  label="Two connected singleton chips"
   tip="Connect A.IN to B.OUT instead, or add ground wires for both chips."
   source={twoComponentsProgram}
 />

@@ -215,20 +215,27 @@ html.dark {
   height: 100%;
   min-height: 0;
   border: 0;
-  border-radius: 0.55rem 0 0 0.55rem;
+  border-radius: 0;
+  background: #1c6548;
+  color: #fff;
+}
+
+.bb-example__actions--output .bb-example__copy-primary:hover {
+  background: #145039;
 }
 
 .bb-example__copy-menu {
   position: relative;
   box-sizing: border-box;
+  flex: 0 0 1.9rem;
+  width: 1.9rem;
   height: 100%;
-  display: flex;
   border-left: 1px solid rgba(28, 101, 72, 0.16);
 }
 
 .bb-example__copy-menu summary {
   box-sizing: border-box;
-  min-width: 1.85rem;
+  width: 100%;
   height: 100%;
   min-height: 0;
   display: inline-flex;
@@ -396,14 +403,18 @@ html.dark {
 }
 
 .bb-example__status {
+  box-sizing: border-box;
+  height: 100%;
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  padding: 0.28rem 0.48rem;
-  border-radius: 999px;
+  padding: 0.28rem 0.55rem;
+  border-right: 1px solid rgba(28, 101, 72, 0.16);
+  border-radius: 0.55rem 0 0 0.55rem;
   font: 700 0.61rem/1 "JetBrains Mono", monospace;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  white-space: nowrap;
 }
 
 .bb-example__status svg {
@@ -508,10 +519,12 @@ html.dark .bb-example__output {
 }
 
 html.dark .bb-example__panel-title { color: #c8c2b7; }
-html.dark .bb-example__actions--output button { background: #202620; color: #97dfbd; }
 html.dark .bb-example__copy-split { background: #202620; }
+html.dark .bb-example__actions--output .bb-example__copy-primary { background: #2f805e; color: #fff; }
+html.dark .bb-example__actions--output .bb-example__copy-primary:hover { background: #3b9671; }
 html.dark .bb-example__copy-menu summary,
 html.dark .bb-example__copy-menu-popover { background: #202620; color: #97dfbd; }
+html.dark .bb-example__copy-menu-popover button { background: #202620; color: #97dfbd; }
 html.dark .bb-example__status--valid { color: #97dfbd; }
 
 /* Course */
