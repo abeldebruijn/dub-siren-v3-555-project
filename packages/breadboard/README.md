@@ -2,6 +2,8 @@
 
 Pure TypeScript compiler for Breadboard descriptions. It runs in Node and browsers, has no DOM dependency, and exposes one public interface.
 
+The settled language extension is documented in [V0.2-SPEC.md](V0.2-SPEC.md).
+
 ## Interface
 
 ```ts
