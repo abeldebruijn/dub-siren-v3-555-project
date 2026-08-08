@@ -104,6 +104,26 @@ _Avoid_: Rotation
 A named placement of a chip definition, centred across the terminal gap with its top pin pair anchored to a breadboard row.
 _Avoid_: Chip definition
 
+**Singleton chip**:
+A chip declaration that defines and places one named chip in the same source declaration; it cannot be placed again.
+_Avoid_: Chip definition, chip instance
+
+**Two-terminal component**:
+A rendered component with a `from` and `to` terminal, such as an LED, capacitor, or resistor. Its body is visual-only and may run diagonally.
+_Avoid_: Wire
+
+**Placed control**:
+A button, potentiometer, or switch with terminals automatically placed from a row and optional terminal side.
+_Avoid_: Two-terminal component
+
+**Component terminal**:
+A named or numbered terminal belonging to a placed component. A terminal reference resolves to a free hole in its electrical group.
+_Avoid_: Component body, wire endpoint
+
+**Numbered annotation**:
+A non-electrical positive-integer marker anchored to a resolved endpoint and rendered as a small circle.
+_Avoid_: Text annotation
+
 **Pin order**:
 Counter-clockwise physical numbering beginning at the top-left, increasing down the left side, continuing at the bottom-right, and increasing up the right side. A flipped placement mirrors this order horizontally.
 _Avoid_: Alias order
