@@ -6,7 +6,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "pnpm --filter @dub-siren/breadboard build && pnpm --filter dub-siren-v3-site build && pnpm --filter dub-siren-v3-docs build && node scripts/assemble-site.mjs",
+    "dev": "pnpm --parallel --filter dub-siren-v3-site --filter dub-siren-v3-docs --filter pico-dub-siren-lessons run dev",
+    "build": "pnpm --filter @dub-siren/breadboard build && pnpm --filter dub-siren-v3-site build && pnpm --filter dub-siren-v3-docs build && pnpm --filter pico-dub-siren-lessons build && node scripts/assemble-site.mjs",
     "test": "pnpm -r test",
     "check:release": "pnpm test && pnpm build"
   }

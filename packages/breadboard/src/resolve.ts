@@ -1,8 +1,9 @@
 import type {
+  CanonicalAnnotation,
   CanonicalPoint,
   CanonicalBreadboardModel,
+  CanonicalBoardTerminal,
   CanonicalChip,
-  CanonicalPin,
   CanonicalWire,
   Diagnostic,
   Endpoint,
@@ -15,11 +16,27 @@ import type {
   SurfaceColor,
   SurfaceDocument,
   SurfaceStatement,
+  StructuralConnection,
   UnsupportedReason,
 } from "./types.js";
+import {
+  resolvePlacedControls,
+  type ComponentReference,
+} from "./resolve/controls.js";
+import { resolveTwoTerminalComponents } from "./resolve/two-terminal.js";
 
-type ChipStatement = Extract<SurfaceStatement, { kind: "chip-definition" }>;
+type ChipStatement = Extract<
+  SurfaceStatement,
+  { kind: "chip-definition" | "chip" }
+>;
 type PlacementStatement = Extract<SurfaceStatement, { kind: "placement" }>;
+type ChipPlacement = Readonly<{
+  instance: PlacementStatement["instance"];
+  row: PlacementStatement["row"];
+  flip: PlacementStatement["flip"];
+  color: PlacementStatement["color"];
+  span: SourceSpan;
+}>;
 
 type ResolvedDefinition = Readonly<{
   statement: ChipStatement;
@@ -234,7 +251,7 @@ function definitionFrom(
           : member.kind === "color-member"
             ? 2
             : 3;
-    if (rank < highestRank) {
+    if (statement.kind === "chip-definition" && rank < highestRank) {
       report(
         context,
         "chip.member-order",
@@ -275,7 +292,7 @@ function definitionFrom(
       );
       valid = false;
     } else {
-      if (number < previousPin) {
+      if (statement.kind === "chip-definition" && number < previousPin) {
         report(
           context,
           "chip.pin-order",
@@ -328,6 +345,20 @@ function definitionFrom(
       : highestPin > 0
         ? Math.ceil(highestPin / 2)
         : null;
+  if (
+    statement.kind === "chip" &&
+    heightMember === undefined &&
+    highestPin > 0 &&
+    highestPin % 2 !== 0
+  ) {
+    report(
+      context,
+      "chip.height-not-inferable",
+      statement.span,
+      "Chip height requires an even highest pin number",
+    );
+    valid = false;
+  }
   if (height === null) {
     report(
       context,
@@ -394,7 +425,8 @@ function selectorCandidates(
   holes: readonly ExactHole[],
   occupied: ReadonlyMap<string, SourceSpan>,
   instances: ReadonlyMap<string, ResolvedInstance>,
-  declaredInstances: ReadonlySet<string>,
+  declaredInstances: ReadonlyMap<string, SourceSpan>,
+  componentReferences: ReadonlyMap<string, ComponentReference>,
   context: ValidationContext,
 ): readonly HoleCandidate[] | null {
   const available = (hole: ExactHole) => !occupied.has(holeKey(hole));
@@ -462,35 +494,48 @@ function selectorCandidates(
 
   const instanceKey = endpoint.instance.value.toLowerCase();
   const instance = instances.get(instanceKey);
-  if (instance === undefined) {
-    if (!declaredInstances.has(instanceKey)) {
-      report(context, "selector.unknown-instance", endpoint.instance.span, "Unknown chip instance");
-    }
+  const componentReference = componentReferences.get(instanceKey);
+  const declarationSource =
+    instance?.chip.source ??
+    componentReference?.source ??
+    declaredInstances.get(instanceKey);
+  if (declarationSource === undefined) {
+    report(context, "selector.unknown-instance", endpoint.instance.span, "Unknown component instance");
     return null;
   }
-  if (instance.chip.source.start > endpoint.span.start) {
+  if (declarationSource.start > endpoint.span.start) {
     report(
       context,
       "name.forward-reference",
       endpoint.instance.span,
-      "Chip instance is declared later",
-      [instance.chip.source],
+      "Component instance is declared later",
+      [declarationSource],
     );
     return null;
   }
-  let matchingPins: readonly CanonicalPin[];
+  if (instance === undefined && componentReference === undefined) return null;
+  let matchingPins: readonly Readonly<{
+    number: number;
+    hole: ExactHole;
+  }>[];
   if (endpoint.target.kind === "number") {
     const number = endpoint.target.number.value;
-    if (number === null || number < 1 || number > instance.definition.height * 2) {
+    matchingPins = instance === undefined
+      ? (componentReference?.terminals.filter((terminal) => terminal.number === number) ?? [])
+      : instance.chip.terminals.filter((terminal) => terminal.number === number);
+    if (number === null || matchingPins.length === 0) {
       report(context, "selector.unknown-pin", endpoint.target.span, "Unknown physical pin");
       return null;
     }
-    matchingPins = instance.chip.pins.filter((pin) => pin.number === number);
   } else {
     const alias = endpoint.target.alias.value.toLowerCase();
-    matchingPins = instance.chip.pins.filter((pin) =>
-      instance.definition.pins.get(pin.number)?.aliases.includes(alias),
-    );
+    matchingPins = instance === undefined
+      ? (componentReference?.terminals.filter((terminal) =>
+          terminal.names.some((name) => name.toLowerCase() === alias),
+        ) ?? [])
+      : instance.chip.terminals.filter((terminal) =>
+          instance.definition.pins.get(terminal.number)?.aliases.includes(alias),
+        );
     if (matchingPins.length === 0) {
       report(context, "selector.unknown-alias", endpoint.target.span, "Unknown pin alias");
       return null;
@@ -499,11 +544,13 @@ function selectorCandidates(
   const groups = new Set(matchingPins.map(({ hole }) => groupKey(hole)));
   const result = candidates(
     holes.filter(
-      (hole) => hole.kind === "terminal-hole" && groups.has(groupKey(hole)),
+      (hole) =>
+        groups.has(groupKey(hole)) &&
+        (instance === undefined || hole.kind === "terminal-hole"),
     ),
   );
   if (result.length === 0) {
-    report(context, "selector.no-free-hole", endpoint.span, "Pin selector has no free terminal hole");
+    report(context, "selector.no-free-hole", endpoint.span, "Pin selector has no free hole");
     return null;
   }
   return result;
@@ -583,7 +630,7 @@ function wireColor(
   return { ...final, underlay };
 }
 
-function explicitRoute(
+function routeAnchors(
   statement: Extract<SurfaceStatement, { kind: "wire" }>,
   from: ExactHole,
   to: ExactHole,
@@ -633,27 +680,6 @@ function explicitRoute(
     const span = current.source ?? statement.to.span;
     if (previous.x4 === current.x4 && previous.y4 === current.y4) {
       report(context, "route.duplicate-point", span, "Route repeats a point");
-      return [];
-    }
-    if (previous.x4 !== current.x4 && previous.y4 !== current.y4) {
-      report(context, "route.diagonal", span, "Route segment is diagonal");
-      return [];
-    }
-  }
-  for (let index = 1; index < path.length - 1; index += 1) {
-    const before = path[index - 1] as CanonicalPoint;
-    const current = path[index] as CanonicalPoint;
-    const after = path[index + 1] as CanonicalPoint;
-    const first = { x: current.x4 - before.x4, y: current.y4 - before.y4 };
-    const second = { x: after.x4 - current.x4, y: after.y4 - current.y4 };
-    if ((first.x === 0) === (second.x === 0)) {
-      const dot = first.x * second.x + first.y * second.y;
-      report(
-        context,
-        dot < 0 ? "route.reversal" : "route.collinear",
-        current.source ?? statement.span,
-        dot < 0 ? "Route reverses direction" : "Route point is not a turn",
-      );
       return [];
     }
   }
@@ -876,6 +902,39 @@ function automaticRoute(
   return null;
 }
 
+function orthogonalRoute(
+  anchors: readonly CanonicalPoint[] | null,
+  from: CanonicalPoint,
+  to: CanonicalPoint,
+  chips: readonly CanonicalChip[],
+  earlierWires: readonly CanonicalWire[],
+  rows: number,
+  columns: number,
+): readonly CanonicalPoint[] | null {
+  if (anchors === null) {
+    return automaticRoute(from, to, chips, earlierWires, rows, columns);
+  }
+  const route: CanonicalPoint[] = [];
+  for (let index = 1; index < anchors.length; index += 1) {
+    const start = anchors[index - 1] as CanonicalPoint;
+    const end = anchors[index] as CanonicalPoint;
+    const leg = automaticRoute(
+      start,
+      end,
+      chips,
+      earlierWires,
+      rows,
+      columns,
+    );
+    if (leg === null) return null;
+    const withAnchorSource = leg.map((point, pointIndex) =>
+      pointIndex === leg.length - 1 ? { ...point, source: end.source } : point,
+    );
+    route.push(...(index === 1 ? withAnchorSource : withAnchorSource.slice(1)));
+  }
+  return route;
+}
+
 function pathsOverlap(
   left: readonly CanonicalPoint[],
   right: readonly CanonicalPoint[],
@@ -912,7 +971,7 @@ class Connectivity {
 }
 
 function placeChip(
-  placement: PlacementStatement,
+  placement: ChipPlacement,
   definition: ResolvedDefinition,
   columns: number,
 ): Readonly<{ chip: CanonicalChip; occupancy: readonly Occupancy[] }> {
@@ -922,7 +981,7 @@ function placeChip(
     : Math.floor(definition.width / 2);
   const rightWidth = definition.width - leftWidth;
   const pinColumn = { left: leftWidth, right: rightWidth } as const;
-  const pins: CanonicalPin[] = [];
+  const terminals: CanonicalBoardTerminal[] = [];
   const occupancy: Occupancy[] = [];
   const pinByHole = new Map<string, number>();
 
@@ -945,10 +1004,10 @@ function placeChip(
       column: pinColumn[side],
     };
     const declaration = definition.pins.get(number);
-    pins.push({
+    terminals.push({
       number,
       hole,
-      label: declaration?.label || null,
+      name: declaration?.label || null,
       source: declaration?.span ?? null,
     });
     pinByHole.set(holeKey(hole), number);
@@ -967,15 +1026,15 @@ function placeChip(
         occupancy.push(
           pin === undefined
             ? {
-                kind: "chip-covered",
+                kind: "component-covered",
                 hole,
-                chip: placement.instance.value,
+                component: placement.instance.value,
               }
             : {
-                kind: "chip-pin",
+                kind: "component-terminal",
                 hole,
-                chip: placement.instance.value,
-                pin,
+                component: placement.instance.value,
+                terminal: pin,
               },
         );
       }
@@ -990,8 +1049,12 @@ function placeChip(
   );
   return {
     chip: {
-      definitionName: definition.statement.name.spelling,
-      instanceName: placement.instance.spelling,
+      kind: "chip",
+      name: placement.instance.spelling,
+      label:
+        definition.statement.kind === "chip-definition"
+          ? definition.statement.name.spelling
+          : null,
       flip,
       color:
         placement.color === null ? definition.color : colorValue(placement.color),
@@ -1001,7 +1064,7 @@ function placeChip(
         width4: rightX4 - leftX4 + 40,
         height4: bottomY4 - topY4 + 72,
       },
-      pins,
+      terminals,
       source: placement.span,
     },
     occupancy,
@@ -1056,29 +1119,50 @@ export function resolveBreadboard(
   const definitions = new Map<string, ResolvedDefinition>();
   const definitionStatements = new Map<string, ChipStatement>();
   const names = new Map<string, SourceSpan>();
-  if (boardStatement?.kind === "breadboard" && boardStatement.name !== null) {
-    names.set(boardStatement.name.value.toLowerCase(), boardStatement.name.span);
-  }
+  const declarationName = (statement: SurfaceStatement) =>
+    statement.kind === "breadboard"
+      ? statement.name
+      : statement.kind === "placement"
+        ? statement.instance
+        : statement.kind === "chip-definition" ||
+            statement.kind === "chip" ||
+            statement.kind === "led" ||
+            statement.kind === "capacitor" ||
+            statement.kind === "resistor" ||
+            statement.kind === "button" ||
+            statement.kind === "potentiometer" ||
+            statement.kind === "switch"
+          ? statement.name
+          : null;
   for (const statement of ast.statements) {
-    if (statement.kind === "chip-definition") {
+    const name = declarationName(statement);
+    if (name === null) continue;
+    const key = name.value.toLowerCase();
+    const first = names.get(key);
+    if (first === undefined) {
+      names.set(key, name.span);
+    } else {
+      report(
+        context,
+        "name.duplicate",
+        name.span,
+        "Name is already declared",
+        [first],
+      );
+    }
+  }
+  const ownsName = (value: Readonly<{ value: string; span: SourceSpan }>) => {
+    const owner = names.get(value.value.toLowerCase());
+    return owner?.start === value.span.start && owner.end === value.span.end;
+  };
+  for (const statement of ast.statements) {
+    if (statement.kind === "chip-definition" || statement.kind === "chip") {
       const nameKey = statement.name.value.toLowerCase();
       if (!definitionStatements.has(nameKey)) {
         definitionStatements.set(nameKey, statement);
       }
-      const firstName = names.get(nameKey);
-      if (firstName !== undefined) {
-        report(
-          context,
-          "name.duplicate",
-          statement.name.span,
-          "Name is already declared",
-          [firstName],
-        );
-      } else {
-        names.set(nameKey, statement.name.span);
-      }
       const definition = definitionFrom(statement, columns, context);
-      if (definition !== null) {
+      if (definition !== null && ownsName(statement.name)) {
         definitions.set(nameKey, definition);
       }
     }
@@ -1097,87 +1181,180 @@ export function resolveBreadboard(
   }
 
   const chips: CanonicalChip[] = [];
+  const controlComponents: ReturnType<typeof resolvePlacedControls>["components"][number][] = [];
+  const controlConnections: Extract<StructuralConnection, { kind: "contact" }>[] = [];
+  const twoTerminalComponents: ReturnType<typeof resolveTwoTerminalComponents>["components"][number][] = [];
   const occupancy: Occupancy[] = [];
   const occupied = new Map<string, SourceSpan>();
   const instances = new Map<string, ResolvedInstance>();
-  const declaredInstances = new Set<string>();
+  const declaredInstances = new Map<string, SourceSpan>();
+  const holes = allHoles(rows, columns);
+  const componentReferences = new Map<string, ComponentReference>();
   for (const statement of ast.statements) {
-    if (statement.kind !== "placement") continue;
-    const nameKey = statement.instance.value.toLowerCase();
-    declaredInstances.add(nameKey);
-    if (!statement.row.supported) continue;
-    const firstName = names.get(nameKey);
-    if (firstName !== undefined) {
-      report(
-        context,
-        "name.duplicate",
-        statement.instance.span,
-        "Name is already declared",
-        [firstName],
-      );
-      continue;
+    const name = declarationName(statement);
+    if (
+      name !== null &&
+      statement.kind !== "breadboard" &&
+      statement.kind !== "chip-definition" &&
+      !declaredInstances.has(name.value.toLowerCase())
+    ) {
+      declaredInstances.set(name.value.toLowerCase(), statement.span);
     }
-    names.set(nameKey, statement.instance.span);
-    const definitionKey = statement.definition.value.toLowerCase();
-    const declaration = definitionStatements.get(definitionKey);
-    if (declaration !== undefined && declaration.span.start > statement.span.start) {
-      report(
-        context,
-        "name.forward-reference",
-        statement.definition.span,
-        "Chip definition is declared later",
-        [declaration.name.span],
-      );
-      continue;
-    }
-    const definition = definitions.get(definitionKey);
-    if (definition === undefined) {
-      if (declaration === undefined) {
+  }
+  for (const statement of ast.statements) {
+    if (statement.kind === "placement" || statement.kind === "chip") {
+      const singleton = statement.kind === "chip";
+      const placement: ChipPlacement = singleton
+        ? {
+            instance: statement.name,
+            row: statement.row,
+            flip: statement.flip,
+            color: null,
+            span: statement.span,
+          }
+        : statement;
+      const nameKey = placement.instance.value.toLowerCase();
+      if (!placement.row.supported || !ownsName(placement.instance)) continue;
+      const definitionKey = singleton
+        ? nameKey
+        : statement.definition.value.toLowerCase();
+      const declaration = definitionStatements.get(definitionKey);
+      if (
+        !singleton &&
+        declaration !== undefined &&
+        declaration.span.start > statement.span.start
+      ) {
         report(
           context,
-          "placement.unknown-chip",
+          "name.forward-reference",
           statement.definition.span,
-          "Unknown chip definition",
+          "Chip definition is declared later",
+          [declaration.name.span],
         );
+        continue;
+      }
+      const definition = definitions.get(definitionKey);
+      if (definition === undefined) {
+        if (!singleton && declaration === undefined) {
+          report(
+            context,
+            "placement.unknown-chip",
+            statement.definition.span,
+            "Unknown chip definition",
+          );
+        }
+        continue;
+      }
+      const row = placement.row.value ?? 1;
+      if (row + definition.height - 1 > rows) {
+        report(
+          context,
+          "placement.row-overflow",
+          placement.row.span,
+          "Chip placement exceeds the breadboard rows",
+        );
+        continue;
+      }
+      const placed = placeChip(placement, definition, columns);
+      const collision = placed.occupancy.find((entry) =>
+        occupied.has(holeKey(entry.hole as ExactTerminalHole)),
+      );
+      if (collision !== undefined) {
+        const first = occupied.get(holeKey(collision.hole as ExactTerminalHole));
+        report(
+          context,
+          "placement.overlap",
+          placement.span,
+          "Chip footprint overlaps an earlier placement",
+          first === undefined ? [] : [first],
+        );
+        continue;
+      }
+      chips.push(placed.chip);
+      occupancy.push(...placed.occupancy);
+      instances.set(nameKey, { definition, chip: placed.chip });
+      for (const entry of placed.occupancy) {
+        occupied.set(holeKey(entry.hole), placement.span);
       }
       continue;
     }
-    const row = statement.row.value ?? 1;
-    if (row + definition.height - 1 > rows) {
-      report(
-        context,
-        "placement.row-overflow",
-        statement.row.span,
-        "Chip placement exceeds the breadboard rows",
-      );
+
+    if (
+      statement.kind === "button" ||
+      statement.kind === "potentiometer" ||
+      statement.kind === "switch"
+    ) {
+      const resolved = resolvePlacedControls([statement], {
+        rows,
+        columns,
+        occupiedSource: (hole) => occupied.get(holeKey(hole)) ?? null,
+        pointForHole: (hole) => holePoint(columns, hole),
+        claimName: (name, span) => {
+          const owner = names.get(name.toLowerCase());
+          return owner?.start === span.start && owner.end === span.end;
+        },
+        report: (code, span, message, related, severity) =>
+          report(context, code, span, message, related, severity),
+      });
+      controlComponents.push(...resolved.components);
+      controlConnections.push(...resolved.connections);
+      occupancy.push(...resolved.occupancy);
+      for (const claim of resolved.claimedHoles) {
+        occupied.set(holeKey(claim.hole), claim.source);
+      }
+      for (const reference of resolved.references) {
+        componentReferences.set(reference.name.toLowerCase(), reference);
+      }
       continue;
     }
-    const placed = placeChip(statement, definition, columns);
-    const collision = placed.occupancy.find((entry) =>
-      occupied.has(holeKey(entry.hole as ExactTerminalHole)),
-    );
-    if (collision !== undefined) {
-      const first = occupied.get(holeKey(collision.hole as ExactTerminalHole));
-      report(
-        context,
-        "placement.overlap",
-        statement.span,
-        "Chip footprint overlaps an earlier placement",
-        first === undefined ? [] : [first],
-      );
-      continue;
-    }
-    chips.push(placed.chip);
-    occupancy.push(...placed.occupancy);
-    instances.set(nameKey, { definition, chip: placed.chip });
-    for (const entry of placed.occupancy) {
-      occupied.set(holeKey(entry.hole), statement.span);
+
+    if (
+      statement.kind === "led" ||
+      statement.kind === "capacitor" ||
+      statement.kind === "resistor"
+    ) {
+      if (!ownsName(statement.name)) continue;
+      const resolved = resolveTwoTerminalComponents({
+        statements: [statement],
+        candidates: (endpoint) =>
+          selectorCandidates(
+            endpoint,
+            rows,
+            columns,
+            holes,
+            occupied,
+            instances,
+            declaredInstances,
+            componentReferences,
+            context,
+          ),
+        groupKey,
+        point: (hole) => holePoint(columns, hole),
+        color: colorValue,
+        report: (code, span, message, related, severity) =>
+          report(context, code, span, message, related, severity),
+        occupy: (hole, span) => occupied.set(holeKey(hole), span),
+        register: (component) =>
+          componentReferences.set(component.name.toLowerCase(), {
+            name: component.name,
+            source: component.source,
+            terminals: component.terminals.map(({ number, name, hole }) => ({
+              number,
+              names: name === null ? [] : [name],
+              hole,
+            })),
+          }),
+      });
+      twoTerminalComponents.push(...resolved.components);
+      occupancy.push(...resolved.occupancy);
     }
   }
-
-  const holes = allHoles(rows, columns);
   const wires: CanonicalWire[] = [];
+  const connections: StructuralConnection[] = [...controlConnections];
   const connectivity = new Connectivity();
+  for (const connection of controlConnections) {
+    connectivity.union(groupKey(connection.from), groupKey(connection.to));
+  }
   const wireStatements = ast.statements.filter(
     (statement) => statement.kind === "wire",
   );
@@ -1201,6 +1378,7 @@ export function resolveBreadboard(
       occupied,
       instances,
       declaredInstances,
+      componentReferences,
       context,
     );
     const toCandidates = selectorCandidates(
@@ -1211,6 +1389,7 @@ export function resolveBreadboard(
       occupied,
       instances,
       declaredInstances,
+      componentReferences,
       context,
     );
     if (fromCandidates === null || toCandidates === null) continue;
@@ -1261,7 +1440,7 @@ export function resolveBreadboard(
     if (selected === undefined) continue;
     const fromPoint = holePoint(columns, selected.from.hole);
     const toPoint = holePoint(columns, selected.to.hole);
-    const explicit = explicitRoute(
+    const anchors = routeAnchors(
       statement,
       selected.from.hole,
       selected.to.hole,
@@ -1269,10 +1448,9 @@ export function resolveBreadboard(
       columns,
       context,
     );
-    if (explicit !== null && explicit.length === 0) continue;
-    const path =
-      explicit ??
-      automaticRoute(
+    if (anchors !== null && anchors.length === 0) continue;
+    const path = orthogonalRoute(
+        anchors,
         fromPoint,
         toPoint,
         chips,
@@ -1316,6 +1494,13 @@ export function resolveBreadboard(
       color: wireColor(statement, selected.from.hole),
       source: statement.span,
     });
+    connections.push({
+      kind: "wire",
+      wire: number,
+      from: selected.from.hole,
+      to: selected.to.hole,
+      source: statement.span,
+    });
     occupancy.push(
       {
         kind: "wire-endpoint",
@@ -1334,10 +1519,177 @@ export function resolveBreadboard(
     occupied.set(holeKey(selected.to.hole), statement.to.span);
   }
 
+  const annotations: CanonicalAnnotation[] = [];
+  const annotationNumbers = new Map<number, SourceSpan>();
+  for (const statement of ast.statements) {
+    if (statement.kind !== "annotation" || !statement.number.supported) continue;
+    const number = statement.number.value;
+    const first = annotationNumbers.get(number);
+    if (first !== undefined) {
+      report(
+        context,
+        "annotation.duplicate-number",
+        statement.number.span,
+        "Annotation number is already declared",
+        [first],
+      );
+      continue;
+    }
+    annotationNumbers.set(number, statement.number.span);
+    const exactBoardTarget =
+      statement.target.kind === "pin-selector" ||
+      (statement.target.kind === "rail-selector" &&
+        statement.target.side !== null &&
+        statement.target.row !== null) ||
+      (statement.target.kind === "terminal-selector" &&
+        statement.target.side !== null &&
+        statement.target.column !== null);
+    if (!exactBoardTarget) {
+      report(
+        context,
+        "annotation.target-not-exact",
+        statement.target.span,
+        "Annotation target must identify an exact endpoint",
+      );
+      continue;
+    }
+    let targetHole: ExactHole | null = null;
+    if (statement.target.kind === "rail-selector") {
+      const row = statement.target.row?.value ?? null;
+      if (row === null || row < 1 || row > rows || statement.target.side === null) {
+        report(context, "selector.out-of-range", statement.target.span, "Annotation target is outside the breadboard");
+        continue;
+      }
+      targetHole = {
+        kind: "rail-hole",
+        side: statement.target.side.value,
+        polarity: statement.target.polarity.value,
+        row,
+      };
+    } else if (statement.target.kind === "terminal-selector") {
+      const row = statement.target.row.value;
+      const column = statement.target.column?.value ?? null;
+      if (
+        row === null ||
+        row < 1 ||
+        row > rows ||
+        column === null ||
+        column < 1 ||
+        column > columns ||
+        statement.target.side === null
+      ) {
+        report(context, "selector.out-of-range", statement.target.span, "Annotation target is outside the breadboard");
+        continue;
+      }
+      targetHole = {
+        kind: "terminal-hole",
+        side: statement.target.side.value,
+        row,
+        column,
+      };
+    } else {
+      const pinTarget = statement.target;
+      const key = pinTarget.instance.value.toLowerCase();
+      const instance = instances.get(key);
+      const reference = componentReferences.get(key);
+      const declaration =
+        instance?.chip.source ?? reference?.source ?? declaredInstances.get(key);
+      if (declaration === undefined) {
+        report(context, "selector.unknown-instance", pinTarget.instance.span, "Unknown component instance");
+        continue;
+      }
+      if (declaration.start > pinTarget.span.start) {
+        report(
+          context,
+          "name.forward-reference",
+          pinTarget.instance.span,
+          "Component instance is declared later",
+          [declaration],
+        );
+        continue;
+      }
+      if (instance === undefined && reference === undefined) continue;
+      let matching: readonly Readonly<{ number: number; hole: ExactHole }>[];
+      if (pinTarget.target.kind === "number") {
+        const number = pinTarget.target.number.value;
+        matching = instance === undefined
+          ? (reference?.terminals.filter((terminal) => terminal.number === number) ?? [])
+          : instance.chip.terminals.filter((terminal) => terminal.number === number);
+      } else {
+        const alias = pinTarget.target.alias.value.toLowerCase();
+        matching = instance === undefined
+          ? (reference?.terminals.filter((terminal) =>
+              terminal.names.some((name) => name.toLowerCase() === alias),
+            ) ?? [])
+          : instance.chip.terminals.filter((terminal) =>
+              instance.definition.pins
+                .get(terminal.number)
+                ?.aliases.includes(alias),
+            );
+      }
+      if (matching.length === 0) {
+        report(
+          context,
+          pinTarget.target.kind === "number"
+            ? "selector.unknown-pin"
+            : "selector.unknown-alias",
+          pinTarget.target.span,
+          pinTarget.target.kind === "number"
+            ? "Unknown physical pin"
+            : "Unknown pin alias",
+        );
+        continue;
+      }
+      if (
+        pinTarget.target.kind === "alias" &&
+        new Set(matching.map(({ hole }) => groupKey(hole))).size > 1
+      ) {
+        report(
+          context,
+          "annotation.target-not-exact",
+          pinTarget.target.span,
+          "Annotation alias resolves to more than one pin",
+        );
+        continue;
+      }
+      targetHole = [...matching]
+        .sort((left, right) => holeOrder(columns, left.hole) - holeOrder(columns, right.hole))[0]?.hole ?? null;
+    }
+    if (targetHole === null) continue;
+    annotations.push({
+      number,
+      target: { hole: targetHole, source: statement.target.span },
+      source: statement.span,
+    });
+  }
+
   occupancy.sort(
     (left, right) =>
       holeOrder(columns, left.hole) - holeOrder(columns, right.hole),
   );
+  const boardWidth4 = (300 + 44 * columns) * 4;
+  const boardHeight4 = (56 + 22 * rows) * 4;
+  const viewportLeft = Math.min(
+    0,
+    ...controlComponents.map(({ body }) => body.x4),
+  );
+  const viewportTop = Math.min(
+    0,
+    ...controlComponents.map(({ body }) => body.y4),
+  );
+  const viewportRight = Math.max(
+    boardWidth4,
+    ...controlComponents.map(({ body }) => body.x4 + body.width4),
+  );
+  const viewportBottom = Math.max(
+    boardHeight4,
+    ...controlComponents.map(({ body }) => body.y4 + body.height4),
+  );
+  const components = [
+    ...chips,
+    ...controlComponents,
+    ...twoTerminalComponents,
+  ].sort((left, right) => left.source.start - right.source.start);
 
   return {
     model: {
@@ -1352,8 +1704,16 @@ export function resolveBreadboard(
         source:
           boardStatement?.kind === "breadboard" ? boardStatement.span : null,
       },
-      chips,
+      viewport: {
+        x4: viewportLeft,
+        y4: viewportTop,
+        width4: viewportRight - viewportLeft,
+        height4: viewportBottom - viewportTop,
+      },
+      components,
       wires,
+      annotations,
+      connections,
       occupancy,
     },
     diagnostics: context.diagnostics,

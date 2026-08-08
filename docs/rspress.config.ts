@@ -3,7 +3,10 @@ import { defineConfig } from "@rspress/core";
 
 export default defineConfig({
   root: path.join(import.meta.dirname, "content"),
-  base: "/dub-siren-v3-555-project/docs/",
+  base: "/pico-dub-siren/breadboard/docs/",
+  route: {
+    cleanUrls: true,
+  },
   title: "Breadboard language",
   description: "The interactive reference for the Breadboard diagram language.",
   icon: "/breadboard-mark.svg",
@@ -22,7 +25,7 @@ export default defineConfig({
       {
         icon: "github",
         mode: "link",
-        content: "https://github.com/abeldebruijn/dub-siren-v3-555-project",
+        content: "https://github.com/abeldebruijn/pico-dub-siren",
       },
     ],
   },

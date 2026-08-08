@@ -54,6 +54,48 @@ export const FlipKeyword = keyword("FlipKeyword", /flip/i);
 export const WireKeyword = keyword("WireKeyword", /wire/i);
 export const ViaKeyword = keyword("ViaKeyword", /via/i);
 export const SaturationKeyword = keyword("SaturationKeyword", /saturation/i);
+export const LedKeyword = keyword("LedKeyword", /led/i);
+export const CapacitorKeyword = keyword("CapacitorKeyword", /capacitor/i);
+export const ResistorKeyword = keyword("ResistorKeyword", /resistor/i);
+export const ButtonKeyword = keyword("ButtonKeyword", /button/i);
+export const PotentiometerKeyword = keyword(
+  "PotentiometerKeyword",
+  /potentiometer/i,
+);
+export const SwitchKeyword = keyword("SwitchKeyword", /switch/i);
+export const AnnotationKeyword = keyword("AnnotationKeyword", /annotation/i);
+export const FromKeyword = keyword("FromKeyword", /from/i);
+export const ToKeyword = keyword("ToKeyword", /to/i);
+export const OnKeyword = keyword("OnKeyword", /on/i);
+export const DisplayLegsKeyword = keyword(
+  "DisplayLegsKeyword",
+  /display-legs/i,
+);
+export const TrueKeyword = keyword("TrueKeyword", /true/i);
+export const FalseKeyword = keyword("FalseKeyword", /false/i);
+export const TypeKeyword = keyword("TypeKeyword", /type/i);
+export const CapacitanceKeyword = keyword(
+  "CapacitanceKeyword",
+  /capacitance/i,
+);
+export const MaxVoltageKeyword = keyword(
+  "MaxVoltageKeyword",
+  /max-voltage/i,
+);
+export const DisplayedKeyword = keyword("DisplayedKeyword", /displayed/i);
+export const ValueKeyword = keyword("ValueKeyword", /value/i);
+export const BandsKeyword = keyword("BandsKeyword", /bands/i);
+export const PinsPerSideKeyword = keyword(
+  "PinsPerSideKeyword",
+  /pins-per-side/i,
+);
+export const ResistanceKeyword = keyword(
+  "ResistanceKeyword",
+  /resistance/i,
+);
+export const OptionsKeyword = keyword("OptionsKeyword", /options/i);
+export const RightKeyword = keyword("RightKeyword", /right/i);
+export const OutsideKeyword = keyword("OutsideKeyword", /outside/i);
 
 export const Arrow = createToken({ name: "Arrow", pattern: /-->/, ...content });
 export const LeftBrace = createToken({
@@ -84,6 +126,16 @@ export const PercentageLiteral = createToken({
   pattern: /\d+%/,
   ...content,
 });
+export const SuffixedResistanceLiteral = createToken({
+  name: "SuffixedResistanceLiteral",
+  pattern: /\d+(?:\.\d+)?[kKmM]/,
+  ...content,
+});
+export const DecimalLiteral = createToken({
+  name: "DecimalLiteral",
+  pattern: /\d+\.\d+/,
+  ...content,
+});
 export const InvalidIdentifier = createToken({
   name: "InvalidIdentifier",
   pattern: /(?:\d+[A-Za-z_-][A-Za-z0-9_-]*|-[A-Za-z0-9_-]+)/,
@@ -111,6 +163,13 @@ export const topLevelKeywords = [
   ChipKeyword,
   PlaceKeyword,
   WireKeyword,
+  LedKeyword,
+  CapacitorKeyword,
+  ResistorKeyword,
+  ButtonKeyword,
+  PotentiometerKeyword,
+  SwitchKeyword,
+  AnnotationKeyword,
 ];
 export const chipMemberKeywords = [
   HeightKeyword,
@@ -134,6 +193,8 @@ export const breadboardTokens = [
   HexColorLiteral,
   InvalidHexColorLiteral,
   PercentageLiteral,
+  SuffixedResistanceLiteral,
+  DecimalLiteral,
   BreadboardKeyword,
   RowsKeyword,
   ColumnsKeyword,
@@ -141,6 +202,7 @@ export const breadboardTokens = [
   HeightKeyword,
   WidthKeyword,
   ColorKeyword,
+  PinsPerSideKeyword,
   PinKeyword,
   PlaceKeyword,
   AtKeyword,
@@ -148,6 +210,29 @@ export const breadboardTokens = [
   WireKeyword,
   ViaKeyword,
   SaturationKeyword,
+  LedKeyword,
+  CapacitorKeyword,
+  ResistorKeyword,
+  ButtonKeyword,
+  PotentiometerKeyword,
+  SwitchKeyword,
+  AnnotationKeyword,
+  FromKeyword,
+  ToKeyword,
+  OnKeyword,
+  DisplayLegsKeyword,
+  TrueKeyword,
+  FalseKeyword,
+  TypeKeyword,
+  CapacitanceKeyword,
+  MaxVoltageKeyword,
+  DisplayedKeyword,
+  ValueKeyword,
+  BandsKeyword,
+  ResistanceKeyword,
+  OptionsKeyword,
+  RightKeyword,
+  OutsideKeyword,
   InvalidIdentifier,
   RowCoordinate,
   Identifier,

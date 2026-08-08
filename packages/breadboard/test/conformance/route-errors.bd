@@ -1,6 +1,4 @@
 breadboard rows 3 columns 2
 wire LP1 --> RG3 via LT-R2C1
-wire LP1 --> RG3 via LP1, LT-R3C1
-wire LP1 --> RG1 via LT-R1C1
-wire LP1 --> RG1 via LT-R1C1, LG1
-wire LP1 --> RG3 via LT-R9C1
+wire LP2 --> RG2 via LP2, LT-R3C1
+wire LG1 --> RP3 via LT-R9C1

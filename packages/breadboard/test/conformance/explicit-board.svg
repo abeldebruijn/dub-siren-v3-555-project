@@ -1,9 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" role="img" width="432" height="100" viewBox="0 0 432 100" preserveAspectRatio="xMidYMid meet" overflow="hidden">
+<svg xmlns="http://www.w3.org/2000/svg" role="img" width="432" height="100" viewBox="0 0 432 100" preserveAspectRatio="xMidYMid meet" overflow="visible">
   <title>Stage breadboard diagram</title>
-  <desc>2 rows, 3 terminal columns, 0 chips, 0 wires.</desc>
+  <desc>2 rows, 3 terminal columns, 0 components, 0 wires, 0 annotations.</desc>
   <g data-layer="board">
-    <rect x="18" y="10" width="396" height="76" rx="24" fill="#F5F2EB" stroke="#CDBF9D" stroke-width="3"/>
-    <rect x="206" y="24" width="20" height="48" rx="8" fill="#D9CFB8"/>
+    <rect x="18" y="10" width="396" height="76" rx="12" fill="#F5F2EB" stroke="#B9AD8D" stroke-width="3"/>
+    <rect x="206" y="24" width="20" height="48" rx="8" fill="#DFD5B9"/>
   </g>
   <g data-layer="rails">
     <line x1="62" y1="32" x2="62" y2="64" stroke="#D64545" stroke-width="3"/>
@@ -12,27 +12,31 @@
     <line x1="370" y1="32" x2="370" y2="64" stroke="#252525" stroke-width="3"/>
   </g>
   <g data-layer="holes">
-    <circle cx="62" cy="42" r="4.25" fill="#544F45"/>
-    <circle cx="94" cy="42" r="4.25" fill="#544F45"/>
-    <circle cx="120" cy="42" r="4.25" fill="#544F45"/>
-    <circle cx="142" cy="42" r="4.25" fill="#544F45"/>
-    <circle cx="164" cy="42" r="4.25" fill="#544F45"/>
-    <circle cx="268" cy="42" r="4.25" fill="#544F45"/>
-    <circle cx="290" cy="42" r="4.25" fill="#544F45"/>
-    <circle cx="312" cy="42" r="4.25" fill="#544F45"/>
-    <circle cx="338" cy="42" r="4.25" fill="#544F45"/>
-    <circle cx="370" cy="42" r="4.25" fill="#544F45"/>
-    <circle cx="62" cy="64" r="4.25" fill="#544F45"/>
-    <circle cx="94" cy="64" r="4.25" fill="#544F45"/>
-    <circle cx="120" cy="64" r="4.25" fill="#544F45"/>
-    <circle cx="142" cy="64" r="4.25" fill="#544F45"/>
-    <circle cx="164" cy="64" r="4.25" fill="#544F45"/>
-    <circle cx="268" cy="64" r="4.25" fill="#544F45"/>
-    <circle cx="290" cy="64" r="4.25" fill="#544F45"/>
-    <circle cx="312" cy="64" r="4.25" fill="#544F45"/>
-    <circle cx="338" cy="64" r="4.25" fill="#544F45"/>
-    <circle cx="370" cy="64" r="4.25" fill="#544F45"/>
+    <circle cx="62" cy="42" r="4.25" fill="#D1CCC3"/>
+    <circle cx="94" cy="42" r="4.25" fill="#D1CCC3"/>
+    <circle cx="120" cy="42" r="4.25" fill="#D1CCC3"/>
+    <circle cx="142" cy="42" r="4.25" fill="#D1CCC3"/>
+    <circle cx="164" cy="42" r="4.25" fill="#D1CCC3"/>
+    <circle cx="268" cy="42" r="4.25" fill="#D1CCC3"/>
+    <circle cx="290" cy="42" r="4.25" fill="#D1CCC3"/>
+    <circle cx="312" cy="42" r="4.25" fill="#D1CCC3"/>
+    <circle cx="338" cy="42" r="4.25" fill="#D1CCC3"/>
+    <circle cx="370" cy="42" r="4.25" fill="#D1CCC3"/>
+    <circle cx="62" cy="64" r="4.25" fill="#D1CCC3"/>
+    <circle cx="94" cy="64" r="4.25" fill="#D1CCC3"/>
+    <circle cx="120" cy="64" r="4.25" fill="#D1CCC3"/>
+    <circle cx="142" cy="64" r="4.25" fill="#D1CCC3"/>
+    <circle cx="164" cy="64" r="4.25" fill="#D1CCC3"/>
+    <circle cx="268" cy="64" r="4.25" fill="#D1CCC3"/>
+    <circle cx="290" cy="64" r="4.25" fill="#D1CCC3"/>
+    <circle cx="312" cy="64" r="4.25" fill="#D1CCC3"/>
+    <circle cx="338" cy="64" r="4.25" fill="#D1CCC3"/>
+    <circle cx="370" cy="64" r="4.25" fill="#D1CCC3"/>
   </g>
+  <g data-layer="wires"/>
+  <g data-layer="components">
+  </g>
+  <g data-layer="annotations"/>
   <g data-layer="labels">
     <text x="62" y="25" text-anchor="middle" fill="#413B31" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold">LP <tspan font-size="8">+</tspan></text>
     <text x="94" y="25" text-anchor="middle" fill="#413B31" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="bold">LG <tspan font-size="8">−</tspan></text>
@@ -45,7 +49,4 @@
     <text x="268" y="35" text-anchor="middle" fill="#756E60" font-family="Menlo, Consolas, monospace" font-size="8" font-weight="bold">1</text>
     <text x="312" y="35" text-anchor="middle" fill="#756E60" font-family="Menlo, Consolas, monospace" font-size="8" font-weight="bold">3</text>
   </g>
-  <g data-layer="chips"/>
-  <g data-layer="wires"/>
-  <g data-layer="markers"/>
 </svg>

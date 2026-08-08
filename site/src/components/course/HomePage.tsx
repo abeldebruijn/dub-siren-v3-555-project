@@ -23,6 +23,8 @@ const statusLabels = {
   done: "Done",
 };
 
+const SITE_BASE = "/pico-dub-siren";
+
 export function HomePage() {
   const progress = useProgress();
   const hasProgress = hasAnyProgress(progress);
@@ -66,7 +68,7 @@ export function HomePage() {
             <div className="flex flex-col gap-3 sm:flex-row">
               {continueTarget ? (
                 <Button asChild size="lg" className="flex-1">
-                  <a href={`#/lessons/${continueTarget.slug}`}>
+                  <a href={`${SITE_BASE}/lessons/lesson${continueTarget.number}.html`}>
                     <Play className="h-4 w-4 fill-current" />
                     {hasProgress ? "Continue" : "Start lesson 1"}
                   </a>
@@ -74,7 +76,7 @@ export function HomePage() {
               ) : null}
               {hasProgress ? <ResetJourneyDialog /> : null}
             </div>
-            <a className="mt-4 inline-flex items-center gap-2 font-bold text-cyan-200 underline decoration-cyan-400/50 hover:text-cyan-100" href="#/breadboard">
+            <a className="mt-4 inline-flex items-center gap-2 font-bold text-cyan-200 underline decoration-cyan-400/50 hover:text-cyan-100" href={`${SITE_BASE}/breadboard/playground/`}>
               <Cable className="h-4 w-4" /> Open breadboard canvas
             </a>
           </div>
@@ -139,7 +141,7 @@ export function HomePage() {
             );
 
             return lesson.isMigrated ? (
-              <a key={lesson.slug} href={`#/lessons/${lesson.slug}`} className="block no-underline">
+              <a key={lesson.slug} href={`${SITE_BASE}/lessons/lesson${lesson.number}.html`} className="block no-underline">
                 {body}
               </a>
             ) : (

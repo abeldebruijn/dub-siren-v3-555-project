@@ -1,0 +1,43 @@
+[
+  {
+    "code": "selector.exact-hole-unavailable",
+    "severity": "error",
+    "range": { "start": { "line": 10, "column": 20 }, "end": { "line": 10, "column": 27 } }
+  },
+  {
+    "code": "selector.exact-hole-unavailable",
+    "severity": "error",
+    "range": { "start": { "line": 15, "column": 19 }, "end": { "line": 15, "column": 26 } }
+  },
+  {
+    "code": "selector.exact-hole-unavailable",
+    "severity": "error",
+    "range": { "start": { "line": 15, "column": 30 }, "end": { "line": 15, "column": 37 } }
+  },
+  {
+    "code": "selector.exact-hole-unavailable",
+    "severity": "error",
+    "range": { "start": { "line": 22, "column": 18 }, "end": { "line": 22, "column": 25 } }
+  },
+  {
+    "code": "selector.exact-hole-unavailable",
+    "severity": "error",
+    "range": { "start": { "line": 22, "column": 29 }, "end": { "line": 22, "column": 36 } }
+  },
+  {
+    "code": "placement.overlap",
+    "severity": "error",
+    "range": { "start": { "line": 26, "column": 1 }, "end": { "line": 29, "column": 16 } },
+    "related": [
+      { "start": { "line": 2, "column": 1 }, "end": { "line": 9, "column": 13 } }
+    ]
+  },
+  {
+    "code": "placement.overlap",
+    "severity": "error",
+    "range": { "start": { "line": 30, "column": 1 }, "end": { "line": 33, "column": 22 } },
+    "related": [
+      { "start": { "line": 2, "column": 1 }, "end": { "line": 9, "column": 13 } }
+    ]
+  }
+]

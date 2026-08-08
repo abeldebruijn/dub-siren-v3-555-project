@@ -1,17 +1,27 @@
 import type { CstNode, IToken } from "chevrotain";
 
 import type {
+  ButtonMember,
+  CapacitorMember,
+  CapacitorType,
+  DisplayedCapacitorValue,
   Endpoint,
   ExactRoutePoint,
+  LedMember,
   NamedColor,
+  PotentiometerMember,
+  ResistorMember,
   Side,
   SourceSpan,
   SourceValue,
   SurfaceColor,
+  SurfaceDecimal,
   SurfaceDocument,
   SurfaceInteger,
   SurfacePercentage,
+  SurfaceResistance,
   SurfaceStatement,
+  SwitchMember,
 } from "../types.js";
 import { breadboardParser } from "./parser.js";
 import { Newline } from "./tokens.js";
@@ -185,6 +195,76 @@ function surfacePercentage(value: IToken): SurfacePercentage {
       };
 }
 
+function surfaceDecimal(value: IToken): SurfaceDecimal {
+  const spelling = value.image;
+  const number = Number(spelling);
+  return Number.isFinite(number) && Math.abs(number) <= Number.MAX_SAFE_INTEGER
+    ? {
+        kind: "decimal",
+        supported: true,
+        value: number,
+        spelling,
+        span: spanOfToken(value),
+      }
+    : {
+        kind: "decimal",
+        supported: false,
+        value: null,
+        spelling,
+        span: spanOfToken(value),
+      };
+}
+
+function surfaceResistance(value: IToken): SurfaceResistance {
+  const spelling = value.image;
+  const suffix = /[kKmM]$/u.exec(spelling)?.[0].toLowerCase() ?? null;
+  const magnitude = Number(suffix === null ? spelling : spelling.slice(0, -1));
+  const multiplier = suffix === "k" ? 1_000 : suffix === "m" ? 1_000_000 : 1;
+  const ohms = magnitude * multiplier;
+  return Number.isFinite(ohms) && Math.abs(ohms) <= Number.MAX_SAFE_INTEGER
+    ? {
+        kind: "resistance",
+        supported: true,
+        ohms,
+        spelling,
+        span: spanOfToken(value),
+      }
+    : {
+        kind: "resistance",
+        supported: false,
+        ohms: null,
+        spelling,
+        span: spanOfToken(value),
+      };
+}
+
+function firstUsableToken(children: CstChildren): IToken | undefined {
+  return Object.values(children)
+    .flat()
+    .find((value): value is IToken => isToken(value) && !value.isInsertedInRecovery);
+}
+
+function invalidMember(kind: string, children: CstChildren) {
+  return {
+    kind,
+    diagnosticCodes: ["syntax.unexpected-token"],
+    span: spanOfChildren(children),
+  };
+}
+
+function retypeInvalidMember<T>(value: unknown, kind: string): T {
+  if (
+    value !== null &&
+    typeof value === "object" &&
+    "kind" in value &&
+    typeof value.kind === "string" &&
+    value.kind.startsWith("invalid-")
+  ) {
+    return { ...value, kind } as T;
+  }
+  return value as T;
+}
+
 const BaseVisitor = breadboardParser.getBaseCstVisitorConstructorWithDefaults();
 
 class SurfaceAstBuilder extends BaseVisitor {
@@ -243,12 +323,25 @@ class SurfaceAstBuilder extends BaseVisitor {
         span: spanOfChildren(children),
       };
     }
+    const members = (children.chipMemberLine ?? []).map((node) =>
+      this.visit(node as CstNode),
+    );
+    const row = usableToken(children, "RowCoordinate");
+    if (row === undefined) {
+      return {
+        kind: "chip-definition",
+        name: sourceString(name),
+        members,
+        span: spanOfChildren(children),
+      };
+    }
+    const flip = usableToken(children, "FlipKeyword");
     return {
-      kind: "chip-definition",
+      kind: "chip",
       name: sourceString(name),
-      members: (children.chipMemberLine ?? []).map((node) =>
-        this.visit(node as CstNode),
-      ),
+      members,
+      row: rowInteger(row),
+      flip: flip === undefined ? null : sourceLiteral(flip, true),
       span: spanOfChildren(children),
     };
   }
@@ -365,6 +458,364 @@ class SurfaceAstBuilder extends BaseVisitor {
           : (this.visit(colorNode) as SurfaceColor),
       span: spanOfChildren(children),
     };
+  }
+
+  public ledStatement(children: CstChildren): SurfaceStatement {
+    return this.twoTerminalStatement("led", children, "ledMemberLine");
+  }
+
+  public ledMemberLine(children: CstChildren): LedMember {
+    const node = Object.values(children).flat()[0] as CstNode;
+    if (node.name === "invalidComponentMember") {
+      return invalidMember("invalid-led-member", node.children) as LedMember;
+    }
+    return retypeInvalidMember<LedMember>(
+      this.visit(node),
+      "invalid-led-member",
+    );
+  }
+
+  public onMember(children: CstChildren): LedMember | ButtonMember {
+    const value = children.booleanValue?.[0] as CstNode | undefined;
+    const boolean = value === undefined ? null : this.visit(value);
+    return boolean === null
+      ? (invalidMember("invalid-led-member", children) as LedMember)
+      : {
+          kind: "on-member",
+          on: boolean,
+          span: spanOfChildren(children),
+        };
+  }
+
+  public displayLegsMember(children: CstChildren): LedMember {
+    const value = children.booleanValue?.[0] as CstNode | undefined;
+    const boolean = value === undefined ? null : this.visit(value);
+    return boolean === null
+      ? (invalidMember("invalid-led-member", children) as LedMember)
+      : {
+          kind: "display-legs-member",
+          displayLegs: boolean,
+          span: spanOfChildren(children),
+        };
+  }
+
+  public booleanValue(children: CstChildren) {
+    const value = firstUsableToken(children);
+    if (value === undefined) return null;
+    const normalized = value.image.toLowerCase();
+    return normalized === "true" || normalized === "false"
+      ? sourceLiteral(value, normalized === "true")
+      : null;
+  }
+
+  public capacitorStatement(children: CstChildren): SurfaceStatement {
+    return this.twoTerminalStatement(
+      "capacitor",
+      children,
+      "capacitorMemberLine",
+    );
+  }
+
+  public capacitorMemberLine(children: CstChildren): CapacitorMember {
+    const node = Object.values(children).flat()[0] as CstNode;
+    if (node.name === "invalidComponentMember") {
+      return invalidMember(
+        "invalid-capacitor-member",
+        node.children,
+      ) as CapacitorMember;
+    }
+    return retypeInvalidMember<CapacitorMember>(
+      this.visit(node),
+      "invalid-capacitor-member",
+    );
+  }
+
+  public capacitorTypeMember(children: CstChildren): CapacitorMember {
+    const value = usableToken(children, "NameLike");
+    const accepted = new Set<CapacitorType>([
+      "ceramic",
+      "electrolytic",
+      "film",
+      "tantalum",
+      "supercapacitor",
+    ]);
+    const normalized = value?.image.toLowerCase() as CapacitorType | undefined;
+    return value !== undefined && normalized !== undefined && accepted.has(normalized)
+      ? {
+          kind: "capacitor-type-member",
+          type: sourceLiteral(value, normalized),
+          span: spanOfChildren(children),
+        }
+      : (invalidMember(
+          "invalid-capacitor-member",
+          children,
+        ) as CapacitorMember);
+  }
+
+  public capacitanceMember(children: CstChildren): CapacitorMember {
+    const value = children.decimalValue?.[0] as CstNode | undefined;
+    return value === undefined
+      ? (invalidMember("invalid-capacitor-member", children) as CapacitorMember)
+      : {
+          kind: "capacitance-member",
+          capacitance: this.visit(value),
+          span: spanOfChildren(children),
+        };
+  }
+
+  public maxVoltageMember(children: CstChildren): CapacitorMember {
+    const value = children.decimalValue?.[0] as CstNode | undefined;
+    return value === undefined
+      ? (invalidMember("invalid-capacitor-member", children) as CapacitorMember)
+      : {
+          kind: "max-voltage-member",
+          maxVoltage: this.visit(value),
+          span: spanOfChildren(children),
+        };
+  }
+
+  public displayedMember(children: CstChildren): CapacitorMember {
+    const values = ((children.NameLike ?? []) as IToken[]).filter(
+      ({ isInsertedInRecovery }) => !isInsertedInRecovery,
+    );
+    const accepted = new Set<DisplayedCapacitorValue>([
+      "capacitance",
+      "max-voltage",
+    ]);
+    const normalized = values.map(
+      ({ image }) => image.toLowerCase() as DisplayedCapacitorValue,
+    );
+    return values.length > 0 && normalized.every((value) => accepted.has(value))
+      ? {
+          kind: "displayed-member",
+          values: values.map((value, index) =>
+            sourceLiteral(value, normalized[index] as DisplayedCapacitorValue),
+          ),
+          span: spanOfChildren(children),
+        }
+      : (invalidMember(
+          "invalid-capacitor-member",
+          children,
+        ) as CapacitorMember);
+  }
+
+  public decimalValue(children: CstChildren): SurfaceDecimal {
+    const value = firstUsableToken(children);
+    if (value === undefined) {
+      return {
+        kind: "decimal",
+        supported: false,
+        value: null,
+        spelling: "",
+        span: spanOfChildren(children),
+      };
+    }
+    return surfaceDecimal(value);
+  }
+
+  public resistorStatement(children: CstChildren): SurfaceStatement {
+    return this.twoTerminalStatement(
+      "resistor",
+      children,
+      "resistorMemberLine",
+    );
+  }
+
+  public resistorMemberLine(children: CstChildren): ResistorMember {
+    const node = Object.values(children).flat()[0] as CstNode;
+    return node.name === "invalidComponentMember"
+      ? (invalidMember("invalid-resistor-member", node.children) as ResistorMember)
+      : (this.visit(node) as ResistorMember);
+  }
+
+  public resistorValueMember(children: CstChildren): ResistorMember {
+    const value = children.resistanceValue?.[0] as CstNode | undefined;
+    return value === undefined
+      ? (invalidMember("invalid-resistor-member", children) as ResistorMember)
+      : {
+          kind: "resistor-value-member",
+          value: this.visit(value),
+          span: spanOfChildren(children),
+        };
+  }
+
+  public bandsMember(children: CstChildren): ResistorMember {
+    const value = usableToken(children, "IntegerLiteral");
+    return value === undefined
+      ? (invalidMember("invalid-resistor-member", children) as ResistorMember)
+      : {
+          kind: "bands-member",
+          bands: surfaceInteger(value),
+          span: spanOfChildren(children),
+        };
+  }
+
+  public resistanceValue(children: CstChildren): SurfaceResistance {
+    const value = firstUsableToken(children);
+    if (value === undefined) {
+      return {
+        kind: "resistance",
+        supported: false,
+        ohms: null,
+        spelling: "",
+        span: spanOfChildren(children),
+      };
+    }
+    return surfaceResistance(value);
+  }
+
+  public buttonStatement(children: CstChildren): SurfaceStatement {
+    const statement = this.controlStatement(children, "buttonMemberLine");
+    return statement === null
+      ? this.invalidStatement(children)
+      : {
+          kind: "button",
+          name: statement.name,
+          members: statement.members as ButtonMember[],
+          row: statement.row,
+          outside: statement.outside,
+          span: spanOfChildren(children),
+        };
+  }
+
+  public buttonMemberLine(children: CstChildren): ButtonMember {
+    const node = Object.values(children).flat()[0] as CstNode;
+    if (node.name === "invalidComponentMember") {
+      return invalidMember("invalid-button-member", node.children) as ButtonMember;
+    }
+    return retypeInvalidMember<ButtonMember>(
+      this.visit(node),
+      "invalid-button-member",
+    );
+  }
+
+  public pinsPerSideMember(children: CstChildren): ButtonMember {
+    const value = usableToken(children, "IntegerLiteral");
+    return value === undefined
+      ? (invalidMember("invalid-button-member", children) as ButtonMember)
+      : {
+          kind: "pins-per-side-member",
+          pinsPerSide: surfaceInteger(value),
+          span: spanOfChildren(children),
+        };
+  }
+
+  public potentiometerStatement(children: CstChildren): SurfaceStatement {
+    const statement = this.controlStatement(
+      children,
+      "potentiometerMemberLine",
+    );
+    if (statement === null) return this.invalidStatement(children);
+    const right = usableToken(children, "RightKeyword");
+    return {
+      kind: "potentiometer",
+      name: statement.name,
+      members: statement.members as PotentiometerMember[],
+      row: statement.row,
+      side: right === undefined ? null : sourceLiteral(right, "right" as const),
+      outside: statement.outside,
+      span: spanOfChildren(children),
+    };
+  }
+
+  public potentiometerMemberLine(
+    children: CstChildren,
+  ): PotentiometerMember {
+    const node = Object.values(children).flat()[0] as CstNode;
+    return node.name === "invalidComponentMember"
+      ? (invalidMember(
+          "invalid-potentiometer-member",
+          node.children,
+        ) as PotentiometerMember)
+      : (this.visit(node) as PotentiometerMember);
+  }
+
+  public resistanceMember(children: CstChildren): PotentiometerMember {
+    const value = children.resistanceValue?.[0] as CstNode | undefined;
+    return value === undefined
+      ? (invalidMember(
+          "invalid-potentiometer-member",
+          children,
+        ) as PotentiometerMember)
+      : {
+          kind: "resistance-member",
+          resistance: this.visit(value),
+          span: spanOfChildren(children),
+        };
+  }
+
+  public controlDecimalValueMember(
+    children: CstChildren,
+  ): PotentiometerMember {
+    const value = children.decimalValue?.[0] as CstNode | undefined;
+    return value === undefined
+      ? (invalidMember(
+          "invalid-potentiometer-member",
+          children,
+        ) as PotentiometerMember)
+      : {
+          kind: "control-value-member",
+          value: this.visit(value),
+          span: spanOfChildren(children),
+        };
+  }
+
+  public switchStatement(children: CstChildren): SurfaceStatement {
+    const statement = this.controlStatement(children, "switchMemberLine");
+    if (statement === null) return this.invalidStatement(children);
+    const right = usableToken(children, "RightKeyword");
+    return {
+      kind: "switch",
+      name: statement.name,
+      members: statement.members as SwitchMember[],
+      row: statement.row,
+      side: right === undefined ? null : sourceLiteral(right, "right" as const),
+      outside: statement.outside,
+      span: spanOfChildren(children),
+    };
+  }
+
+  public switchMemberLine(children: CstChildren): SwitchMember {
+    const node = Object.values(children).flat()[0] as CstNode;
+    return node.name === "invalidComponentMember"
+      ? (invalidMember("invalid-switch-member", node.children) as SwitchMember)
+      : (this.visit(node) as SwitchMember);
+  }
+
+  public optionsMember(children: CstChildren): SwitchMember {
+    const value = usableToken(children, "IntegerLiteral");
+    return value === undefined
+      ? (invalidMember("invalid-switch-member", children) as SwitchMember)
+      : {
+          kind: "options-member",
+          options: surfaceInteger(value),
+          span: spanOfChildren(children),
+        };
+  }
+
+  public controlIntegerValueMember(children: CstChildren): SwitchMember {
+    const value = usableToken(children, "IntegerLiteral");
+    return value === undefined
+      ? (invalidMember("invalid-switch-member", children) as SwitchMember)
+      : {
+          kind: "control-value-member",
+          value: surfaceInteger(value),
+          span: spanOfChildren(children),
+        };
+  }
+
+  public annotationStatement(children: CstChildren): SurfaceStatement {
+    const number = usableToken(children, "IntegerLiteral");
+    const endpoint = children.endpoint?.[0] as CstNode | undefined;
+    const target = endpoint === undefined ? null : (this.visit(endpoint) as Endpoint);
+    return number === undefined || target === null
+      ? this.invalidStatement(children)
+      : {
+          kind: "annotation",
+          number: surfaceInteger(number),
+          target,
+          span: spanOfChildren(children),
+        };
   }
 
   public wireStatement(children: CstChildren): SurfaceStatement {
@@ -532,6 +983,58 @@ class SurfaceAstBuilder extends BaseVisitor {
       kind: "invalid-chip-member" as const,
       diagnosticCodes: ["syntax.unexpected-token"],
       span: spanOfChildren(children),
+    };
+  }
+
+  public invalidComponentMember(children: CstChildren) {
+    return invalidMember("invalid-component-member", children);
+  }
+
+  private twoTerminalStatement(
+    kind: "led" | "capacitor" | "resistor",
+    children: CstChildren,
+    memberRule: "ledMemberLine" | "capacitorMemberLine" | "resistorMemberLine",
+  ): SurfaceStatement {
+    const name = usableToken(children, "NameLike");
+    const endpoints = (children.endpoint ?? []).map((node) =>
+      this.visit(node as CstNode),
+    ) as MaybeEndpoint[];
+    if (name === undefined || endpoints.length < 2 || endpoints.includes(null)) {
+      return this.invalidStatement(children);
+    }
+    const base = {
+      name: sourceString(name),
+      from: endpoints[0] as Endpoint,
+      to: endpoints[1] as Endpoint,
+      members: (children[memberRule] ?? []).map((node) =>
+        this.visit(node as CstNode),
+      ),
+      span: spanOfChildren(children),
+    };
+    if (kind === "led") return { kind, ...base } as SurfaceStatement;
+    if (kind === "capacitor") return { kind, ...base } as SurfaceStatement;
+    return { kind, ...base } as SurfaceStatement;
+  }
+
+  private controlStatement(
+    children: CstChildren,
+    memberRule:
+      | "buttonMemberLine"
+      | "potentiometerMemberLine"
+      | "switchMemberLine",
+  ) {
+    const name = usableToken(children, "NameLike");
+    const row = usableToken(children, "RowCoordinate");
+    if (name === undefined || row === undefined) return null;
+    const outside = usableToken(children, "OutsideKeyword");
+    return {
+      name: sourceString(name),
+      members: (children[memberRule] ?? []).map((node) =>
+        this.visit(node as CstNode),
+      ),
+      row: rowInteger(row),
+      outside:
+        outside === undefined ? null : sourceLiteral(outside, true as const),
     };
   }
 

@@ -1,0 +1,67 @@
+breadboard V02Gallery rows 20 columns 5
+
+led D1 from LP1 to LT-R2C1 {
+  color red
+  on true
+}
+
+led D2 from LG2 to LT-R2C2 {
+  color blue
+  on false
+  display-legs false
+}
+
+capacitor C1 from LT-R3C2 to LT-R5C2 {
+  type ceramic
+  capacitance 0.1
+  displayed capacitance
+}
+
+capacitor C2 from LT-R6C2 to LT-R8C2 {
+  type electrolytic
+  capacitance 100
+  max-voltage 16
+  displayed capacitance max-voltage
+}
+
+capacitor C3 from LT-R9C2 to LT-R11C2 {
+  type film
+}
+
+capacitor C4 from RT-R3C2 to RT-R5C2 {
+  type tantalum
+}
+
+capacitor C5 from RT-R6C2 to RT-R8C2 {
+  type supercapacitor
+}
+
+resistor R1 from LT-R12C1 to RT-R12C1 {
+  value 4.7k
+  bands 4
+}
+
+resistor R2 from LT-R13C1 to RT-R13C1 {
+  value 100k
+  bands 6
+}
+
+button S1 {
+  pins-per-side 2
+  on true
+} at R14
+
+potentiometer P1 {
+  resistance 10k
+  value 0.25
+} at R16 outside
+
+switch SW1 {
+  options 3
+  value 2
+} at R16 right outside
+
+wire LP20 --> LT-R20C5 via LT-R19C5
+annotation 1 at D1.1
+annotation 2 at D1.1
+annotation 3 at P1.wiper

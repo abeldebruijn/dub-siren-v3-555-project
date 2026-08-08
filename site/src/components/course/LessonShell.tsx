@@ -50,19 +50,19 @@ export function LessonShell({ lesson }: Props) {
               </div>
               <div className="flex flex-col gap-2">
                 <Button asChild variant="outline" className="justify-start border-white/20 bg-transparent text-white hover:bg-accent hover:text-stone-950">
-                  <a href="#/">
+                  <a href="/pico-dub-siren/">
                     <ArrowLeft className="h-4 w-4" />
                     Journey
                   </a>
                 </Button>
                 {previous?.isMigrated ? (
                   <Button asChild variant="ghost" className="justify-start text-white hover:bg-white/10">
-                    <a href={`#/lessons/${previous.slug}`}>← Lesson {previous.number}</a>
+                    <a href={`/pico-dub-siren/lessons/lesson${previous.number}.html`}>← Lesson {previous.number}</a>
                   </Button>
                 ) : null}
                 {done && next?.isMigrated ? (
                   <Button asChild variant="ghost" className="justify-start text-white hover:bg-white/10">
-                    <a href={`#/lessons/${next.slug}`}>Lesson {next.number} →</a>
+                    <a href={`/pico-dub-siren/lessons/lesson${next.number}.html`}>Lesson {next.number} →</a>
                   </Button>
                 ) : null}
               </div>

@@ -1,0 +1,10 @@
+[
+  {
+    "code": "component.polarity-warning",
+    "severity": "warning",
+    "range": {
+      "start": { "line": 8, "column": 13 },
+      "end": { "line": 8, "column": 16 }
+    }
+  }
+]

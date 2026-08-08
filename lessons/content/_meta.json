@@ -1,0 +1,12 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Course overview"
+  },
+  {
+    "type": "file",
+    "name": "lesson1",
+    "label": "01 · Blink an LED"
+  }
+]

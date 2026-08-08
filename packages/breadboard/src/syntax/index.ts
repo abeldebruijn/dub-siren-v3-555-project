@@ -112,17 +112,26 @@ function astDiagnostics(
     }
   };
 
-  for (const statement of ast.statements) {
-    if (statement.kind === "invalid-statement") {
-      for (const code of statement.diagnosticCodes) append(code, statement.span);
-    } else if (statement.kind === "chip-definition") {
-      for (const member of statement.members) {
-        if (member.kind === "invalid-chip-member") {
-          for (const code of member.diagnosticCodes) append(code, member.span);
-        }
+  const walk = (value: unknown): void => {
+    if (Array.isArray(value)) {
+      for (const item of value) walk(item);
+      return;
+    }
+    if (value === null || typeof value !== "object") return;
+    const node = value as Record<string, unknown>;
+    if (
+      typeof node.kind === "string" &&
+      node.kind.startsWith("invalid-") &&
+      Array.isArray(node.diagnosticCodes) &&
+      node.span !== undefined
+    ) {
+      for (const code of node.diagnosticCodes) {
+        if (typeof code === "string") append(code, node.span as SourceSpan);
       }
     }
-  }
+    for (const child of Object.values(node)) walk(child);
+  };
+  walk(ast);
   return diagnostics;
 }
 
@@ -134,7 +143,15 @@ function statementOrderDiagnostics(
     breadboard: 0,
     "chip-definition": 1,
     placement: 2,
+    chip: 1,
+    led: 1,
+    capacitor: 1,
+    resistor: 1,
+    button: 1,
+    potentiometer: 1,
+    switch: 1,
     wire: 3,
+    annotation: 4,
   } as const;
   const diagnostics: LocatedDiagnostic[] = [];
   let highest = -1;
@@ -219,6 +236,36 @@ function literalDiagnostics(
         ),
       );
     } else if (
+      node.kind === "decimal" &&
+      node.supported === true &&
+      typeof node.spelling === "string" &&
+      !/^(?:0|[1-9]\d*)(?:\.\d+)?$/u.test(node.spelling) &&
+      span !== undefined
+    ) {
+      diagnostics.push(
+        locatedDiagnostic(
+          source,
+          "syntax.invalid-decimal",
+          span,
+          "Expected a decimal without leading zeroes",
+        ),
+      );
+    } else if (
+      node.kind === "resistance" &&
+      node.supported === true &&
+      typeof node.spelling === "string" &&
+      !/^(?:0|[1-9]\d*)(?:\.\d+)?[kKmM]?$/u.test(node.spelling) &&
+      span !== undefined
+    ) {
+      diagnostics.push(
+        locatedDiagnostic(
+          source,
+          "syntax.invalid-resistance",
+          span,
+          "Expected an ohm value without spaces or leading zeroes",
+        ),
+      );
+    } else if (
       node.kind === "named-color" &&
       typeof node.spelling === "string" &&
       !COLOR_NAMES.has(node.spelling.toLowerCase()) &&
@@ -254,6 +301,30 @@ const RESERVED_NAMES = new Set([
   "wire",
   "via",
   "saturation",
+  "led",
+  "capacitor",
+  "resistor",
+  "button",
+  "potentiometer",
+  "switch",
+  "annotation",
+  "from",
+  "to",
+  "on",
+  "display-legs",
+  "true",
+  "false",
+  "type",
+  "capacitance",
+  "max-voltage",
+  "displayed",
+  "value",
+  "bands",
+  "pins-per-side",
+  "resistance",
+  "options",
+  "right",
+  "outside",
   "capacitor",
   "led",
   "button",
@@ -282,7 +353,16 @@ function nameDiagnostics(
   for (const statement of ast.statements) {
     if (statement.kind === "breadboard" && statement.name !== null) {
       names.push(statement.name);
-    } else if (statement.kind === "chip-definition") {
+    } else if (
+      statement.kind === "chip-definition" ||
+      statement.kind === "chip" ||
+      statement.kind === "led" ||
+      statement.kind === "capacitor" ||
+      statement.kind === "resistor" ||
+      statement.kind === "button" ||
+      statement.kind === "potentiometer" ||
+      statement.kind === "switch"
+    ) {
       names.push(statement.name);
     } else if (statement.kind === "placement") {
       names.push(statement.instance, statement.definition);
@@ -306,6 +386,34 @@ function nameDiagnostics(
               : "Invalid identifier",
           ),
         ];
+  });
+}
+
+function migrationDiagnostics(
+  source: string,
+  ast: SurfaceDocument,
+): LocatedDiagnostic[] {
+  const singletonNames = new Set(
+    ast.statements
+      .filter((statement) => statement.kind === "chip")
+      .map((statement) => statement.name.value.toLowerCase()),
+  );
+  return ast.statements.flatMap((statement) => {
+    if (
+      statement.kind === "placement" &&
+      (singletonNames.has(statement.instance.value.toLowerCase()) ||
+        singletonNames.has(statement.definition.value.toLowerCase()))
+    ) {
+      return [
+        locatedDiagnostic(
+          source,
+          "syntax.place-singleton",
+          statement.span,
+          "A singleton chip cannot be placed again",
+        ),
+      ];
+    }
+    return [];
   });
 }
 
@@ -366,6 +474,7 @@ export function parseSyntax(source: string): SyntaxResult {
       ...literalDiagnostics(source, ast),
       ...nameDiagnostics(source, ast),
       ...statementOrderDiagnostics(source, ast),
+      ...migrationDiagnostics(source, ast),
     ]),
   };
 }

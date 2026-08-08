@@ -1,0 +1,14 @@
+[
+  {
+    "text": "Home",
+    "link": "../"
+  },
+  {
+    "text": "Breadboard docs",
+    "link": "../breadboard/docs/"
+  },
+  {
+    "text": "Playground",
+    "link": "../breadboard/playground/"
+  }
+]

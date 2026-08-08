@@ -1,4 +1,4 @@
-name: Test and deploy course
+name: Test and deploy Pico Dub Siren
 
 on:
   push:

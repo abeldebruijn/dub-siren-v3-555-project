@@ -24,18 +24,18 @@ place U1 Timer at R2
 
   assert.equal(result.status, "valid");
   assert.deepEqual(result.diagnostics, []);
-  assert.equal(result.model.chips.length, 1);
-  assert.deepEqual(result.model.chips[0]?.body, {
+  assert.equal(result.model.components.length, 1);
+  assert.deepEqual(result.model.components[0]?.body, {
     x4: 724,
     y4: 220,
     width4: 632,
     height4: 160,
   });
   assert.deepEqual(
-    result.model.chips[0]?.pins.map(({ number, hole, label }) => ({
+    result.model.components[0]?.terminals.map(({ number, hole, name }) => ({
       number,
       hole,
-      label,
+      label: name,
     })),
     [
       {
@@ -148,6 +148,22 @@ wire P --> LT-R2C
     color: { r: 214, g: 69, b: 69, underlay: false },
     source: { start: 28, end: 45 },
   });
+  assert.deepEqual(result.model.connections, [
+    {
+      kind: "wire",
+      wire: 1,
+      from: { kind: "rail-hole", side: "left", polarity: "positive", row: 2 },
+      to: { kind: "terminal-hole", side: "left", row: 2, column: 2 },
+      source: { start: 28, end: 45 },
+    },
+  ]);
+  assert.deepEqual(result.model.viewport, {
+    x4: 0,
+    y4: 0,
+    width4: 1552,
+    height4: 488,
+  });
+  assert.deepEqual(result.model.annotations, []);
 });
 
 test("compile rejects native-group wires and warns on duplicate connectivity", () => {
@@ -166,7 +182,7 @@ wire LP2 --> RG2
   assert.equal(duplicate.model.wires.length, 2);
 });
 
-test("compile preserves valid explicit bends and rejects malformed routes", () => {
+test("compile preserves ordered vias and inserts deterministic orthogonal bends", () => {
   const valid = compile(`breadboard rows 3 columns 2
 wire LP1 --> RG3 via LT-R1C1, LT-R3C1
 `);
@@ -181,11 +197,34 @@ wire LP1 --> RG3 via LT-R1C1, LT-R3C1
     ],
   );
 
+  const diagonal = compile(`breadboard rows 3 columns 2
+wire LP1 --> RG3 via LT-R2C1
+`);
+  assert.equal(diagonal.status, "valid");
+  assert.deepEqual(
+    diagonal.model.wires[0]?.path.map(({ x4, y4, source }) => ({ x4, y4, source })),
+    [
+      { x4: 248, y4: 168, source: null },
+      { x4: 568, y4: 168, source: null },
+      { x4: 568, y4: 256, source: { start: 49, end: 56 } },
+      { x4: 1304, y4: 256, source: null },
+      { x4: 1304, y4: 344, source: null },
+    ],
+  );
+
+  for (const wire of [
+    "wire LP1 --> RG1 via LT-R1C1",
+    "wire LP1 --> RG1 via LT-R1C1, LG1",
+  ]) {
+    assert.equal(
+      compile(`breadboard rows 3 columns 2\n${wire}\n`).status,
+      "valid",
+      wire,
+    );
+  }
+
   const cases = [
-    ["wire LP1 --> RG3 via LT-R2C1", "route.diagonal"],
     ["wire LP1 --> RG3 via LP1, LT-R3C1", "route.duplicate-point"],
-    ["wire LP1 --> RG1 via LT-R1C1", "route.collinear"],
-    ["wire LP1 --> RG1 via LT-R1C1, LG1", "route.reversal"],
     ["wire LP1 --> RG3 via LT-R9C1", "route.point-not-hole"],
     ["wire LP1 --> RG3 via R2C", "route.point-not-exact"],
   ] as const;
@@ -194,6 +233,96 @@ wire LP1 --> RG3 via LT-R1C1, LT-R3C1
     assert.equal(result.status, "invalid", wire);
     assert.deepEqual(codes(result), [expected], wire);
   }
+});
+
+test("singleton chips infer footprints and expose pins and aliases through free holes", () => {
+  const result = compile(`breadboard rows 8 columns 5
+chip NE555 {
+  pin 8 VCC
+  color black
+  pin 1 GND
+  width 4
+  pin 3 OUT | SIGNAL
+} at R3 flip
+wire NE555.SIGNAL --> RG7
+`);
+
+  assert.equal(result.status, "valid");
+  assert.deepEqual(result.diagnostics, []);
+  const chip = result.model.components[0];
+  assert.equal(chip?.kind, "chip");
+  if (chip?.kind !== "chip") return;
+  assert.equal(chip.name, "NE555");
+  assert.equal(chip.label, null);
+  assert.equal(chip.flip, true);
+  assert.deepEqual(
+    chip.terminals.filter(({ number }) => [1, 3, 8].includes(number)),
+    [
+      {
+        number: 1,
+        hole: { kind: "terminal-hole", side: "right", row: 3, column: 2 },
+        name: "GND",
+        source: { start: 69, end: 78 },
+      },
+      {
+        number: 3,
+        hole: { kind: "terminal-hole", side: "right", row: 5, column: 2 },
+        name: "OUT",
+        source: { start: 91, end: 109 },
+      },
+      {
+        number: 8,
+        hole: { kind: "terminal-hole", side: "left", row: 3, column: 2 },
+        name: "VCC",
+        source: { start: 43, end: 52 },
+      },
+    ],
+  );
+  assert.deepEqual(result.model.wires[0]?.from.hole, {
+    kind: "terminal-hole",
+    side: "right",
+    row: 5,
+    column: 5,
+  });
+  assert.equal(
+    result.model.occupancy.filter(({ kind }) => kind.startsWith("component-"))
+      .length,
+    16,
+  );
+});
+
+test("singleton chips reject ambiguous height, overflow, overlap, and covered holes", () => {
+  const odd = compile(`chip Odd {
+  pin 3 OUT
+} at R1
+`);
+  assert.equal(odd.status, "invalid");
+  assert.deepEqual(codes(odd), ["chip.height-not-inferable"]);
+
+  const invalidPlacement = compile(`breadboard rows 4 columns 3
+chip A {
+  height 2
+  width 4
+} at R1
+chip B {
+  height 2
+  width 4
+} at R2
+wire LP1 --> LT-R1C1
+`);
+  assert.equal(invalidPlacement.status, "invalid");
+  assert.deepEqual(codes(invalidPlacement), [
+    "placement.overlap",
+    "selector.exact-hole-unavailable",
+  ]);
+
+  const overflow = compile(`breadboard rows 2 columns 3
+chip Tall {
+  height 3
+} at R1
+`);
+  assert.equal(overflow.status, "invalid");
+  assert.deepEqual(codes(overflow), ["placement.row-overflow"]);
 });
 
 test("automatic routing detours above chip obstacles on the finite grid", () => {
@@ -321,14 +450,14 @@ wire A.GND --> LP1
 `);
 
   assert.equal(result.status, "valid");
-  assert.equal(result.model.chips[0]?.pins.length, 4);
-  assert.deepEqual(result.model.chips[0]?.pins[0]?.hole, {
+  assert.equal(result.model.components[0]?.terminals.length, 4);
+  assert.deepEqual(result.model.components[0]?.terminals[0]?.hole, {
     kind: "terminal-hole",
     side: "left",
     row: 1,
     column: 1,
   });
-  assert.deepEqual(result.model.chips[1]?.pins[0]?.hole, {
+  assert.deepEqual(result.model.components[1]?.terminals[0]?.hole, {
     kind: "terminal-hole",
     side: "right",
     row: 4,
@@ -360,8 +489,8 @@ place timer NE555 at R1
 
   assert.equal(result.status, "valid");
   assert.deepEqual(result.diagnostics, []);
-  assert.equal(result.model.chips[0]?.pins.length, 10);
-  assert.equal(result.model.chips[0]?.pins[8]?.number, 9);
+  assert.equal(result.model.components[0]?.terminals.length, 10);
+  assert.equal(result.model.components[0]?.terminals[8]?.number, 9);
 });
 
 test("references to later declarations get a forward-reference diagnostic", () => {
@@ -408,4 +537,18 @@ place U1 Gate at R1
     "name.forward-reference",
     "syntax.statement-order",
   ]);
+});
+
+test("annotations reject chip aliases that identify multiple physical pins", () => {
+  const result = compile(`breadboard rows 4 columns 3
+chip U1 {
+  height 2
+  pin 1 SHARED
+  pin 2 SHARED
+} at R1
+annotation 1 at U1.SHARED
+`);
+
+  assert.equal(result.status, "invalid");
+  assert.deepEqual(codes(result), ["annotation.target-not-exact"]);
 });

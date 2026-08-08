@@ -1,0 +1,39 @@
+breadboard rows 20 columns 5
+chip NE555 {
+  height 4
+  width 2
+  color black
+  pin 1 GND
+  pin 3 OUT
+  pin 8 VCC
+} at R5 flip
+led D1 from LP1 to LT-R5C1 {
+  color red
+  on true
+  display-legs true
+}
+capacitor C1 from LT-R5C1 to LT-R8C1 {
+  type electrolytic
+  color blue
+  capacitance 100
+  max-voltage 16
+  displayed capacitance max-voltage
+}
+resistor R1 from LT-R6C1 to RT-R6C1 {
+  value 4.7K
+  bands 4
+}
+button S1 {
+  pins-per-side 2
+  on false
+} at R5 outside
+potentiometer P1 {
+  resistance 10k
+  value 0.25
+} at R5 right outside
+switch S2 {
+  options 3
+  value 2
+} at R10 outside
+wire NE555.OUT --> D1.1 via LT-R5C2
+annotation 1 at NE555.OUT

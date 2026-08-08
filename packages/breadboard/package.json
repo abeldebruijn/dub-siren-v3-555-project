@@ -19,7 +19,7 @@
     "build": "tsc -p tsconfig.json",
     "generate:grammar": "pnpm build && node scripts/generate-grammar.mjs",
     "check:grammar": "pnpm build && node scripts/generate-grammar.mjs --check",
-    "test": "pnpm build && node scripts/generate-grammar.mjs --check && node --test test/*.test.ts"
+    "test": "pnpm build && tsc -p tsconfig.types.json && node scripts/generate-grammar.mjs --check && node --test test/*.test.ts"
   },
   "dependencies": {
     "chevrotain": "13.2.0"

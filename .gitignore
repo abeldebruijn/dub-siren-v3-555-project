@@ -9,5 +9,6 @@ site/vite.config.js
 site/vite.config.d.ts
 
 docs/doc_build/
+lessons/doc_build/
 .playwright-cli/
 output/playwright/

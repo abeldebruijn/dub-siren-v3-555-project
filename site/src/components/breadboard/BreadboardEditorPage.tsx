@@ -10,12 +10,13 @@ import {
   Eye,
   EyeOff,
   FileCode2,
+  GalleryHorizontalEnd,
   LoaderCircle,
   RotateCcw,
   TriangleAlert,
   XCircle,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MutableRefObject, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type MutableRefObject, type ReactNode } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,16 +51,18 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
-const STORAGE_KEY = "dub-siren:breadboard-source:v1";
+const STORAGE_KEY = "dub-siren:breadboard-source:v2";
+const LEGACY_STORAGE_KEY = "dub-siren:breadboard-source:v1";
 const SHARED_SOURCE_PARAM = "source";
 const COMPILE_DELAY_MS = 260;
 const EDITOR_TEXT_CLASS =
   "font-mono text-[13px] font-normal leading-[26px] tracking-normal [font-variant-ligatures:none] md:text-sm md:leading-[26px]";
 
-const EXAMPLE_SOURCE = `breadboard Stage rows 14 columns 5
+const STARTER_SOURCE = `breadboard Stage rows 14 columns 5
 chip NE555 {
   height 4
   width 3
@@ -67,28 +70,117 @@ chip NE555 {
   pin 1 GND
   pin 3 OUT
   pin 8 VCC
+} at R4
+
+led D1 from NE555.OUT to LG10 {
+  color red
+  on true
 }
-place timer NE555 at R5
-wire timer.VCC --> LP4 color red
-wire timer.GND --> LG10 color black
-wire timer.OUT --> RT-R8C3 color yellow
+
+resistor R1 from NE555.VCC to LP4 {
+  value 1k
+}
+
+wire NE555.GND --> LG8 color black
+annotation 1 at NE555.OUT
 `;
 
+const GALLERY_SOURCE = `breadboard Gallery rows 20 columns 5
+
+led D1 from LP1 to LT-R2C1 {
+  color red
+  on true
+}
+led D2 from LT-R2C2 to RG2 {
+  color blue
+  on false
+  display-legs false
+}
+
+capacitor C1 from LT-R3C2 to LT-R5C2 {
+  type ceramic
+  capacitance 0.1
+  displayed capacitance
+}
+capacitor C2 from LT-R6C2 to LT-R8C2 {
+  type electrolytic
+  capacitance 100
+  max-voltage 16
+  displayed capacitance max-voltage
+}
+capacitor C3 from LT-R9C2 to LT-R11C2 {
+  type film
+}
+capacitor C4 from RT-R3C2 to RT-R5C2 {
+  type tantalum
+}
+capacitor C5 from RT-R6C2 to RT-R8C2 {
+  type supercapacitor
+}
+
+resistor R1 from LT-R12C1 to RT-R12C1 {
+  value 4.7k
+  bands 4
+}
+resistor R2 from LT-R13C1 to RT-R13C1 {
+  value 100k
+  bands 6
+}
+
+button S1 {
+  pins-per-side 2
+  on true
+} at R14
+potentiometer P1 {
+  resistance 10k
+  value 0.25
+} at R16 outside
+switch SW1 {
+  options 3
+  value 2
+} at R16 right outside
+
+annotation 1 at D1.1
+annotation 2 at D1.1
+annotation 3 at P1.wiper
+`;
+
+const DIAGNOSTIC_SOURCE = `breadboard Errors rows 8 columns 5
+
+resistor R1 from LP1 to LP2 {
+  value 100
+}
+annotation 1 at Missing.1
+`;
+
+const EXAMPLES = [
+  { name: "Pico starter", description: "Singleton NE555, LED, resistor, wire, annotation", source: STARTER_SOURCE },
+  { name: "V0.2 gallery", description: "Every V0.2 component and outside controls", source: GALLERY_SOURCE },
+  { name: "Diagnostics", description: "Intentional electrical and annotation errors", source: DIAGNOSTIC_SOURCE },
+] as const;
+
 type ValidResult = Extract<CompileResult, { status: "valid" }>;
+type SelectedComponent = Readonly<{
+  name: string;
+  kind: string;
+  markup: string;
+  clientX: number;
+  clientY: number;
+}>;
 
 export function BreadboardEditorPage() {
   const [source, setSource] = useState(readInitialSource);
-  const [result, setResult] = useState<CompileResult>(() => compile(readInitialSource()));
-  const [lastValid, setLastValid] = useState<ValidResult | null>(() => {
-    const initial = compile(readInitialSource());
-    return initial.status === "valid" ? initial : null;
-  });
+  const [result, setResult] = useState<CompileResult>(() => compile(source));
+  const [lastValid, setLastValid] = useState<ValidResult | null>(() => result.status === "valid" ? result : null);
   const [isCompiling, setIsCompiling] = useState(false);
   const [isSaved, setIsSaved] = useState(true);
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [sourceOpen, setSourceOpen] = useState(() => window.matchMedia("(min-width: 768px)").matches);
   const [selectedLine, setSelectedLine] = useState<number | null>(null);
+  const [pendingExample, setPendingExample] = useState<(typeof EXAMPLES)[number] | null>(null);
+  const [selectedComponent, setSelectedComponent] = useState<SelectedComponent | null>(null);
   const editorRef = useRef<HTMLTextAreaElement | null>(null);
+  const previewRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const parameters = new URLSearchParams(window.location.search);
@@ -117,6 +209,24 @@ export function BreadboardEditorPage() {
   const displayed = currentValid ?? lastValid;
   const previewIsStale = displayed !== null && currentValid === null;
   const diagnostics = result.diagnostics;
+  const inspectedComponent = selectedComponent === null
+    ? null
+    : displayed?.model.components.find(
+      (component) => component.name === selectedComponent.name && component.kind === selectedComponent.kind,
+    ) ?? null;
+
+  useEffect(() => {
+    const preview = previewRef.current;
+    if (!preview) return;
+    for (const component of preview.querySelectorAll<SVGGElement>("g[data-component]")) {
+      const name = component.dataset.component ?? "component";
+      const kind = component.dataset.kind ?? "part";
+      component.tabIndex = 0;
+      component.setAttribute("role", "button");
+      component.setAttribute("aria-label", `Magnify ${name} ${kind}`);
+    }
+    setSelectedComponent(null);
+  }, [displayed?.svg]);
 
   function jumpToDiagnostic(diagnostic: Diagnostic) {
     setSourceOpen(true);
@@ -134,8 +244,15 @@ export function BreadboardEditorPage() {
   }
 
   function resetSource() {
-    setSource(EXAMPLE_SOURCE);
+    setSource(STARTER_SOURCE);
     setSelectedLine(null);
+  }
+
+  function loadPendingExample() {
+    if (pendingExample === null) return;
+    setSource(pendingExample.source);
+    setSelectedLine(null);
+    setPendingExample(null);
   }
 
   function downloadSvg() {
@@ -147,6 +264,34 @@ export function BreadboardEditorPage() {
     anchor.download = `${currentValid.model.board.name ?? "breadboard"}.svg`;
     anchor.click();
     URL.revokeObjectURL(url);
+  }
+
+  function magnifyComponent(element: SVGGElement, clientX: number, clientY: number) {
+    const name = element.dataset.component;
+    const kind = element.dataset.kind;
+    if (!name || !kind) return;
+    const bounds = element.getBBox();
+    const padding = 10;
+    const clone = element.cloneNode(true) as SVGGElement;
+    for (const attribute of ["aria-label", "data-component", "role", "tabindex"]) {
+      clone.removeAttribute(attribute);
+    }
+    const markup = `<svg xmlns="http://www.w3.org/2000/svg" role="img" viewBox="${bounds.x - padding} ${bounds.y - padding} ${bounds.width + padding * 2} ${bounds.height + padding * 2}" preserveAspectRatio="xMidYMid meet" overflow="visible">${clone.outerHTML}</svg>`;
+    setSelectedComponent({ name, kind, markup, clientX, clientY });
+  }
+
+  function handlePreviewClick(event: MouseEvent<HTMLDivElement>) {
+    const component = (event.target as Element | null)?.closest<SVGGElement>("g[data-component]");
+    if (component) magnifyComponent(component, event.clientX, event.clientY);
+  }
+
+  function handlePreviewKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    const component = (event.target as Element | null)?.closest<SVGGElement>("g[data-component]");
+    if (!component) return;
+    event.preventDefault();
+    const bounds = component.getBoundingClientRect();
+    magnifyComponent(component, bounds.left + bounds.width / 2, bounds.top + bounds.height / 2);
   }
 
   const editor = (
@@ -165,21 +310,46 @@ export function BreadboardEditorPage() {
   return (
     <main className="breadboard-lab flex h-dvh min-h-[34rem] flex-col overflow-hidden bg-[#080b0f] text-slate-100">
       <header className="relative z-30 flex min-h-16 flex-wrap items-center gap-3 border-b border-white/10 bg-[#090c10]/95 px-3 py-3 backdrop-blur md:px-5">
-        <a href="#/" className="group flex min-w-0 items-center gap-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500">
+        <a href="/pico-dub-siren/" className="group flex min-w-0 items-center gap-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary font-display text-lg font-black text-white shadow-[0_0_28px_rgba(242,62,30,.24)]">BB</span>
           <span className="min-w-0">
             <span className="block truncate font-display text-lg font-bold leading-tight md:text-xl">Breadboard canvas</span>
-            <span className="block truncate text-xs text-slate-400">Dub Siren course tool</span>
+            <span className="block truncate text-xs text-slate-400">Dub Siren course tool · Breadboard V0.2</span>
           </span>
         </a>
 
         <div className="ml-auto flex items-center gap-1.5 md:gap-2">
           <Button asChild variant="ghost" size="sm" className="h-10 px-3 text-slate-200 hover:bg-white/10 hover:text-white">
-            <a href="/dub-siren-v3-555-project/docs/" aria-label="Open language documentation">
+            <a href="/pico-dub-siren/breadboard/docs/" aria-label="Open language documentation">
               <BookOpen className="h-4 w-4" />
               <span className="hidden sm:inline">Docs</span>
             </a>
           </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button aria-label="Choose source example" variant="ghost" size="sm" className="h-10 px-3 text-slate-200 hover:bg-white/10 hover:text-white">
+                <GalleryHorizontalEnd className="h-4 w-4" />
+                <span className="hidden md:inline">Examples</span>
+                <ChevronDown className="h-3.5 w-3.5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-72 border-white/10 bg-[#11161d] text-slate-200">
+              {EXAMPLES.map((example) => (
+                <DropdownMenuItem
+                  key={example.name}
+                  onSelect={() => setPendingExample(example)}
+                  className="items-start gap-3 py-3 focus:bg-white/10 focus:text-white"
+                >
+                  <FileCode2 className="mt-0.5 h-4 w-4 shrink-0 text-cyan-300" />
+                  <span>
+                    <span className="block font-bold">{example.name}</span>
+                    <span className="mt-0.5 block text-xs text-slate-400">{example.description}</span>
+                  </span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <Button
             variant="ghost"
@@ -205,7 +375,7 @@ export function BreadboardEditorPage() {
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Reset the breadboard source?</AlertDialogTitle>
-                <AlertDialogDescription>Your locally saved source will be replaced with the working NE555 example.</AlertDialogDescription>
+                <AlertDialogDescription>Your locally saved source will be replaced with the working V0.2 Pico starter.</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Keep mine</AlertDialogCancel>
@@ -264,12 +434,15 @@ export function BreadboardEditorPage() {
           <div className="absolute inset-0 flex items-center justify-center px-4 pb-20 pt-24 md:px-10 md:pb-10">
             {displayed ? (
               <div
+                ref={previewRef}
                 className={cn(
-                  "breadboard-svg flex h-full w-full items-center justify-center transition duration-300 [&>svg]:h-full [&>svg]:max-h-full [&>svg]:w-full [&>svg]:max-w-full",
+                  "breadboard-svg flex h-full w-full items-center justify-center transition duration-300 [&>svg]:h-full [&>svg]:max-h-full [&>svg]:w-full [&>svg]:max-w-full [&_[data-component]]:cursor-zoom-in [&_[data-component]:focus]:outline-none [&_[data-component]:focus]:drop-shadow-[0_0_5px_#67e8f9]",
                   previewIsStale && "scale-[0.985] opacity-35 grayscale-[35%]",
                 )}
                 dangerouslySetInnerHTML={{ __html: displayed.svg }}
                 aria-label={previewIsStale ? "Stale breadboard preview" : "Breadboard preview"}
+                onClick={handlePreviewClick}
+                onKeyDown={handlePreviewKeyDown}
               />
             ) : (
               <div className="max-w-md rounded-3xl border border-dashed border-white/20 bg-black/25 p-8 text-center backdrop-blur">
@@ -302,6 +475,47 @@ export function BreadboardEditorPage() {
           </SheetContent>
         </Sheet>
       ) : null}
+
+      <AlertDialog open={pendingExample !== null} onOpenChange={(open) => { if (!open) setPendingExample(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Load {pendingExample?.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your current source will be replaced and the selected V0.2 example will become the locally saved version.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep mine</AlertDialogCancel>
+            <AlertDialogAction onClick={loadPendingExample}>Load example</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Popover open={selectedComponent !== null} onOpenChange={(open) => { if (!open) setSelectedComponent(null); }}>
+        {selectedComponent ? (
+          <PopoverAnchor asChild>
+            <span
+              aria-hidden="true"
+              className="pointer-events-none fixed h-px w-px"
+              style={{ left: selectedComponent.clientX, top: selectedComponent.clientY }}
+            />
+          </PopoverAnchor>
+        ) : null}
+        <PopoverContent className="w-[min(24rem,calc(100vw-2rem))] border-white/15 bg-[#101820] p-4" side="top">
+          {selectedComponent ? (
+            <>
+              <div className="rounded-xl bg-[#f5f2eb] p-3 [&>svg]:h-36 [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: selectedComponent.markup }} />
+              <div className="mt-3 flex items-baseline justify-between gap-3">
+                <h2 className="font-display text-xl font-bold">{selectedComponent.name}</h2>
+                <span className="rounded-full bg-cyan-400/10 px-2.5 py-1 font-mono text-[11px] font-bold text-cyan-200">{selectedComponent.kind}</span>
+              </div>
+              {inspectedComponent ? (
+                <pre className="mt-3 max-h-36 overflow-auto rounded-xl bg-black/30 p-3 font-mono text-[10px] leading-4 text-slate-300">{JSON.stringify(inspectedComponent, null, 2)}</pre>
+              ) : null}
+            </>
+          ) : null}
+        </PopoverContent>
+      </Popover>
     </main>
   );
 }
@@ -584,7 +798,7 @@ function StatusChip({ isCompiling, result, stale }: { isCompiling: boolean; resu
 }
 
 function highlightLine(line: string) {
-  const matcher = /(\/\/.*$|#[0-9a-f]{6}\b|\b(?:breadboard|rows|columns|chip|height|width|color|pin|place|at|flip|wire|via|saturation)\b|-->|\b(?:R\d+|\d+%?|LP\d+|LG\d+|RP\d+|RG\d+|LT-R\d+C\d+|RT-R\d+C\d+)\b|[{}|,.])/giu;
+  const matcher = /(\/\/.*$|#[0-9a-f]{6}\b|\b(?:breadboard|rows|columns|chip|height|width|color|pin|place|at|flip|led|capacitor|resistor|button|potentiometer|switch|annotation|from|to|type|capacitance|max-voltage|displayed|bands|pins-per-side|on|display-legs|resistance|value|options|outside|left|right|wire|via|saturation)\b|\b(?:true|false|ceramic|electrolytic|film|tantalum|supercapacitor|black|red|brown|orange|yellow|green|forest|blue|cyan|purple|grey|white)\b|-->|\b(?:\d+(?:\.\d+)?(?:[kKmM]|%)?|R\d+|LP\d*|LG\d*|RP\d*|RG\d*|LT-R\d+C\d*|RT-R\d+C\d*)\b|[{}|,.])/giu;
   const parts: ReactNode[] = [];
   let cursor = 0;
   for (const match of line.matchAll(matcher)) {
@@ -597,9 +811,11 @@ function highlightLine(line: string) {
         ? "text-slate-400"
         : token.startsWith("#")
           ? "text-amber-300"
-          : /^(?:\d+%?|R\d+|LP\d+|LG\d+|RP\d+|RG\d+|LT-|RT-)/iu.test(token)
+          : /^(?:\d|R\d+|LP|LG|RP|RG|LT-|RT-)/iu.test(token)
             ? "text-cyan-300"
-            : "text-fuchsia-300";
+            : /^(?:true|false|ceramic|electrolytic|film|tantalum|supercapacitor|black|red|brown|orange|yellow|green|forest|blue|cyan|purple|grey|white)$/iu.test(token)
+              ? "text-amber-300"
+              : "text-fuchsia-300";
     parts.push(<span className={className} key={`${index}-${token}`}>{token}</span>);
     cursor = index + token.length;
   }
@@ -621,9 +837,16 @@ function readInitialSource() {
       window.localStorage.setItem(STORAGE_KEY, sharedSource);
       return sharedSource;
     }
-    return window.localStorage.getItem(STORAGE_KEY) ?? EXAMPLE_SOURCE;
+    const current = window.localStorage.getItem(STORAGE_KEY);
+    if (current !== null) return current;
+    const legacy = window.localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy !== null) {
+      window.localStorage.setItem(STORAGE_KEY, legacy);
+      return legacy;
+    }
+    return STARTER_SOURCE;
   } catch {
-    return EXAMPLE_SOURCE;
+    return STARTER_SOURCE;
   }
 }
 

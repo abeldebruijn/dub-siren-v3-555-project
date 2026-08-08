@@ -1,0 +1,48 @@
+---
+title: Make your first light blink
+description: Wire one safe LED path, then make the Raspberry Pi Pico pulse it with MicroPython.
+---
+
+<p className="course-eyebrow">Pico Dub Siren · Lesson 01</p>
+
+# Make your first light blink
+
+The Pico switches a physical LED on and off. Later, the same idea becomes the visible pulse for the dub siren’s modulation rate.
+
+Build slowly: unplug USB before wiring changes, use a resistor, and trace one complete electrical path before running code.
+
+## 1. Gather only these parts
+
+- Raspberry Pi Pico 2 with headers
+- Full-size breadboard
+- One 5 mm red LED
+- One 1 kΩ resistor
+- Two male-to-male jumper wires
+- Micro-USB data cable
+
+Every item here is compatible with the Raspberry Pi Pico. Use the **1 kΩ** resistor first; it is a cautious value for this beginner test.
+
+## 2. Build one complete path
+
+Unplug USB. The LED only works when current can travel from a Pico output, through the resistor and LED, then back to ground.
+
+<CircuitPath />
+
+## 3. Put the rhythm on the Pico
+
+Run this as `main.py`. The notes point out the two lines worth checking before you run it.
+
+<LessonCode />
+
+## 4. Test the idea
+
+1. The LED should stay on for half a second, then off for half a second.
+2. Change both `0.5` values to `0.1`.
+3. Predict what should happen before saving the file.
+4. Save, watch the real LED, then compare it with the simulator.
+
+If both values are `0.1`, one full cycle is `0.1 + 0.1 = 0.2` seconds. That makes five complete blinks per second.
+
+<BlinkSimulator />
+
+<LessonChecklist />

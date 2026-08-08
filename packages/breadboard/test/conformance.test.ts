@@ -41,8 +41,11 @@ test("empty document compiles as the default breadboard", async () => {
   assert.deepEqual(result.model, {
     kind: "breadboard-model",
     board: { name: null, rows: 30, columns: 5, source: null },
-    chips: [],
+    viewport: { x4: 0, y4: 0, width4: 2080, height4: 2864 },
+    components: [],
     wires: [],
+    annotations: [],
+    connections: [],
     occupancy: [],
   });
   assert.equal(result.svg, fixture.svg);
@@ -272,11 +275,106 @@ test("explicit breadboard declaration reaches the same compile interface", async
       columns: 3,
       source: { start: 0, end: 33 },
     },
-    chips: [],
+    viewport: { x4: 0, y4: 0, width4: 1728, height4: 400 },
+    components: [],
     wires: [],
+    annotations: [],
+    connections: [],
     occupancy: [],
   });
   assert.equal(result.svg, fixture.svg);
+});
+
+test("V0.2 declarations preserve literals, modifiers, and source order", async () => {
+  const fixtures = await loadConformanceFixtures(
+    new URL("./conformance/", import.meta.url),
+  );
+  const fixture = fixtures.find(({ name }) => name === "v02-declarations");
+  assert.ok(fixture);
+
+  const result = compile(fixture.source);
+
+  assert.equal(result.status, "invalid");
+  assert.deepEqual(normativeDiagnostics(result.diagnostics), fixture.diagnostics);
+  assert.deepEqual(
+    result.ast.statements.map(({ kind }) => kind),
+    [
+      "breadboard",
+      "chip",
+      "led",
+      "capacitor",
+      "resistor",
+      "button",
+      "potentiometer",
+      "switch",
+      "wire",
+      "annotation",
+    ],
+  );
+
+  const chip = result.ast.statements[1];
+  assert.equal(chip?.kind, "chip");
+  if (chip?.kind === "chip") {
+    assert.equal(chip.row.value, 5);
+    assert.equal(chip.flip?.value, true);
+  }
+
+  const capacitor = result.ast.statements[3];
+  assert.equal(capacitor?.kind, "capacitor");
+  if (capacitor?.kind === "capacitor") {
+    const displayed = capacitor.members.find(
+      ({ kind }) => kind === "displayed-member",
+    );
+    assert.equal(displayed?.kind, "displayed-member");
+    if (displayed?.kind === "displayed-member") {
+      assert.deepEqual(
+        displayed.values.map(({ value }) => value),
+        ["capacitance", "max-voltage"],
+      );
+    }
+  }
+
+  const resistor = result.ast.statements[4];
+  assert.equal(resistor?.kind, "resistor");
+  if (resistor?.kind === "resistor") {
+    const value = resistor.members.find(
+      ({ kind }) => kind === "resistor-value-member",
+    );
+    assert.equal(value?.kind, "resistor-value-member");
+    if (value?.kind === "resistor-value-member") {
+      assert.equal(value.value.spelling, "4.7K");
+      assert.equal(value.value.ohms, 4700);
+    }
+  }
+
+  const potentiometer = result.ast.statements[6];
+  assert.equal(potentiometer?.kind, "potentiometer");
+  if (potentiometer?.kind === "potentiometer") {
+    assert.equal(potentiometer.side?.value, "right");
+    assert.equal(potentiometer.outside?.value, true);
+  }
+});
+
+test("V0.2 member recovery and singleton-place errors stay local", async () => {
+  const fixtures = await loadConformanceFixtures(
+    new URL("./conformance/", import.meta.url),
+  );
+  const fixture = fixtures.find(({ name }) => name === "v02-recovery");
+  assert.ok(fixture);
+
+  const result = compile(fixture.source);
+
+  assert.equal(result.status, "invalid");
+  assert.deepEqual(normativeDiagnostics(result.diagnostics), fixture.diagnostics);
+  const led = result.ast.statements[1];
+  assert.equal(led?.kind, "led");
+  if (led?.kind === "led") {
+    assert.deepEqual(
+      led.members.map(({ kind }) => kind),
+      ["invalid-led-member", "invalid-led-member"],
+    );
+  }
+  assert.equal(result.ast.statements.at(-1)?.kind, "wire");
 });
 
 test("every conformance fixture matches normative diagnostics and SVG bytes", async () => {
@@ -327,9 +425,9 @@ test("valid SVG uses the canonical constrained vocabulary", async () => {
       /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" role="img" /u,
       fixture.name,
     );
-    assert.equal(
-      [...fixture.svg.matchAll(/<g data-layer=/gu)].length,
-      7,
+    assert.deepEqual(
+      [...fixture.svg.matchAll(/<g data-layer="([^"]+)"/gu)].map(([, layer]) => layer),
+      ["board", "rails", "holes", "wires", "components", "annotations", "labels"],
       fixture.name,
     );
     assert.equal(
@@ -341,4 +439,38 @@ test("valid SVG uses the canonical constrained vocabulary", async () => {
       assert.ok(slash !== undefined || allowedElements.has(element ?? ""), fixture.name);
     }
   }
+});
+
+test("V0.2 SVG covers every glyph, outside viewports, and annotation offsets", async () => {
+  const fixtures = await loadConformanceFixtures(
+    new URL("./conformance/", import.meta.url),
+  );
+  const fixture = fixtures.find(({ name }) => name === "v02-rendering");
+  assert.ok(fixture?.svg);
+
+  for (const kind of [
+    "led",
+    "capacitor",
+    "resistor",
+    "button",
+    "potentiometer",
+    "switch",
+  ]) {
+    assert.match(fixture.svg, new RegExp(`data-kind="${kind}"`, "u"));
+  }
+  for (const type of [
+    "ceramic",
+    "electrolytic",
+    "film",
+    "tantalum",
+    "supercapacitor",
+  ]) {
+    assert.match(fixture.svg, new RegExp(`data-capacitor-type="${type}"`, "u"));
+  }
+  assert.match(fixture.svg, /viewBox="-44 0 608 496"/u);
+  assert.match(fixture.svg, /overflow="visible"/u);
+  assert.equal([...fixture.svg.matchAll(/data-annotation=/gu)].length, 3);
+  assert.match(fixture.svg, /data-bands="4"/u);
+  assert.match(fixture.svg, /data-bands="6"/u);
+  assert.match(fixture.svg, />C2 100µF 16V</u);
 });

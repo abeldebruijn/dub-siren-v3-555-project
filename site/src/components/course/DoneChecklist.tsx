@@ -68,7 +68,7 @@ export function DoneChecklist({ lesson, items }: Props) {
 
         {done && nextLesson?.isMigrated ? (
           <Button asChild size="lg">
-            <a href={`#/lessons/${nextLesson.slug}`}>Lesson {nextLesson.number} →</a>
+            <a href={`/pico-dub-siren/lessons/lesson${nextLesson.number}.html`}>Lesson {nextLesson.number} →</a>
           </Button>
         ) : done && nextLesson ? (
           <p className="border border-dashed border-white/20 p-4 text-sm text-slate-400">

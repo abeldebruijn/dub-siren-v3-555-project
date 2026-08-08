@@ -1,0 +1,10 @@
+chip Solo {
+  height 2
+  pin 1 A
+} at R2
+led Bad from LP1 to RG1 {
+  on maybe
+  mystery 1
+}
+place Solo Solo at R3
+wire LP2 --> RG2

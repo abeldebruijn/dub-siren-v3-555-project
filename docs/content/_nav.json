@@ -1,10 +1,10 @@
 [
   {
     "text": "Language guide",
-    "link": "/"
+    "link": "./"
   },
   {
     "text": "Open playground",
-    "link": "https://abeldebruijn.github.io/dub-siren-v3-555-project/#/breadboard"
+    "link": "../playground/"
   }
 ]
