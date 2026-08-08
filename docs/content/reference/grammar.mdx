@@ -1,0 +1,68 @@
+---
+title: Complete grammar
+description: Every Breadboard V0.2 production on one page.
+---
+
+# Complete grammar
+
+Optional items use `[brackets]`; alternatives use `|`; repeated items use `...`. Newlines separate statements and `//` starts a comment.
+
+```text
+document = newline* statement (newline+ statement)* newline*
+
+statement = breadboard | chip | led | capacitor | resistor |
+            button | potentiometer | switch | wire | annotation
+
+breadboard = "breadboard" [name] "rows" integer ["columns" integer]
+
+chip = "chip" name "{" newline chip-member* "}"
+       "at" row ["flip"]
+chip-member = "height" integer | "width" integer |
+              "color" colour-value |
+              "pin" integer alias ("|" alias)*
+
+led = "led" name "from" endpoint "to" endpoint "{" newline
+      led-member* "}"
+led-member = "color" colour-value | "on" boolean |
+             "display-legs" boolean
+
+capacitor = "capacitor" name "from" endpoint "to" endpoint "{" newline
+            capacitor-member* "}"
+capacitor-member = "type" capacitor-type | "color" colour-value |
+                   "capacitance" decimal | "max-voltage" decimal |
+                   "displayed" display-field+
+
+resistor = "resistor" name "from" endpoint "to" endpoint "{" newline
+           resistor-member* "}"
+resistor-member = "value" resistance | "bands" ("4" | "5" | "6")
+
+button = "button" name "{" newline button-member* "}"
+         "at" row ["outside"]
+button-member = "pins-per-side" integer | "on" boolean
+
+potentiometer = "potentiometer" name "{" newline potentiometer-member* "}"
+                "at" row ["right"] ["outside"]
+potentiometer-member = "resistance" resistance | "value" decimal
+
+switch = "switch" name "{" newline switch-member* "}"
+         "at" row ["right"] ["outside"]
+switch-member = "options" integer | "value" integer
+
+wire = "wire" endpoint "-->" endpoint
+       ["via" exact-point ("," exact-point)*]
+       ["color" colour-value]
+       ["saturation" percentage]
+
+annotation = "annotation" positive-integer "at" exact-endpoint
+
+endpoint = rail-selector | terminal-selector | component-pin
+component-pin = name "." (integer | alias)
+exact-point = exact-rail | exact-terminal
+
+colour-value = named-colour | "#" hex hex hex hex hex hex
+boolean = "true" | "false"
+resistance = positive-decimal ["k" | "K" | "m" | "M"]
+percentage = integer "%"
+```
+
+Declarations must follow V0.2 document order. Component properties may appear in any order but cannot repeat. See the language chapters for selector forms, accepted capacitor types, value ranges, and semantic constraints.

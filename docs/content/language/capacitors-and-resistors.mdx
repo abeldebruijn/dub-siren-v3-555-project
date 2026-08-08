@@ -1,0 +1,41 @@
+---
+title: Capacitors and resistors
+description: Declare passive two-terminal parts and their displayed values.
+---
+
+import { capacitorResistorProgram } from "../../examples/sources";
+
+# Capacitors and resistors
+
+Both components use strict `from` and `to` endpoints. Their bodies may be horizontal, vertical, or diagonal, but endpoints cannot share one electrical group.
+
+## Capacitor
+
+```text
+capacitor <name> from <positive> to <negative> {
+  [type ceramic | electrolytic | film | tantalum | supercapacitor]
+  [color <colour>]
+  [capacitance <positive-decimal>]
+  [max-voltage <positive-decimal>]
+  [displayed capacitance [max-voltage]]
+}
+```
+
+Type defaults to `ceramic`. Capacitance is in µF and maximum voltage in V; units are omitted in source. Electrolytic, tantalum, and supercapacitor types are polarised and receive direct rail-polarity warnings.
+
+## Resistor
+
+```text
+resistor <name> from <endpoint> to <endpoint> {
+  value <ohms>
+  [bands 4 | 5 | 6]
+}
+```
+
+`value` is required. Write ohms as a positive decimal with optional `k` or `m` suffix: `470`, `4.7k`, or `1m`. Bands default to `4` and are derived from the value.
+
+<BreadboardExample
+  label="Capacitor and resistor"
+  tip="Try a film capacitor, hide max-voltage, or change R1 to 10k."
+  source={capacitorResistorProgram}
+/>

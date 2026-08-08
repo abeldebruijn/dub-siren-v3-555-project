@@ -1,0 +1,38 @@
+---
+title: Switches and potentiometers
+description: Place adjustable three-pin and multi-option controls.
+---
+
+import { switchPotentiometerProgram } from "../../examples/sources";
+
+# Switches and potentiometers
+
+Controls occupy their leg holes. `right` selects the right terminal strip; `outside` moves the body beyond the nearest board edge while expanding the SVG viewport.
+
+## Potentiometer
+
+```text
+potentiometer <name> {
+  [resistance <ohms>]
+  [value <decimal-from-0-to-1>]
+} at R<row> [right] [outside]
+```
+
+Resistance defaults to `10k`; value defaults to `0.5`. Pins `1`, `2`, and `3` are also named `low`, `wiper`, and `high`. Potentiometer value is visual only.
+
+## Switch
+
+```text
+switch <name> {
+  [options <integer-at-least-2>]
+  [value <selected-option>]
+} at R<row> [right] [outside]
+```
+
+Options default to `2`; value defaults to `1`. Pin `1` is `common`; remaining pins are `option1…optionN`. The selected option participates in structural connectivity.
+
+<BreadboardExample
+  label="Outside potentiometer and switch"
+  tip="Move P1 right, select switch option 3, or bring either control inside."
+  source={switchPotentiometerProgram}
+/>

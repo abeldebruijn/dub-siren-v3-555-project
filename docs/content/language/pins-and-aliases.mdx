@@ -1,0 +1,40 @@
+---
+title: Pins and aliases
+description: Give singleton chip pins readable aliases and reference component terminals.
+---
+
+import { pinAliasesProgram } from "../../examples/sources";
+
+# Pins and aliases
+
+Each declared chip pin has a physical number and one or more readable aliases.
+
+```text
+pin 2 OUT | SIGNAL | PWM
+```
+
+The aliases all select physical pin 2. The first alias is used as its SVG label.
+
+## Numbering
+
+Without `flip`, pin 1 starts at the top-left, continues down the left, then returns up the right. `flip` mirrors that arrangement. Sparse declarations are valid; omitted physical pins still exist but have no alias.
+
+## References
+
+For a singleton chip named `Gate`, these forms are equivalent:
+
+```text
+wire Gate.2 --> RP1
+wire Gate.OUT --> RP1
+wire Gate.SIGNAL --> RP1
+```
+
+LEDs, capacitors, and resistors expose numeric terminals `1` and `2`. Controls additionally expose names such as `S1.left1`, `P1.wiper`, and `SW1.common`.
+
+<BreadboardExample
+  label="Pin aliases"
+  tip="Change Gate.SIGNAL to Gate.2, or add another alias after a pipe."
+  source={pinAliasesProgram}
+/>
+
+Names and aliases are case-insensitive. Aliases cannot start with a number, repeat on one pin, or use a reserved keyword.

@@ -1,0 +1,37 @@
+---
+title: LEDs and buttons
+description: Place two-terminal LEDs and centre-gap push buttons.
+---
+
+import { ledButtonProgram } from "../../examples/sources";
+
+# LEDs and buttons
+
+## LED
+
+```text
+led <name> from <anode> to <cathode> {
+  [color <colour>]
+  [on true | false]
+  [display-legs true | false]
+}
+```
+
+The first endpoint is the anode (`+`) and the second is the cathode (`−`). Colour defaults to red, `on` defaults to false, and `display-legs` defaults to true. Connecting the anode directly to ground or cathode directly to positive produces a warning.
+
+## Button
+
+```text
+button <name> {
+  [pins-per-side <integer>]
+  [on true | false]
+} at R<row> [outside]
+```
+
+A button straddles the centre gap. `pins-per-side` defaults to `2`. Pins on each side are internally connected; `on true` connects both sides. Named terminals are `left1…leftN` and `right1…rightN`.
+
+<BreadboardExample
+  label="LED and button"
+  tip="Set S1 on true, turn D1 off, or connect S1.right1 to ground."
+  source={ledButtonProgram}
+/>

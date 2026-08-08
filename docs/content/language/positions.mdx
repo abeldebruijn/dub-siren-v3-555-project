@@ -1,0 +1,74 @@
+---
+title: Positions and shortcuts
+description: Exact breadboard coordinates and shorter selectors inferred by the compiler.
+---
+
+import { positionShortcutsProgram } from "../../examples/sources";
+
+# Positions and shortcuts
+
+Before choosing a position, it helps to understand which holes are already connected inside a breadboard.
+
+## Rails, terminals, and electrical groups
+
+A **rail** is a long line of holes near an outside edge of the board. Rails are normally used to distribute power. This language names four rails: left positive (`LP`), left ground (`LG`), right positive (`RP`), and right ground (`RG`).
+
+A **terminal strip** is a block of holes beside the centre gap. Component legs and wires are inserted into these holes. The left terminal strip is `LT`; the right terminal strip is `RT`.
+
+An **electrical group** is a set of holes joined by metal underneath the breadboard. Putting two legs in the same group connects them electrically without a wire.
+
+### What is connected internally?
+
+| Holes | Connected? |
+| --- | --- |
+| `LP1`, `LP2`, and every other `LP` hole | Yes — the complete left-positive rail is one group |
+| `LG1`, `LG2`, and every other `LG` hole | Yes — the complete left-ground rail is one group |
+| `LT-R2C1` through `LT-R2C5` | Yes — one left-terminal row is one group |
+| `RT-R2C1` through `RT-R2C5` | Yes — one right-terminal row is one group |
+| `LT-R2C1` and `RT-R2C1` | No — the centre gap separates both sides |
+| `LT-R2C1` and `LT-R3C1` | No — adjacent terminal rows are separate |
+| `LP1` and `RP1` | No — left and right rails are separate |
+| A positive rail and a ground rail | No — every named rail is a separate group |
+
+For a five-column board, one row looks like this:
+
+```text
+LP  LG   LT  5 4 3 2 1  |  1 2 3 4 5  RT   RP  RG
+        └── connected ┘   └── connected ┘
+                        ↑
+                   not connected
+```
+
+A component leg occupies one hole and joins that hole's group. A `wire` connects its two endpoint groups. Intermediate `via` points only guide the drawn route and do not create extra electrical connections.
+
+## Exact positions
+
+| Form | Meaning |
+| --- | --- |
+| `LP1`, `LG1` | Left positive or ground rail, row 1 |
+| `RP1`, `RG1` | Right positive or ground rail, row 1 |
+| `LT-R2C4` | Left terminal, row 2, column 4 |
+| `RT-R2C4` | Right terminal, row 2, column 4 |
+
+Every rail is one continuous electrical group. Every terminal row is connected within its own side. The centre gap separates left and right terminals.
+
+## Shortcuts
+
+Shortcuts select deterministic available holes while respecting occupancy.
+
+| Shortcut | Resolution |
+| --- | --- |
+| `LP`, `LG`, `RP`, `RG` | Suitable hole on one named rail |
+| `P`, `G` | Suitable positive or ground rail; side inferred |
+| `LT-R2C`, `RT-R2C` | Suitable free column on a fixed side and row |
+| `R2C` | Suitable side and free terminal column on row 2 |
+
+<BreadboardExample
+  label="Position shortcut examples"
+  tip="Replace R2C with R3C, or make the rail connection G --> G."
+  source={positionShortcutsProgram}
+/>
+
+:::warning Deterministic placement, not simulation
+The compiler chooses legal holes using occupancy, distance, and stable tie-breaks. It does not infer circuit intent or voltage.
+:::
