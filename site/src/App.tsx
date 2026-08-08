@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { HomePage } from "./components/course/HomePage";
 import { LessonShell } from "./components/course/LessonShell";
 import { BreadboardEditorPage } from "./components/breadboard/BreadboardEditorPage";
+import { V02ComponentPrototypePage } from "./components/breadboard/V02ComponentPrototypePage";
 import { lessons } from "./lessons";
 
 function getHashPath() {
@@ -30,6 +31,10 @@ export function App() {
 
   if (path === "/breadboard") {
     return <BreadboardEditorPage />;
+  }
+
+  if (path.startsWith("/prototype/v02-components")) {
+    return <V02ComponentPrototypePage />;
   }
 
   return <HomePage />;
