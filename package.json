@@ -6,7 +6,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "pnpm -r build",
+    "build": "pnpm --filter @dub-siren/breadboard build && pnpm --filter dub-siren-v3-site build && pnpm --filter dub-siren-v3-docs build && node scripts/assemble-site.mjs",
     "test": "pnpm -r test",
     "check:release": "pnpm test && pnpm build"
   }

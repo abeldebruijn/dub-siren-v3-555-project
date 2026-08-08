@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "grammar",
+    "label": "Complete grammar"
+  },
+  {
+    "type": "file",
+    "name": "breadboard",
+    "label": "Breadboard"
+  },
+  {
+    "type": "file",
+    "name": "components",
+    "label": "Components and placement"
+  },
+  {
+    "type": "file",
+    "name": "wires",
+    "label": "Wires"
+  }
+]

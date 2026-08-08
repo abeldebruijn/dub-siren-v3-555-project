@@ -7,3 +7,7 @@ site/dist/
 site/*.tsbuildinfo
 site/vite.config.js
 site/vite.config.d.ts
+
+docs/doc_build/
+.playwright-cli/
+output/playwright/

@@ -1,0 +1,24 @@
+---
+title: Errors and warnings
+description: Understand compiler errors, recoverable warnings, and source locations.
+---
+
+import { diagnosticProgram } from "../../examples/sources";
+
+# Errors and warnings
+
+The compiler returns ordered diagnostics with a stable code, severity, source range, and human-readable message.
+
+## Errors
+
+Errors prevent the canonical breadboard model and SVG. Common examples are an unknown pin alias, an out-of-range position, an overlapping placement, or an exact hole that is already occupied.
+
+## Warnings
+
+Warnings preserve the model and SVG. They identify suspicious but drawable situations such as duplicate connectivity or overlapping wire routes.
+
+<BreadboardExample
+  label="Compiler diagnostic example"
+  tip="Fix the alias NOPE by changing it to OUT."
+  source={diagnosticProgram}
+/>

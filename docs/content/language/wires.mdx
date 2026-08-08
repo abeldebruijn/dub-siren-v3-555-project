@@ -1,0 +1,37 @@
+---
+title: Wires
+description: Connect endpoints, guide routes, and control wire colour and saturation.
+---
+
+import { automaticWireProgram, viaWireProgram } from "../../examples/sources";
+
+# Wires
+
+Wires connect two resolved electrical groups. They only use horizontal and vertical segments.
+
+```text
+wire <endpoint> --> <endpoint>
+  [via <exact-position> [, <exact-position> ...]]
+  [color <colour>]
+  [saturation <percentage>]
+```
+
+## Automatic routes
+
+Without `via`, the compiler selects endpoints and finds a deterministic orthogonal route with as few unnecessary connections and bends as possible.
+
+<BreadboardExample
+  label="Automatic wire route"
+  tip="Try P --> P, LG2 --> RG2, or reduce saturation to 35%."
+  source={automaticWireProgram}
+/>
+
+## Via points
+
+Every `via` point must be an exact coordinate such as `LT-R1C1` or `RG5`. Via points guide the visible path; they do not create an electrical connection at that intermediate hole.
+
+<BreadboardExample
+  label="Wire with exact via points"
+  tip="Move the second turn from LT-R5C1 to RT-R5C1."
+  source={viaWireProgram}
+/>

@@ -1,6 +1,7 @@
 import { compile, type CompileResult, type Diagnostic } from "@dub-siren/breadboard";
 import {
   Braces,
+  BookOpen,
   Check,
   ChevronDown,
   Code2,
@@ -53,6 +54,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 
 const STORAGE_KEY = "dub-siren:breadboard-source:v1";
+const SHARED_SOURCE_PARAM = "source";
 const COMPILE_DELAY_MS = 260;
 const EDITOR_TEXT_CLASS =
   "font-mono text-[13px] font-normal leading-[26px] tracking-normal [font-variant-ligatures:none] md:text-sm md:leading-[26px]";
@@ -87,6 +89,12 @@ export function BreadboardEditorPage() {
   const [sourceOpen, setSourceOpen] = useState(() => window.matchMedia("(min-width: 768px)").matches);
   const [selectedLine, setSelectedLine] = useState<number | null>(null);
   const editorRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    const parameters = new URLSearchParams(window.location.search);
+    if (!parameters.has(SHARED_SOURCE_PARAM)) return;
+    window.history.replaceState(null, "", `${window.location.pathname}${window.location.hash}`);
+  }, []);
 
   useEffect(() => {
     setIsCompiling(true);
@@ -166,6 +174,13 @@ export function BreadboardEditorPage() {
         </a>
 
         <div className="ml-auto flex items-center gap-1.5 md:gap-2">
+          <Button asChild variant="ghost" size="sm" className="h-10 px-3 text-slate-200 hover:bg-white/10 hover:text-white">
+            <a href="/dub-siren-v3-555-project/docs/" aria-label="Open language documentation">
+              <BookOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">Docs</span>
+            </a>
+          </Button>
+
           <Button
             variant="ghost"
             size="sm"
@@ -601,6 +616,11 @@ function offsetAt(source: string, line: number, column: number) {
 
 function readInitialSource() {
   try {
+    const sharedSource = new URLSearchParams(window.location.search).get(SHARED_SOURCE_PARAM);
+    if (sharedSource !== null) {
+      window.localStorage.setItem(STORAGE_KEY, sharedSource);
+      return sharedSource;
+    }
     return window.localStorage.getItem(STORAGE_KEY) ?? EXAMPLE_SOURCE;
   } catch {
     return EXAMPLE_SOURCE;

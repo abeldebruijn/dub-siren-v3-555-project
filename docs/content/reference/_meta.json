@@ -1,0 +1,22 @@
+[
+  {
+    "type": "file",
+    "name": "positions",
+    "label": "Positions and shortcuts"
+  },
+  {
+    "type": "file",
+    "name": "pins-and-aliases",
+    "label": "Pins and aliases"
+  },
+  {
+    "type": "file",
+    "name": "colours",
+    "label": "Colours"
+  },
+  {
+    "type": "file",
+    "name": "diagnostics",
+    "label": "Errors and warnings"
+  }
+]

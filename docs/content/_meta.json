@@ -1,0 +1,28 @@
+[
+  {
+    "type": "file",
+    "name": "index",
+    "label": "Introduction"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "language",
+    "label": "Language",
+    "collapsible": true,
+    "collapsed": false
+  },
+  {
+    "type": "dir-section-header",
+    "name": "reference",
+    "label": "Reference",
+    "collapsible": true,
+    "collapsed": false
+  },
+  {
+    "type": "dir-section-header",
+    "name": "examples",
+    "label": "Examples",
+    "collapsible": true,
+    "collapsed": false
+  }
+]

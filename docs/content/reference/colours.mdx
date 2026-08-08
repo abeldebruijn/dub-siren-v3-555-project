@@ -1,0 +1,31 @@
+---
+title: Colours
+description: Named colours, hexadecimal colours, defaults, and saturation.
+---
+
+import { coloursProgram } from "../../examples/sources";
+
+# Colours
+
+Components and wires accept named colours or six-digit hexadecimal colours.
+
+## Named colours
+
+`black`, `red`, `brown`, `orange`, `yellow`, `green`, `forest`, `blue`, `cyan`, `purple`, `grey`, and `white` are supported.
+
+## Wire defaults
+
+- A wire starting on a positive rail is red.
+- A wire starting on a ground rail is black.
+- Other starts choose deterministically from brown, orange, yellow, green, blue, purple, grey, and white.
+- Yellow and white receive a thin dark understroke for contrast.
+
+## Saturation
+
+`saturation 0%` removes all colour; `saturation 100%` preserves the original. Saturation changes colour intensity without making the wire transparent.
+
+<BreadboardExample
+  label="Wire colours and saturation"
+  tip="Try cyan, #E0B929, or saturation 25%."
+  source={coloursProgram}
+/>

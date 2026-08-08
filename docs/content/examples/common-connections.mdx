@@ -1,0 +1,26 @@
+---
+title: Common wire connections
+description: A compact catalogue of useful rail, terminal, pin, route, colour, and saturation forms.
+---
+
+import { commonConnectionsProgram } from "../../examples/sources";
+
+# Common wire connections
+
+## Bridge positive rails
+
+`P --> P` chooses opposite positive rails and makes the wire red by default.
+
+## Cross the centre gap
+
+`R2C --> R2C` chooses a left and right terminal hole on row 2.
+
+## Connect a rail to a terminal
+
+`LP --> LT-R4C` chooses a nearby free left-positive rail hole and terminal column.
+
+<BreadboardExample
+  label="Common wire connections"
+  tip="Change P --> P to G --> G, then add an explicit via route."
+  source={commonConnectionsProgram}
+/>

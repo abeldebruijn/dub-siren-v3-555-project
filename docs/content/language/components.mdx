@@ -1,0 +1,41 @@
+---
+title: Components and placement
+description: Declare reusable chips, their dimensions, pins, aliases, and placements.
+---
+
+import { componentProgram } from "../../examples/sources";
+
+# Components and placement
+
+A chip declaration describes a reusable footprint. A separate placement gives it an instance name and a top row.
+
+## Chip declaration
+
+```text
+chip <name> {
+  [height <integer>]
+  [width <integer>]
+  [color <colour>]
+  pin <number> <alias> [| <alias> ...]
+}
+```
+
+Members use the order shown above. Pin numbers must be ascending, but pins may be omitted. `width` is optional and defaults to `2`. `height` overrides the inferred height; otherwise it is calculated from the highest pin number.
+
+## Placement
+
+```text
+place <instance> <chip-name> at R<row> [flip] [color <colour>]
+```
+
+The row is the top of the footprint. `flip` places pin 1 on the right instead of the left. A placement colour overrides the chip's declared colour.
+
+<BreadboardExample
+  label="Chip declaration and placement"
+  tip="Add flip, change forest to black, or move U1 to R1."
+  source={componentProgram}
+/>
+
+## Occupancy
+
+Chip pins occupy their physical terminal holes, and the body covers the holes underneath it. Overlapping placements are errors. Stacking components in a future z-direction is intentionally out of scope for now.

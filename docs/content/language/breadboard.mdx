@@ -1,0 +1,32 @@
+---
+title: Breadboard
+description: Declare the board size and understand its defaults.
+---
+
+import { breadboardProgram } from "../../examples/sources";
+
+# Breadboard
+
+The optional `breadboard` statement controls the board name, row count, and number of terminal columns on each side.
+
+```text
+breadboard [name] rows <integer> [columns <integer>]
+```
+
+## Rows
+
+`rows` is required when the declaration is present. Rows are numbered from top to bottom starting at `1`.
+
+## Columns
+
+`columns` controls the terminal holes on each side of the centre gap. It is optional and defaults to `5`. On the left terminal the visual order is `5 4 3 2 1`; on the right it is `1 2 3 4 5`.
+
+<BreadboardExample
+  label="Breadboard declaration"
+  tip="Change rows to 3, or omit columns to use the default of 5."
+  source={breadboardProgram}
+/>
+
+## Omitted declaration
+
+The complete first line may be omitted. The compiler then chooses the default board. Writing the declaration is useful in examples because the intended dimensions remain visible.

@@ -1,0 +1,47 @@
+---
+title: Pins and aliases
+description: Declare sparse physical pin numbers and give each pin one or more readable aliases.
+---
+
+import { pinAliasesProgram } from "../../examples/sources";
+
+# Pins and aliases
+
+Every declared pin has a physical number and at least one readable alias.
+
+```text
+pin 2 OUT | SIGNAL | PWM
+```
+
+Here `OUT`, `SIGNAL`, and `PWM` all refer to physical pin 2. The first alias is printed as the pin label in the SVG.
+
+## Pin numbering
+
+For an unflipped chip, pin 1 starts at the top-left and increases down the left. Numbering continues from the bottom-right back toward the top-right. `flip` moves pin 1 to the right and mirrors that arrangement.
+
+Pins may be sparse: a four-pin footprint may declare only pins 1, 2, and 4. An omitted pin still exists physically, but has no declared alias.
+
+## Pin references
+
+Given an instance named `U1`, use either its physical number or any declared alias:
+
+```text
+wire U1.2 --> RP1
+wire U1.OUT --> RP1
+wire U1.SIGNAL --> RP1
+```
+
+Pin references resolve to a free hole in the same terminal electrical group as the physical chip pin. They do not reuse the hole occupied by the chip leg.
+
+<BreadboardExample
+  label="Pin aliases"
+  tip="Change U1.SIGNAL to U1.1, or add another alias after a pipe."
+  source={pinAliasesProgram}
+/>
+
+## Alias rules
+
+- Names and aliases are case-insensitive.
+- An alias cannot start with a number.
+- The same alias cannot be repeated on one pin.
+- A numeric selector such as `U1.2` always means the physical pin number.

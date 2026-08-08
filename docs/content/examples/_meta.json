@@ -1,0 +1,12 @@
+[
+  {
+    "type": "file",
+    "name": "two-components",
+    "label": "Two connected components"
+  },
+  {
+    "type": "file",
+    "name": "common-connections",
+    "label": "Common wire connections"
+  }
+]
