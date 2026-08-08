@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "lessons",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "pico-dub-siren-lessons", "run", "dev"],
+      "port": 3102
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+---
+title: Control blink speed with a knob
+description: Turn the potentiometer into your first low-frequency oscillator, or LFO, and use it to set flash rate.
+---
+
+<LessonGate prerequisite="lesson-003">
+
+Hold Trigger and turn the potentiometer. The LED repeats slowly or quickly, like the modulation-rate indicator in your dub siren.
+
+## 1. Keep the complete circuit
+
+Keep the LED on GP15 with its 1 kΩ resistor, button on GP14, and potentiometer wiper on GP26. No wires move.
+
+The pot no longer sets brightness directly. It now sets the **rate** of a repeating event: your first low-frequency oscillator.
+
+## 2. Turn 0…1 into milliseconds
+
+The loop needs a time interval. This line maps the pot to `500…50` milliseconds:
+
+```python
+interval = int(500 - pot.value * 450)
+```
+
+- At `pot.value = 0.0`: interval is `500 ms`.
+- At `pot.value = 0.5`: interval is `275 ms`.
+- At `pot.value = 1.0`: interval is `50 ms`.
+
+Before reading on, predict which end of the knob will flash fastest, and why a smaller interval makes the LED flash faster.
+
+<FlashRateDemo />
+
+## 3. Run the LFO
+
+Replace `main.py` using this diff:
+
+<LessonFourCodeDiff />
+
+`ticks_ms()` reads the Pico’s millisecond clock. `ticks_diff()` asks how much time passed. The loop keeps checking the button every 10 ms, so release can turn the LED off quickly even at the slowest rate.
+
+## 4. Play and test
+
+1. Release button: LED remains off at every knob position.
+2. Hold button with knob fully slow: count five flashes.
+3. Keep holding and turn toward fast: rate changes immediately.
+4. Release during a slow flash: LED turns off without waiting for the interval.
+
+:::details The direction feels backwards
+Change the mapping to `interval = int(50 + pot.value * 450)`. This changes software direction without moving the pot wires.
+:::
+
+:::details The LED appears dim at the fastest end
+At high speed, separate flashes merge visually. That is normal. Slow it down and confirm distinct on/off changes return.
+:::
+
+## 5. Translate it to the synthesizer
+
+The LED shows the LFO’s timing. Later the same repeating value will change pitch or another sound parameter. The pot becomes **Mod Rate**; the button remains **Trigger**.
+
+<LessonFourChecklist />
+
+</LessonGate>

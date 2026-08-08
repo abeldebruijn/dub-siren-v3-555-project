@@ -2,7 +2,7 @@ import { compile } from "@dub-siren/breadboard";
 import { ArrowUpRight, Maximize2, X } from "lucide-react";
 import { useRef } from "react";
 
-const source = `breadboard Lesson1 rows 24 columns 5
+export const lessonOneSource = `breadboard Lesson1 rows 24 columns 5
 chip Pico2 {
   height 20
   width 6
@@ -27,11 +27,20 @@ wire Pico2.38 --> G color black
 
 wire D1.2 --> G color black`;
 
-const result = compile(source);
-const playgroundHref = `/pico-dub-siren/breadboard/playground/?${new URLSearchParams({ source }).toString()}`;
-
 export default function CircuitPath() {
+  return (
+    <BreadboardDiagram
+      source={lessonOneSource}
+      label="Breadboard circuit connecting Pico GP15 through a one kilo-ohm resistor and LED to ground"
+      caption="GP15 → 1 kΩ resistor → LED → GND"
+    />
+  );
+}
+
+export function BreadboardDiagram({ source, label, caption }: { source: string; label: string; caption: string }) {
   const pinoutDialog = useRef<HTMLDialogElement>(null);
+  const result = compile(source);
+  const playgroundHref = `/pico-dub-siren/breadboard/playground/?${new URLSearchParams({ source }).toString()}`;
 
   if (result.status !== "valid") {
     return <p role="alert">The lesson breadboard could not be rendered.</p>;
@@ -48,11 +57,11 @@ export default function CircuitPath() {
       <div
         className="course-breadboard__svg"
         role="img"
-        aria-label="Breadboard circuit connecting Pico GP15 through a one kilo-ohm resistor and LED to ground"
+        aria-label={label}
         dangerouslySetInnerHTML={{ __html: result.svg }}
       />
       <figcaption className="course-breadboard__toolbar">
-        <span>GP15 → 1 kΩ resistor → LED → GND</span>
+        <span>{caption}</span>
         <a href={playgroundHref}>
           Open in playground <ArrowUpRight aria-hidden="true" />
         </a>

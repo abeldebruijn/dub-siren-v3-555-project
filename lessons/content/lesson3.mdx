@@ -1,0 +1,103 @@
+---
+title: Turn position into numbers and light
+description: Measure a B10K potentiometer with GP26/ADC0, then map its value to LED brightness.
+---
+
+<LessonGate prerequisite="lesson-002">
+
+A physical knob becomes a software value—the basis of the dub siren’s **Pitch** control.
+
+## 1. Know the three pins
+
+Your B10K is a 10 kΩ linear potentiometer. Equal turns produce roughly equal changes in its measured value.
+
+| Pin | Job |
+| --- | --- |
+| Outside pin | 3.3 V end |
+| Centre pin | Wiper: moving output |
+| Outside pin | Ground end |
+
+## 2. Add the potentiometer
+
+**Unplug USB before changing the circuit.** Keep the LED and button wiring from Lesson 2.
+
+1. Connect one outside potentiometer pin to Pico `3V3(OUT)`.
+2. Connect the centre wiper to `GP26 / ADC0`.
+3. Connect the other outside pin to `GND`.
+4. Trace it aloud: “3V3, wiper to GP26, ground.”
+
+<LessonThreeCircuit />
+
+The new potentiometer wires are vivid. The existing LED and button wires are muted.
+
+:::danger Protect the Pico
+Use `3V3(OUT)`, never `VBUS` or `VSYS`. An ADC input must not receive more than 3.3 V.
+:::
+
+## 3. Print the position
+
+Reconnect USB, replace `main.py` using this diff, and open Thonny’s Shell:
+
+<LessonThreeCodeDiff />
+
+`pot.value` is a continuous number from `0.0` through `1.0`. Multiplying it by five creates five ranges. `int()` removes the decimal part, while `min(..., 4)` keeps the exact upper endpoint at four.
+
+<PotPositionDemo />
+
+:::details Why did a modulo version wrap around?
+`% 5.0` means “remainder after division by five.” It does not remove decimals. At the top, `5.0 % 5.0` becomes `0.0`.
+:::
+
+## 4. Find all five positions
+
+Turn slowly from one end to the other. Confirm that the Shell shows `0`, `1`, `2`, `3`, then `4`.
+
+- **Direction feels backwards:** unplug USB and exchange only the two outside wires.
+- **Value never changes:** check the centre wiper wire.
+- **Numbers flicker at a boundary:** small analogue variations are normal. A later lesson can stabilize them.
+
+Only GP26, GP27, and GP28 are exposed analogue inputs on the Pico. We start with GP26, also called ADC0.
+
+{/* Keep the merged potentiometer-to-LED practical in this lesson. */}
+
+## 5. Map input to output
+
+Keep every wire in place. Now combine all three controls:
+
+- `GP14 → button → GND` becomes **Trigger**.
+- `3V3 → potentiometer → GND` creates a safe variable voltage.
+- `wiper → GP26` becomes **Mod Amount**.
+- `GP15 → 1 kΩ → LED → GND` displays the result.
+
+Replace the position-printing program using this diff:
+
+<LessonPotLedDiff />
+
+`led.value` accepts the same `0.0…1.0` range produced by `pot.value`. The Pico rapidly switches the LED to create apparent brightness levels. This is pulse-width modulation, or PWM.
+
+## 6. Play the control
+
+1. Release the button and turn the knob: the LED stays off.
+2. Hold the button and turn slowly: brightness follows the knob.
+3. Release: the LED turns off immediately.
+4. Hold again: the current knob position determines brightness.
+
+The button acts like the siren’s **Trigger**. The potentiometer value can later become **Mod Amount**.
+
+## 7. Safely change the LED colour
+
+**Unplug USB.** Remove only the red LED. Insert a yellow or green LED in the same holes and orientation:
+
+- Long leg toward the resistor and GP15.
+- Short leg toward GND.
+- Keep the 1 kΩ resistor in series.
+
+Reconnect USB and repeat the test. Different colours may appear brighter at the same value. Do not use the starter-pack white LED here; its forward voltage is too close to 3.3 V for this beginner circuit.
+
+:::details The replacement LED does not light
+Unplug USB and rotate the LED 180°. LEDs conduct in one direction. Then verify that the resistor remains in series rather than being bypassed.
+:::
+
+<LessonThreeChecklist />
+
+</LessonGate>

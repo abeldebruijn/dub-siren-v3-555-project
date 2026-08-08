@@ -1,0 +1,100 @@
+---
+title: Read a resistor
+description: Identify resistor colour bands and choose a safe current-limiting resistor for an LED.
+---
+
+<p className="course-eyebrow">Appendix · bench reference</p>
+
+# Read a resistor
+
+Resistor stripes answer two practical questions: **what resistance is this part**, and **is it suitable for this LED circuit?**
+
+<div className="resistor-answer">
+  <div>
+    <span>Use in Lesson 1</span>
+    <strong>1 kΩ</strong>
+  </div>
+  <p>Find a resistor with <strong>brown · black · red · gold</strong> bands. With a typical red LED on a 3.3 V Pico pin, it allows about <strong>1.3 mA</strong>: gentle on the Pico and normally visible indoors.</p>
+</div>
+
+> Start with a red LED. Blue and white LEDs have a forward voltage close to the Pico's 3.3 V output, so a correct beginner circuit may look unexpectedly faint. Never solve that by removing the resistor.
+
+<div className="resistor-path" aria-label="Lesson 1 current path">
+  <span><small>1</small><strong>GP15</strong></span>
+  <b>→</b>
+  <span><small>2</small><strong>1 kΩ resistor</strong></span>
+  <b>→</b>
+  <span><small>3</small><strong>LED long leg</strong></span>
+  <b>→</b>
+  <span><small>4</small><strong>GND</strong></span>
+</div>
+
+## 1. Find the reading direction
+
+Read the bands from the end where they are grouped closest together. The final tolerance band is often **gold** or **silver**, sits slightly apart, and belongs on the right.
+
+If the spacing is unclear, read both directions and prefer the result that produces a familiar standard value. A multimeter is the final check when brown, red, orange, blue, and violet are hard to tell apart.
+
+### Colour code
+
+The first bands are digits; the next band is the multiplier. Gold and silver are normally used as multipliers or tolerance bands, not digits.
+
+<ResistorWidget mode="legend" />
+
+### Four bands or five?
+
+| Layout | Read it as | Example |
+| --- | --- | --- |
+| 4 bands | digit · digit · multiplier · tolerance | brown · black · red · gold = 1 kΩ ±5% |
+| 5 bands | digit · digit · digit · multiplier · tolerance | brown · black · black · brown · brown = 1 kΩ ±1% |
+
+The resistor body's physical size mostly indicates its power rating, not its resistance. A single black band means a **0 Ω link**. Ordinary fixed resistors have no electrical direction; their stripes are only read in one direction for humans.
+
+## 2. Decode the stripes
+
+Enter a value to see its bands. Values such as `4k7` mean 4.7 kΩ. Switch layouts when a value cannot be represented exactly.
+
+<ResistorWidget mode="decoder" />
+
+### Common values in the parts box
+
+| Value | Typical use |
+| --- | --- |
+| 100 Ω | Brighter LED experiments; check the current first |
+| 220 Ω / 330 Ω | Common LED current limiting |
+| 1 kΩ | Lesson 1's cautious LED resistor |
+| 4.7 kΩ / 10 kΩ | Pull-up, pull-down, and control signals |
+| 47 kΩ / 100 kΩ | High-impedance controls and timing networks |
+| 1 MΩ | Very light loading and long timing networks |
+
+## 3. Choose an LED resistor
+
+An LED does not safely limit its own current. The series resistor absorbs the voltage left after the LED and turns it into a predictable current:
+
+<p className="resistor-formula">R = (V<sub>supply</sub> − V<sub>forward</sub>) ÷ I<sub>target</sub></p>
+
+For a typical red LED on a Pico 2 GPIO, use 3.3 V for the supply and about 2.0 V for the LED. That leaves roughly 1.3 V across the resistor.
+
+| Target current | Exact result | Next common value | Character |
+| ---: | ---: | ---: | --- |
+| 12 mA | 108 Ω | 120 Ω | Bright; not the beginner default |
+| 8 mA | 163 Ω | 180 Ω | Clearly bright |
+| 4 mA | 325 Ω | 330 Ω | Useful general starting point |
+| 2 mA | 650 Ω | 680 Ω | Gentle |
+| 1.3 mA | 1 kΩ | 1 kΩ | Lesson 1's cautious choice |
+
+The exact LED forward voltage varies with the part, current, and temperature. Choosing the next **higher** standard resistor keeps current at or below the target.
+
+## 4. Check a resistor and LED
+
+Use this estimate before wiring. It is deliberately conservative: real component values vary, and GPIO limits still apply.
+
+<ResistorWidget mode="calculator" />
+
+> Unplug USB before changing the wiring. Trace the full path every time: `GP15 → resistor → LED long leg → LED short leg → GND`.
+
+## References
+
+- [Vishay resistor colour-code card](https://www.vishay.com/docs/49411/resistor_color_code_calculator.pdf)
+- [RP2350 electrical specification](https://datasheets.raspberrypi.com/rp2350/rp2350-datasheet.pdf)
+- [picozero LED recipe](https://picozero.readthedocs.io/en/latest/recipes.html#leds)

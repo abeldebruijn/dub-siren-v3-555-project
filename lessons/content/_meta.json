@@ -8,5 +8,32 @@
     "type": "file",
     "name": "lesson1",
     "label": "01 · Blink an LED"
+  },
+  {
+    "type": "file",
+    "name": "lesson2",
+    "label": "02 · Button controls LED"
+  },
+  {
+    "type": "file",
+    "name": "lesson3",
+    "label": "03 · Read a potentiometer"
+  },
+  {
+    "type": "file",
+    "name": "lesson4",
+    "label": "04 · Control blink speed with a knob"
+  },
+  {
+    "type": "file",
+    "name": "lesson5",
+    "label": "05 · Control speed and brightness together"
+  },
+  {
+    "type": "dir-section-header",
+    "name": "appendix",
+    "label": "Appendix",
+    "collapsible": true,
+    "collapsed": false
   }
 ]

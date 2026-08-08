@@ -1,15 +1,110 @@
 ---
-title: Control the light with a button
-description: Read a push button and make the LED respond.
+title: Control and toggle the light with a button
+description: Add a push button, then compare momentary and toggle control using the same circuit.
 ---
 
 <LessonGate>
-  <p className="course-eyebrow">Pico Dub Siren · Lesson 02</p>
 
-  Lesson 2 is unlocked. Its circuit and instructions are coming next.
+Keep Lesson 1 assembled. Add one input so the LED follows your finger immediately: hold the button, LED on; release it, LED off.
 
-  <div className="course-coming-soon">
-    <strong>Your progress gate is working</strong>
-    <p>You reached this page because every lesson 1 checkpoint is complete. The full button lesson can replace this placeholder without changing the progress system.</p>
-  </div>
+This is the first version of the dub siren’s momentary **Trigger** control.
+
+## 1. Add only these parts
+
+Keep the Pico, red LED, 1 kΩ resistor, and their existing wiring. Add:
+
+- One 12 × 12 mm tactile button
+- Two male-to-male jumper wires
+
+The final panel button works on the same principle, but we save it for the panel build.
+
+## 2. See the two hidden sides
+
+A four-leg tactile button is electrically a two-terminal switch. Two legs form one permanently connected side; the other two form the other side. Pressing joins both sides.
+
+<ButtonAnatomy />
+
+:::warning
+Do not wire two legs from the same side. They are already connected even when the button is untouched.
+:::
+
+## 3. Add the input
+
+**Unplug USB.** Keep the complete GP15 → resistor → LED → GND circuit unchanged.
+
+1. Place the tactile button across the breadboard’s centre trench.
+2. Connect one button side to Pico `GP14`.
+3. Connect the opposite button side to `GND`.
+4. Trace it aloud: “GP14, button, ground.”
+
+<LessonTwoCircuit />
+
+The new input wires are vivid. The wires retained from Lesson 1 are desaturated so the change is easier to see.
+
+:::details Why does the button need no external resistor?
+`Button(14)` defaults to an internal pull-up. Inside the Pico, a weak resistor normally holds GP14 high. Pressing connects GP14 to ground. `picozero` translates that low voltage into `is_pressed = True`.
+:::
+
+## 4. Change input into output
+
+Reconnect USB. Update `main.py` using the diff below. Green lines are added; red lines are removed.
+
+<LessonCodeDiff />
+
+The final two lines do not run the functions immediately. They give `picozero` the actions to call later. That is why `led.on` and `led.off` have no parentheses.
+
+## 5. Test the physical rule
+
+Predict the result before pressing, then test:
+
+1. Leave the button untouched: the LED stays off.
+2. Hold it for three seconds: the LED stays on for three seconds.
+3. Release it: the LED turns off immediately.
+4. Repeat ten times. Each press should produce one clean response.
+
+### If it behaves incorrectly
+
+- **Always on:** unplug USB; the two button wires may use the same internally connected side.
+- **Never on:** verify GP14 and GND, then confirm the LED still works with the Lesson 1 code.
+- **Works only when twisted:** reseat the button; a leg may not be inside a breadboard contact.
+- **Several responses per press:** mechanical contacts bounce. `Button` applies a short debounce time by default.
+
+## 6. Compare two control rules
+
+Keep the circuit exactly as it is. Only the software rule changes.
+
+| Momentary | Toggle |
+| --- | --- |
+| The LED follows the button. | Each press changes the remembered state. |
+| Press turns it on. | First press turns it on. |
+| Release turns it off. | Release does nothing. |
+| Best for the siren’s Trigger. | Useful for a power or Hold control. |
+
+Before changing the code, predict what must disappear if releasing the button should do nothing.
+
+## 7. Make one press remember
+
+Apply this second diff to the same `main.py`:
+
+<LessonToggleDiff />
+
+`toggle` changes off → on or on → off. The release callback is removed, so releasing the button has no assigned action.
+
+## 8. Test its memory
+
+1. Press and release once: the LED stays on.
+2. Wait five seconds: it remains on.
+3. Press again: it turns off.
+4. Try a long press: it should still change only once.
+
+:::details It changes twice from one press
+Mechanical contacts may bounce. Keep `Button(14)` because `picozero` debounces it. Reseat the button if the behavior continues.
+:::
+
+## 9. Connect both rules to the siren
+
+The final **Trigger** is momentary: sound only while held. A power or **Hold** control is latched. The hardware can be identical; the software decides the interaction.
+
+<LessonTwoChecklist />
+
 </LessonGate>

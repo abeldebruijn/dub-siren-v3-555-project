@@ -1,0 +1,57 @@
+---
+title: Control speed and brightness together
+description: Add a second B10K potentiometer on GP27/ADC1 so Rate and Amount control the LFO independently.
+---
+
+<LessonGate prerequisite="lesson-004">
+
+Keep Mod Rate on GP26. Add a second B10K potentiometer on GP27 to control how bright each flash becomes. One knob controls *how fast*; the other controls *how much*. These become Mod Rate and Mod Amount on the final siren.
+
+## 1. Name the existing knob
+
+Your GP26 potentiometer is now **Mod Rate**. Keep its three wires unchanged. The new potentiometer is **Mod Amount**.
+
+## 2. Add Mod Amount with USB unplugged
+
+1. Connect one outside pin of the new B10K pot to the same `3V3(OUT)` supply.
+2. Connect its centre wiper to `GP27 / ADC1`.
+3. Connect its other outside pin to the same `GND`.
+4. Leave GP26, GP14, GP15, and the LED resistor unchanged.
+
+<LessonFiveCircuit />
+
+:::danger Before reconnecting USB
+Trace both pots separately. Each must read: 3V3 → resistance → GND, with only the centre pin going to an ADC. Never connect VBUS or VSYS to GP26/GP27.
+:::
+
+## 3. Name both analogue inputs
+
+Replace `main.py` using this diff:
+
+<LessonFiveCodeDiff />
+
+`light_on` remembers which half of the flash cycle is active. During the active half, `amount.value` sets brightness. Rate and Amount stay independent.
+
+<RateAmountDemo />
+
+## 4. Prove each knob has one job
+
+1. Hold Trigger. Set Amount halfway.
+2. Turn Rate only: speed changes; peak brightness should not.
+3. Set Rate near the middle.
+4. Turn Amount only: brightness changes; speed should not.
+5. Release Trigger: LED stops immediately.
+
+Before continuing, predict the symptom if the two centre-wiper connections were exchanged.
+
+:::details One knob works backwards
+Unplug USB and exchange only that pot’s two outside wires. Do not move its centre wiper.
+:::
+
+:::details Amount at zero makes the flashing disappear
+Correct: zero amount produces zero brightness. Raise Amount before diagnosing Rate.
+:::
+
+<LessonFiveChecklist />
+
+</LessonGate>

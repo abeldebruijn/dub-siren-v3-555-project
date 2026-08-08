@@ -1,17 +1,20 @@
 import { Check, LockKeyhole, RotateCcw } from "lucide-react";
-import { docsBase, lessonOneDoneItems, lessons, lessonSlug } from "./courseData";
+import { docsBase, lessonFourDoneItems, lessonOneDoneItems, lessonThreeDoneItems, lessonTwoDoneItems, lessons, lessonSlug } from "./courseData";
 import { clearProgress, isLessonDone, useCourseProgress } from "./progress";
 
 export default function CourseOverview() {
   const progress = useCourseProgress();
   const lessonOneDone = isLessonDone(progress, "lesson-001", lessonOneDoneItems.map(({ id }) => id));
+  const lessonTwoDone = isLessonDone(progress, "lesson-002", lessonTwoDoneItems.map(({ id }) => id));
+  const lessonThreeDone = isLessonDone(progress, "lesson-003", lessonThreeDoneItems.map(({ id }) => id));
+  const lessonFourDone = isLessonDone(progress, "lesson-004", lessonFourDoneItems.map(({ id }) => id));
 
   return (
     <section className="course-roadmap" aria-label="Course lessons">
       <header className="course-roadmap__header">
         <div>
           <p className="course-eyebrow">Pico Dub Siren</p>
-          <h2>Fourteen small circuits</h2>
+          <h2>Twelve small circuits</h2>
           <p>Each lesson adds one useful control. Finish a lesson’s checklist to unlock the next circuit.</p>
         </div>
         {Object.keys(progress).length > 0 ? (
@@ -25,9 +28,9 @@ export default function CourseOverview() {
         {lessons.map(([title, subtitle], index) => {
           const number = index + 1;
           const slug = lessonSlug(number);
-          const done = number === 1 && lessonOneDone;
-          const available = number === 1 || (number === 2 && lessonOneDone);
-          const contentReady = number <= 2;
+          const done = (number === 1 && lessonOneDone) || (number === 2 && lessonTwoDone) || (number === 3 && lessonThreeDone) || (number === 4 && lessonFourDone);
+          const available = number === 1 || (number === 2 && lessonOneDone) || (number === 3 && lessonTwoDone) || (number === 4 && lessonThreeDone) || (number === 5 && lessonFourDone);
+          const contentReady = number <= 5;
           const state = done ? "done" : available && contentReady ? "available" : "locked";
           const content = (
             <>
