@@ -474,3 +474,18 @@ test("V0.2 SVG covers every glyph, outside viewports, and annotation offsets", a
   assert.match(fixture.svg, /data-bands="6"/u);
   assert.match(fixture.svg, />C2 100µF 16V</u);
 });
+
+test("chip labels include physical pin numbers and primary aliases", () => {
+  const result = compile(`breadboard rows 4 columns 5
+chip Pico2 {
+  height 4
+  width 4
+  pin 1 GP0 | SPI0_RX
+  pin 8 VBUS
+} at R1
+`);
+
+  assert.equal(result.status, "valid");
+  assert.match(result.svg, />1 GP0<\/text>/u);
+  assert.match(result.svg, />VBUS 8<\/text>/u);
+});

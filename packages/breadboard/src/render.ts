@@ -243,7 +243,12 @@ function renderChipLabels(
   for (const pin of chip.terminals) {
     const [x, y] = point(pointForHole(pin.hole));
     const side = pin.hole.side;
-    lines.push(textElement(x + (side === "left" ? 7 : -7), y + 2.5, String(pin.number), {
+    const label = pin.name === null
+      ? String(pin.number)
+      : side === "left"
+        ? `${pin.number} ${pin.name}`
+        : `${pin.name} ${pin.number}`;
+    lines.push(textElement(x + (side === "left" ? 7 : -7), y + 2.5, label, {
       anchor: side === "left" ? "start" : "end",
       fill: color,
       family: MONO,
