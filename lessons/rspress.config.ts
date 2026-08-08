@@ -11,6 +11,11 @@ export default defineConfig({
   description: "Learn Raspberry Pi Pico electronics by building a dub siren.",
   icon: "/breadboard-mark.svg",
   globalStyles: path.join(import.meta.dirname, "styles/index.css"),
+  builderConfig: {
+    dev: {
+      lazyCompilation: false,
+    },
+  },
   markdown: {
     globalComponents: [
       path.join(import.meta.dirname, "components/course/BlinkSimulator.tsx"),

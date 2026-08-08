@@ -11,6 +11,11 @@ export default defineConfig({
   description: "The interactive reference for the Breadboard diagram language.",
   icon: "/breadboard-mark.svg",
   globalStyles: path.join(import.meta.dirname, "styles/index.css"),
+  builderConfig: {
+    dev: {
+      lazyCompilation: false,
+    },
+  },
   markdown: {
     globalComponents: [
       path.join(import.meta.dirname, "components/BreadboardExample.tsx"),
