@@ -6,9 +6,13 @@ This is a Pico learning project, not a component-for-component recreation of the
 
 ## Open the course
 
-**[Launch the Pico Dub Siren course](https://abeldebruijn.github.io/dub-siren-v3-555-project/)**
+**[Launch Pico Dub Siren](https://abeldebruijn.github.io/pico-dub-siren/)**
 
-[![Desktop screenshot of the Pico Dub Siren course homepage](assets/course-homepage.jpg)](https://abeldebruijn.github.io/dub-siren-v3-555-project/)
+[![Desktop screenshot of the Pico Dub Siren homepage](assets/course-homepage.jpg)](https://abeldebruijn.github.io/pico-dub-siren/)
+
+- [Breadboard language documentation](https://abeldebruijn.github.io/pico-dub-siren/breadboard/docs/)
+- [Breadboard playground](https://abeldebruijn.github.io/pico-dub-siren/breadboard/playground/)
+- [Lesson 1](https://abeldebruijn.github.io/pico-dub-siren/lessons/lesson1.html)
 
 ## What you will build
 
@@ -72,8 +76,9 @@ The longer-term goal is a cost-effective instrument with pitch, modulation, temp
 
 | Path | Contents |
 |---|---|
-| [`site/`](site/) | React course interface deployed to GitHub Pages |
-| [`lessons/`](lessons/) | Pico control lessons in standalone HTML |
+| [`site/`](site/) | Synthwave homepage and Breadboard playground |
+| [`docs/`](docs/) | Interactive Rspress Breadboard language documentation |
+| [`lessons/`](lessons/) | Independent Rspress course and legacy lesson material |
 | [`examples/`](examples/) | MicroPython program for each numbered Pico lesson |
 | [`rca-module-13-2/`](rca-module-13-2/) | Separate audio-output and oscillator experiments |
 | [`reference/`](reference/) | Beginner wiring and component references |
@@ -81,14 +86,14 @@ The longer-term goal is a cost-effective instrument with pitch, modulation, temp
 | [`shopping-raspberry.md`](shopping-raspberry.md) | Pico-focused parts and purchasing notes |
 | [`MISSION.md`](MISSION.md) | Project scope, constraints, and definition of success |
 
-## Run the course locally
+## Run locally
 
 ```sh
 pnpm install
-pnpm --filter dub-siren-v3-site dev
+pnpm dev
 ```
 
-Open the URL printed by Vite. The Breadboard editor lives at `#/breadboard` and compiles entirely in the browser.
+Open `http://127.0.0.1:5173/pico-dub-siren/`. The homepage, documentation, lessons, and playground are routed through the same local server.
 
 ## Breadboard compiler and editor
 

@@ -1,14 +1,32 @@
+import { File, type LineAnnotation } from "@pierre/diffs/react";
 import { Check, Clipboard, MessageSquareOff } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 const code = `from picozero import LED
 
 led = LED(15)
 led.blink(on_time=0.5, off_time=0.5)`;
 
+type LineNote = {
+  body: string;
+};
+
+const notes: Record<number, LineNote> = {
+  1: { body: "Make sure picozero is installed on your Pico." },
+  4: { body: "Change both timing values to adjust the blink speed." },
+};
+
 export default function LessonCode() {
   const [showNotes, setShowNotes] = useState(true);
   const [copied, setCopied] = useState(false);
+  const lineAnnotations = useMemo(
+    () =>
+      Object.entries(notes).map(([lineNumber, note]) => ({
+        lineNumber: Number(lineNumber),
+        metadata: note,
+      })) satisfies LineAnnotation<LineNote>[],
+    [],
+  );
 
   async function copyCode() {
     await navigator.clipboard.writeText(code);
@@ -29,13 +47,18 @@ export default function LessonCode() {
           </button>
         </div>
       </header>
-      <pre><code><span><b>from</b> picozero <b>import</b> LED</span>{"\n\n"}<span>led = LED(<em>15</em>)</span>{"\n"}<span>led.blink(on_time=<em>0.5</em>, off_time=<em>0.5</em>)</span></code></pre>
-      {showNotes ? (
-        <div className="course-code__notes">
-          <p><strong>Line 1</strong> Make sure <code>picozero</code> is installed on your Pico.</p>
-          <p><strong>Line 4</strong> Change both timing values to adjust the blink speed.</p>
-        </div>
-      ) : null}
+      <div className="course-code__viewer">
+        <File
+          file={{ name: "main.py", contents: code }}
+          lineAnnotations={showNotes ? lineAnnotations : []}
+          renderAnnotation={showNotes ? renderLineAnnotation : undefined}
+          options={{ theme: "github-dark", overflow: "scroll", disableLineNumbers: false }}
+        />
+      </div>
     </section>
   );
+}
+
+function renderLineAnnotation(annotation: LineAnnotation<LineNote>) {
+  return annotation.metadata ? <p className="course-code__annotation">{annotation.metadata.body}</p> : null;
 }

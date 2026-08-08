@@ -9,6 +9,8 @@
     "preview": "rspress preview"
   },
   "dependencies": {
+    "@dub-siren/breadboard": "workspace:*",
+    "@pierre/diffs": "^1.2.12",
     "@rspress/core": "^2.0.0",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",

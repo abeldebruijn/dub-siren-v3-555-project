@@ -1,4 +1,4 @@
-import { Check, CheckCircle2, LockKeyhole } from "lucide-react";
+import { Check, LockKeyhole } from "lucide-react";
 import { docsBase, lessonOneDoneItems } from "./courseData";
 import { isLessonDone, setChecklistItem, useCourseProgress } from "./progress";
 
@@ -10,11 +10,7 @@ export default function LessonChecklist() {
   return (
     <section className="course-checklist" aria-labelledby="done-means-heading">
       <header>
-        <CheckCircle2 aria-hidden="true" />
-        <div>
-          <p className="course-eyebrow">Lesson checkpoint</p>
-          <h2 id="done-means-heading">Done means</h2>
-        </div>
+        <h2 id="done-means-heading">Done means</h2>
       </header>
       <div className="course-checklist__items">
         {lessonOneDoneItems.map((item) => {

@@ -146,7 +146,7 @@ teachable.
 ## Deployment shape
 
 Add Rspress as a workspace package and build it under a stable documentation
-base path such as `/dub-siren-v3-555-project/docs/`. Rspress emits static HTML,
+base path such as `/pico-dub-siren/breadboard/docs/`. Rspress emits static HTML,
 supports a project `base`, and documents a GitHub Pages Actions deployment
 ([Rspress deployment](https://www.rspress.dev/guide/basic/deploy),
 [static generation](https://www.rspress.dev/guide/basic/ssg)). The final Pages

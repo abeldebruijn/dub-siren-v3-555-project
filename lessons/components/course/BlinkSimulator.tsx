@@ -18,9 +18,7 @@ export default function BlinkSimulator() {
   return (
     <section className="course-simulator" aria-labelledby="blink-simulator-title">
       <div>
-        <p className="course-eyebrow">Interactive</p>
         <h3 id="blink-simulator-title">Blink simulator</h3>
-        <p>Move either timing control and watch how the complete cycle changes.</p>
       </div>
       <div className="course-simulator__body">
         <div className="course-led-stage">
