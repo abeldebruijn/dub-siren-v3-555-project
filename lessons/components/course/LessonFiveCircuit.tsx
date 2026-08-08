@@ -43,10 +43,10 @@ wire Pico2.GP14 --> S1.left1 color purple saturation 18%
 wire S1.right1 --> G color blue saturation 12%
 wire Pico2.36 --> P color red saturation 18%
 wire P1.3 --> P color red saturation 18%
-wire P1.2 --> Pico2.GP26 color cyan saturation 18%
+wire P1.2 --> Pico2.GP26 via LT-R24C2 color cyan saturation 18%
 wire P1.1 --> G color blue saturation 12%
 wire P2.3 --> P color red
-wire P2.2 --> Pico2.GP27 color yellow
+wire P2.2 --> Pico2.GP27 via RT-R9C5 color yellow
 wire P2.1 --> G color black`;
 
 export default function LessonFiveCircuit() {
